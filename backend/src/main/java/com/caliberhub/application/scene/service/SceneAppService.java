@@ -25,6 +25,8 @@ import com.caliberhub.infrastructure.common.exception.ResourceNotFoundException;
 import com.caliberhub.infrastructure.export.RagExportService;
 import com.caliberhub.infrastructure.export.RagExportService.ExportResult;
 import com.caliberhub.infrastructure.scene.service.SceneVersionDataService;
+import com.caliberhub.infrastructure.scene.dao.mapper.SceneVersionExportMapper;
+import com.caliberhub.infrastructure.scene.dao.po.SceneVersionExportPO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,6 +53,7 @@ public class SceneAppService {
         private final RagExportService ragExportService;
         private final AuditService auditService;
         private final SceneVersionDataService sceneVersionDataService;
+        private final SceneVersionExportMapper sceneVersionExportMapper;
 
         /**
          * 创建场景
@@ -257,6 +260,7 @@ public class SceneAppService {
                 if (exportResult.success()) {
                         draft.setExportDocJson(exportResult.docJson());
                         draft.setExportChunksJson(exportResult.chunksJson());
+                        persistExport(draft.getId(), exportResult, actor);
                 }
 
                 // 保存
@@ -422,11 +426,22 @@ public class SceneAppService {
                                 ? content.getSensitiveFields()
                                 : List.of();
 
+                // 若已有导出记录，直接返回
+                var existing = sceneVersionExportMapper.findById(version.getId());
+                if (existing.isPresent()) {
+                        var po = existing.get();
+                        return ExportResult.success(po.getDocJson(), po.getChunksJson(), po.getChunkCount());
+                }
+
                 // Context for Lint
                 LintContext context = LintContext.forDraft(sourceTables, version.isHasSensitive());
                 LintResult lintResult = lintService.lint(version, context);
 
-                return ragExportService.generate(version, domain, sourceTables, sensitiveFields, lintResult);
+                ExportResult result = ragExportService.generate(version, domain, sourceTables, sensitiveFields, lintResult);
+                if (result.success()) {
+                        persistExport(version.getId(), result, UserContextHolder.getCurrentUser());
+                }
+                return result;
         }
 
         private SceneDTO toSceneDTO(Scene scene, Domain domain) {
@@ -480,5 +495,18 @@ public class SceneAppService {
                                 .updatedAt(version.getUpdatedAt())
                                 .updatedBy(version.getUpdatedBy())
                                 .build();
+        }
+
+        private void persistExport(String versionId, ExportResult result, String actor) {
+                SceneVersionExportPO po = SceneVersionExportPO.builder()
+                                .versionId(versionId)
+                                .docJson(result.docJson())
+                                .chunksJson(result.chunksJson())
+                                .chunkCount(result.chunkCount())
+                                .generatedAt(LocalDateTime.now().toString())
+                                .generatedBy(actor)
+                                .hash(null)
+                                .build();
+                sceneVersionExportMapper.save(po);
         }
 }

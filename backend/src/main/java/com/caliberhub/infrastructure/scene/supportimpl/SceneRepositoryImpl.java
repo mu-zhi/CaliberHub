@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
+@org.springframework.context.annotation.Profile("mem")
 public class SceneRepositoryImpl implements SceneRepository {
 
     // Mock 存储

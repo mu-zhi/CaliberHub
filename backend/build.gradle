@@ -58,3 +58,8 @@ tasks.named('test') {
 tasks.named('bootRun') {
     systemProperty 'java.io.tmpdir', layout.projectDirectory.dir('tmp').asFile.absolutePath
 }
+
+// === Dependency locking ===
+dependencyLocking {
+    lockAllConfigurations()
+}

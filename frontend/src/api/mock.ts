@@ -7,8 +7,8 @@ import type {
 import type { TableSearchResult, TableDetail } from './index'
 import dayjs from 'dayjs'
 
-// Mock 数据开关 - 开发时设为 true
-export const USE_MOCK = false
+// Mock 数据开关 - 通过环境变量控制
+export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
 // Mock 领域数据
 export const MOCK_DOMAINS: Domain[] = [

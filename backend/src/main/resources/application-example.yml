@@ -2,28 +2,21 @@ server:
   port: 8080
 
 spring:
-  application:
-    name: caliberhub
-  
   datasource:
     url: jdbc:sqlite:./caliberhub.db
     driver-class-name: org.sqlite.JDBC
-  
   jpa:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
       ddl-auto: none
     show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
-  
   jackson:
     serialization:
       write-dates-as-timestamps: false
-    default-property-inclusion: non_null
 
 logging:
   level:
-    com.caliberhub: ${LOG_LEVEL_COM_CALIBERHUB:INFO}
-    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:WARN}
+    com.caliberhub: INFO
+    org.hibernate.SQL: WARN
+
+# 运行示例数据: 启动时添加 --spring.profiles.active=seed
