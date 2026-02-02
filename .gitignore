@@ -1,0 +1,40 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+*.iml
+
+# Frontend build/cache
+frontend/node_modules/
+frontend/npm-cache/
+frontend/dist/
+frontend/.vite/
+frontend/.cache/
+frontend/.eslintcache
+frontend/tsconfig.tsbuildinfo
+frontend/tsconfig.node.tsbuildinfo
+
+# Backend build/cache
+backend/.gradle/
+backend/build/
+backend/tmp/
+backend/.settings/
+backend/.classpath
+backend/.project
+
+# Local database
+backend/caliberhub.db
