@@ -1,0 +1,12 @@
+package com.cmbchina.datadirect.caliber.application.api.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+
+public record CreateSceneCmd(
+        @NotBlank String sceneTitle,
+        Long domainId,
+        String domain,
+        String rawInput,
+        String operator
+) {
+}

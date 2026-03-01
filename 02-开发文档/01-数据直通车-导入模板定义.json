@@ -1,0 +1,102 @@
+{
+    "doc_type": "CALIBER_IMPORT_V2",
+    "schema_version": "2.0.0",
+    "source_type": "PASTE_MD | FILE_MD | FILE_TXT | FILE_SQL | IMAGE_OCR_TEXT",
+    "global": {
+        "domain_guess": null,
+        "domain_overview_hint": "",
+        "common_tables_hint": [],
+        "keywords": [],
+        "notes": []
+    },
+    "scenes": [
+        {
+            "scene_title": "（必填）场景标题",
+            "scene_code_guess": "",
+            "domain_guess": null,
+            "contributors": [],
+            "owner_guess": null,
+            "scene_description": "",
+            "caliber_definition": "",
+            "applicability": "",
+            "boundaries": "",
+            "inputs": {
+                "params": [
+                    {
+                        "name_en": "",
+                        "name_zh": "",
+                        "type": "STRING|INT|DATE|ENUM|DECIMAL|UNKNOWN",
+                        "required": false,
+                        "example": "",
+                        "description": ""
+                    }
+                ],
+                "constraints": [
+                    {
+                        "name": "",
+                        "description": "",
+                        "required": false,
+                        "impact": ""
+                    }
+                ]
+            },
+            "outputs": {
+                "summary": "",
+                "fields": [
+                    {
+                        "display_name": "",
+                        "source_table": "",
+                        "source_field": "",
+                        "sensitivity_hint": "",
+                        "mask_rule_suggest": ""
+                    }
+                ]
+            },
+            "sql_variants": [
+                {
+                    "variant_name": "（方案名称，如'当前主表查询'）",
+                    "applicable_period": "（适用时段，如'2014至今'，单段SQL可留空）",
+                    "description": "（方案描述）",
+                    "sql_text": "（SQL 原文，必须逐字保真）",
+                    "source_tables": ["schema.table_name"],
+                    "notes": "（备注、限制条件）"
+                }
+            ],
+            "code_mappings": [
+                {
+                    "code": "（码值字段名，如 CARD_GRD_CD）",
+                    "description": "（码值含义，如'卡等级代码'）",
+                    "mappings": {
+                        "value1": "含义1",
+                        "value2": "含义2"
+                    }
+                }
+            ],
+            "caveats": [
+                {
+                    "title": "",
+                    "text": "",
+                    "risk": "LOW|MEDIUM|HIGH"
+                }
+            ],
+            "unmapped_text": "",
+            "quality": {
+                "confidence": 0,
+                "warnings": [],
+                "errors": []
+            }
+        }
+    ],
+    "parse_report": {
+        "parser": "llm-preprocess-v0.2",
+        "warnings": [],
+        "errors": []
+    },
+    "_meta": {
+        "schema_id": "caliber.import.v2",
+        "schema_version": "2.0.0",
+        "mode": "template",
+        "lang": "zh",
+        "changelog": "V2: sql_blocks -> sql_variants (新增 applicable_period, source_tables); 新增 code_mappings; 新增 global.domain_overview_hint; 移除 source_tables_hint/sensitive_fields_hint (合并到 sql_variants.source_tables 和 caveats)"
+    }
+}

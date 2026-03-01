@@ -1,0 +1,400 @@
+package com.cmbchina.datadirect.caliber.adapter.web;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+class SceneApiIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    void shouldCompleteDraftToPublishFlow() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        String domainRequest = """
+                {
+                  "domainCode": "RETAIL_PUBLISH_FLOW",
+                  "domainName": "零售发布域",
+                  "domainOverview": "发布流测试域",
+                  "operator": "admin"
+                }
+                """;
+        MvcResult domainResult = mockMvc.perform(post("/api/domains")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(domainRequest))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long domainId = objectMapper.readTree(domainResult.getResponse().getContentAsString()).path("id").asLong();
+
+        String createRequest = """
+                {
+                  "sceneTitle": "零售客户信息查询",
+                  "domain": "零售金融",
+                  "rawInput": "初始口径文档",
+                  "operator": "tester"
+                }
+                """;
+
+        MvcResult createResult = mockMvc.perform(post("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createRequest))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("DRAFT"))
+                .andReturn();
+
+        JsonNode createdScene = objectMapper.readTree(createResult.getResponse().getContentAsString());
+        long id = createdScene.path("id").asLong();
+        assertThat(id).isPositive();
+
+        String updateRequest = """
+                {
+                  "sceneTitle": "零售客户信息查询（修订）",
+                  "domainId": %d,
+                  "sceneDescription": "查询客户基础信息",
+                  "inputsJson": "[{\\"name\\":\\"cust_id\\"}]",
+                  "outputsJson": "[{\\"name\\":\\"cust_name\\"}]",
+                  "sqlBlocksJson": "[{\\"name\\":\\"SQL块1\\",\\"sql\\":\\"select cust_id from dm_customer_info;\\"}]",
+                  "operator": "editor"
+                }
+                """.formatted(domainId);
+
+        mockMvc.perform(put("/api/scenes/{id}", id)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sceneTitle").value("零售客户信息查询（修订）"));
+
+        String publishRequest = """
+                {
+                  "verifiedAt": "2026-02-10T10:00:00+08:00",
+                  "changeSummary": "修订并发布",
+                  "operator": "reviewer"
+                }
+                """;
+
+        mockMvc.perform(post("/api/scenes/{id}/publish", id)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(publishRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PUBLISHED"))
+                .andExpect(jsonPath("$.publishedBy").value("support"));
+
+        mockMvc.perform(get("/api/scenes/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PUBLISHED"));
+
+        mockMvc.perform(delete("/api/scenes/{id}", id)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("ILLEGAL_STATE"));
+    }
+
+    @Test
+    void shouldReturnCaliberImportV2FromPreprocess() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        String request = """
+                {
+                  "rawText": "# 零售客户信息查询\\n```sql\\nselect * from dm_customer_info;\\n```",
+                  "sourceType": "FILE_SQL",
+                  "sourceName": "09-数据直通车-口径文档现状-零售客户信息查询.sql"
+                }
+                """;
+
+        MvcResult result = mockMvc.perform(post("/api/import/preprocess")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.caliberImportJson").exists())
+                .andExpect(jsonPath("$.scenes").isArray())
+                .andExpect(jsonPath("$.mode").exists())
+                .andReturn();
+
+        JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
+        String caliberImportJson = response.path("caliberImportJson").asText();
+        JsonNode parsed = objectMapper.readTree(caliberImportJson);
+        assertThat(parsed.path("doc_type").asText()).isEqualTo("CALIBER_IMPORT_V2");
+        assertThat(parsed.path("scenes").get(0).path("sql_variants")).isNotNull();
+        assertThat(response.path("scenes").isArray()).isTrue();
+    }
+
+    @Test
+    void shouldReturnLowConfidenceWhenLlmFallbackHappens() throws Exception {
+        String adminToken = loginAndGetToken("admin", "admin123");
+        String supportToken = loginAndGetToken("support", "support123");
+        String updateConfigRequest = """
+                {
+                  "enabled": true,
+                  "endpoint": "http://127.0.0.1:1/v1/chat/completions",
+                  "model": "qwen3-max",
+                  "timeoutSeconds": 15,
+                  "temperature": 0.0,
+                  "maxTokens": 2048,
+                  "fallbackToRule": true,
+                  "operator": "admin"
+                }
+                """;
+        mockMvc.perform(put("/api/system/llm-preprocess-config")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateConfigRequest))
+                .andExpect(status().isOk());
+
+        String preprocessRequest = """
+                {
+                  "rawText": "# 回退验证\\n```sql\\nselect * from dm_customer_info;\\n```",
+                  "sourceType": "FILE_SQL",
+                  "sourceName": "fallback-check.sql"
+                }
+                """;
+        mockMvc.perform(post("/api/import/preprocess")
+                        .header("Authorization", "Bearer " + supportToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(preprocessRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mode").value("rule_generated"))
+                .andExpect(jsonPath("$.lowConfidence").value(true))
+                .andExpect(jsonPath("$.warnings").isArray());
+    }
+
+    @Test
+    void shouldSupportDomainIdFilter() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        String createDomainRequest = """
+                {
+                  "domainCode": "RETAIL_FILTER",
+                  "domainName": "零售业务",
+                  "domainOverview": "零售客户经营场景",
+                  "operator": "admin"
+                }
+                """;
+        MvcResult domainResult = mockMvc.perform(post("/api/domains")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createDomainRequest))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long domainId = objectMapper.readTree(domainResult.getResponse().getContentAsString()).path("id").asLong();
+
+        String createSceneRequest = """
+                {
+                  "sceneTitle": "按域过滤验证",
+                  "domainId": %d,
+                  "rawInput": "raw",
+                  "operator": "tester"
+                }
+                """.formatted(domainId);
+        mockMvc.perform(post("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createSceneRequest))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.domainId").value(domainId));
+
+        mockMvc.perform(get("/api/scenes").param("domainId", String.valueOf(domainId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].domainId").value(domainId))
+                .andExpect(jsonPath("$[0].domainName").value("零售业务"));
+    }
+
+    @Test
+    void shouldSupportLegacyDomainFilterParam() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        String createSceneRequest = """
+                {
+                  "sceneTitle": "旧参数域过滤验证",
+                  "domain": "零售金融-旧口径",
+                  "rawInput": "raw",
+                  "operator": "tester"
+                }
+                """;
+        mockMvc.perform(post("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createSceneRequest))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.domain").value("零售金融-旧口径"));
+
+        mockMvc.perform(get("/api/scenes").param("domain", "零售金融-旧口径"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].domain").value("零售金融-旧口径"));
+    }
+
+    @Test
+    void shouldKeepSqlBlocksCompatibilityWhenOnlyLegacyFieldProvided() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        String createRequest = """
+                {
+                  "sceneTitle": "SQL块兼容验证",
+                  "rawInput": "raw",
+                  "operator": "tester"
+                }
+                """;
+        MvcResult createResult = mockMvc.perform(post("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createRequest))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long sceneId = objectMapper.readTree(createResult.getResponse().getContentAsString()).path("id").asLong();
+
+        String updateRequest = """
+                {
+                  "sceneTitle": "SQL块兼容验证-更新",
+                  "sqlBlocksJson": "[{\\"name\\":\\"SQL块1\\",\\"sql\\":\\"select cust_id from dm_customer_info;\\"}]",
+                  "operator": "editor"
+                }
+                """;
+        mockMvc.perform(put("/api/scenes/{id}", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sqlBlocksJson").value(org.hamcrest.Matchers.containsString("dm_customer_info")))
+                .andExpect(jsonPath("$.sqlVariantsJson").value(org.hamcrest.Matchers.containsString("dm_customer_info")));
+
+        mockMvc.perform(get("/api/scenes").param("keyword", "dm_customer_info"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(sceneId));
+    }
+
+    @Test
+    void shouldRejectWriteWhenUnauthenticated() throws Exception {
+        String createRequest = """
+                {
+                  "sceneTitle": "未登录写入",
+                  "rawInput": "raw"
+                }
+                """;
+        mockMvc.perform(post("/api/scenes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createRequest))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void shouldRejectSceneWriteForFrontlineRole() throws Exception {
+        String token = loginAndGetToken("frontline", "frontline123");
+        String createRequest = """
+                {
+                  "sceneTitle": "前台只读角色写入",
+                  "rawInput": "raw"
+                }
+                """;
+        mockMvc.perform(post("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createRequest))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
+
+    @Test
+    void shouldDiscardDraftAndHideFromDefaultList() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        String title = "弃用草稿-过滤验证";
+        String createRequest = """
+                {
+                  "sceneTitle": "%s",
+                  "rawInput": "raw",
+                  "operator": "tester"
+                }
+                """.formatted(title);
+        MvcResult createResult = mockMvc.perform(post("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createRequest))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long sceneId = objectMapper.readTree(createResult.getResponse().getContentAsString()).path("id").asLong();
+
+        mockMvc.perform(post("/api/scenes/{id}/discard", sceneId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("DISCARDED"));
+
+        mockMvc.perform(get("/api/scenes").param("keyword", title))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+        mockMvc.perform(get("/api/scenes")
+                        .param("status", "DISCARDED")
+                        .param("keyword", title))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(sceneId))
+                .andExpect(jsonPath("$[0].status").value("DISCARDED"));
+    }
+
+    @Test
+    void shouldExposeMinimumUnitDefinitionAndCheck() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        MvcResult createResult = mockMvc.perform(post("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sceneTitle": "最小单元校验场景",
+                                  "rawInput": "raw",
+                                  "operator": "tester"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long sceneId = objectMapper.readTree(createResult.getResponse().getContentAsString()).path("id").asLong();
+
+        mockMvc.perform(get("/api/scenes/minimum-unit"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.unitType").value("CALIBER_SCENE_UNIT_V1"))
+                .andExpect(jsonPath("$.requiredFields").isArray());
+
+        mockMvc.perform(get("/api/scenes/{id}/minimum-unit-check", sceneId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sceneId").value(sceneId))
+                .andExpect(jsonPath("$.publishReady").value(false))
+                .andExpect(jsonPath("$.items").isArray());
+    }
+
+    private String loginAndGetToken(String username, String password) throws Exception {
+        String loginBody = """
+                {
+                  "username": "%s",
+                  "password": "%s"
+                }
+                """.formatted(username, password);
+        MvcResult result = mockMvc.perform(post("/api/system/auth/token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode tokenNode = objectMapper.readTree(result.getResponse().getContentAsString());
+        return tokenNode.path("accessToken").asText();
+    }
+}

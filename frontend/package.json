@@ -1,0 +1,37 @@
+{
+  "name": "datadirect-frontend-react",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "lint": "eslint \"src/**/*.{js,jsx}\"",
+    "test": "vitest run",
+    "type-check": "tsc --noEmit -p tsconfig.typecheck.json",
+    "quality": "npm run lint && npm run type-check && npm run test"
+  },
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "prismjs": "^1.30.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.1",
+    "reactflow": "^11.11.4",
+    "sql-formatter": "^15.7.2",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.20.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "globals": "^15.15.0",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}

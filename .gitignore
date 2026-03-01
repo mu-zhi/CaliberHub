@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs and runtime files
+*.log
+backend/.run/
+test-results/
+
+# Build artifacts
+backend/target/
+frontend/dist/
+
+# Dependencies
+frontend/node_modules/
+
+# Misc
+*.swp
+*.swo

@@ -1,0 +1,24 @@
+caliber:
+  security:
+    # Local/default profile fallback credentials for developer startup.
+    # Do not use these values in production.
+    jwt-secret: local-dev-jwt-secret-change-before-production
+    users:
+      - username: admin
+        password: admin123
+        roles: [ADMIN, SUPPORT]
+      - username: support
+        password: support123
+        roles: [SUPPORT]
+      - username: expert
+        password: expert123
+        roles: [EXPERT]
+      - username: governance
+        password: governance123
+        roles: [GOVERNANCE]
+      - username: frontline
+        password: frontline123
+        roles: [FRONTLINE]
+      - username: compliance
+        password: compliance123
+        roles: [COMPLIANCE]
