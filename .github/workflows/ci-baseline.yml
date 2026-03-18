@@ -1,0 +1,79 @@
+name: CI Baseline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Frontend Install
+        working-directory: frontend
+        run: npm ci
+
+      - name: Frontend Quality
+        working-directory: frontend
+        run: |
+          npm run lint
+          npm run test
+          npm run build
+
+      - name: Sync Frontend Dist To Backend
+        run: bash scripts/sync_frontend_dist.sh
+
+      - name: Backend Unit Test
+        working-directory: backend
+        run: mvn -q test
+
+      - name: Backend Start (Test Profile)
+        working-directory: backend
+        run: |
+          nohup env SPRING_PROFILES_ACTIVE=test mvn -q spring-boot:run >/tmp/datadirect-backend-ci.log 2>&1 &
+          echo $! >/tmp/datadirect-backend-ci.pid
+
+      - name: Wait Backend And Health Check
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS -X POST http://127.0.0.1:8080/api/system/auth/token \
+              -H "Content-Type: application/json" \
+              -d '{"username":"admin","password":"admin123"}' >/tmp/auth.json 2>/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          jq -e '.accessToken | length > 0' /tmp/auth.json >/dev/null
+          curl -sS http://127.0.0.1:8080/actuator/health | jq -e '.status | type == "string"' >/dev/null
+
+      - name: Dump Backend Log On Failure
+        if: failure()
+        run: |
+          echo "===== backend log ====="
+          cat /tmp/datadirect-backend-ci.log || true
+
+      - name: Stop Backend
+        if: always()
+        run: |
+          if [ -f /tmp/datadirect-backend-ci.pid ]; then
+            kill "$(cat /tmp/datadirect-backend-ci.pid)" || true
+          fi

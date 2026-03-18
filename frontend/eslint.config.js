@@ -1,25 +1,60 @@
-import js from '@eslint/js'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import reactHooks from 'eslint-plugin-react-hooks'
-import tseslint from 'typescript-eslint'
+import js from "@eslint/js";
+import globals from "globals";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
 
-export default tseslint.config(
-    {
-        ignores: ['dist', 'node_modules'],
-    },
-    js.configs.recommended,
-    ...tseslint.configs.recommended,
-    {
-        plugins: {
-            'react-refresh': reactRefresh,
-            'react-hooks': reactHooks,
+export default [
+  {
+    ignores: ["dist/**"],
+  },
+  {
+    files: ["src/**/*.{js,jsx}"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
         },
-        rules: {
-            'react-refresh/only-export-components': 'warn',
-            'react-hooks/rules-of-hooks': 'error',
-            'react-hooks/exhaustive-deps': 'warn',
-            '@typescript-eslint/no-explicit-any': 'off',
-            '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-        },
+      },
+      globals: {
+        ...globals.browser,
+      },
     },
-)
+    plugins: {
+      react,
+      "react-hooks": reactHooks,
+      "react-refresh": reactRefresh,
+    },
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...react.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      "no-use-before-define": [
+        "error",
+        {
+          functions: false,
+          classes: true,
+          variables: true,
+        },
+      ],
+      "react/prop-types": "off",
+      "react/react-in-jsx-scope": "off",
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+    },
+  },
+];

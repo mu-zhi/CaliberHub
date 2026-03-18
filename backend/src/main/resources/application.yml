@@ -1,29 +1,107 @@
-server:
-  port: 8080
-
 spring:
   application:
-    name: caliberhub
-  
+    name: caliber-mvp-backend
   datasource:
-    url: jdbc:sqlite:./caliberhub.db
-    driver-class-name: org.sqlite.JDBC
-  
+    url: jdbc:h2:mem:caliber;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
   jpa:
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    open-in-view: false
     hibernate:
-      ddl-auto: none
-    show-sql: false
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
-  
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
   jackson:
     serialization:
       write-dates-as-timestamps: false
-    default-property-inclusion: non_null
+  data:
+    redis:
+      host: ${CALIBER_REDIS_HOST:127.0.0.1}
+      port: ${CALIBER_REDIS_PORT:6379}
+      timeout: 2s
+
+server:
+  port: 8080
+
+info:
+  app:
+    name: 数据直通车
+    version: ${DD_APP_VERSION:0.1.0}
+    build-time: ${DD_APP_BUILD_TIME:unknown}
+  frontend:
+    dist-version: ${DD_FRONTEND_DIST_VERSION:unknown}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: never
+  info:
+    env:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
 
 logging:
-  level:
-    com.caliberhub: ${LOG_LEVEL_COM_CALIBERHUB:INFO}
-    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId:-} %X{userId:-} %X{role:-} %X{api:-} %X{status:-} %X{errorCode:-}] %logger{36} - %msg%n"
+
+caliber:
+  security:
+    enabled: ${CALIBER_SECURITY_ENABLED:false}
+    jwt-secret: ${CALIBER_JWT_SECRET:}
+    token-expire-minutes: ${CALIBER_JWT_EXPIRE_MINUTES:480}
+    require-write-auth: ${CALIBER_REQUIRE_WRITE_AUTH:false}
+    rate-limit-enabled: ${CALIBER_RATE_LIMIT_ENABLED:true}
+    write-per-minute: ${CALIBER_WRITE_RATE_LIMIT:120}
+    llm-per-minute: ${CALIBER_LLM_RATE_LIMIT:30}
+    users:
+      - username: admin
+        password: ${CALIBER_ADMIN_PASSWORD:}
+        roles: [ADMIN, SUPPORT]
+      - username: support
+        password: ${CALIBER_SUPPORT_PASSWORD:}
+        roles: [SUPPORT]
+      - username: expert
+        password: ${CALIBER_EXPERT_PASSWORD:}
+        roles: [EXPERT]
+      - username: governance
+        password: ${CALIBER_GOVERNANCE_PASSWORD:}
+        roles: [GOVERNANCE]
+      - username: frontline
+        password: ${CALIBER_FRONTLINE_PASSWORD:}
+        roles: [FRONTLINE]
+      - username: compliance
+        password: ${CALIBER_COMPLIANCE_PASSWORD:}
+        roles: [COMPLIANCE]
+  cache:
+    redis-enabled: ${CALIBER_CACHE_REDIS_ENABLED:false}
+    ttl-seconds: ${CALIBER_CACHE_TTL_SECONDS:300}
+  llm:
+    preprocess:
+      enabled: true
+      endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+      api-key: "${CALIBER_LLM_API_KEY:sk-df67655474664ebfa40406bb770fa216}"
+      model: "qwen3-max"
+      timeout-seconds: 35
+      temperature: 0.0
+      max-tokens: 4096
+      enable-thinking: false
+      fallback-to-rule: true
+      rate-limit-per-minute: 30
+      circuit-breaker-failure-threshold: 5
+      circuit-breaker-open-seconds: 60
+      secret-key: ${CALIBER_LLM_SECRET_KEY:caliber-local-llm-secret}

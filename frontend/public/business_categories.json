@@ -1,0 +1,3224 @@
+{
+  "source": "03-其他文档/01-当前业务侧的业务场景分类",
+  "generatedAt": "2026-02-12T06:56:32.593Z",
+  "rootCount": 5,
+  "nodeCount": 451,
+  "roots": [
+    {
+      "id": "root-1",
+      "code": "1",
+      "name": "零售基础业务",
+      "level": 1,
+      "children": [
+        {
+          "id": "node-1.1",
+          "code": "1.1",
+          "name": "普通个人业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-1.1.1",
+              "code": "1.1.1",
+              "name": "业务短信发送模板",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.1.1",
+                  "code": "1.1.1.1",
+                  "name": "账务管理",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.1.2",
+                  "code": "1.1.1.2",
+                  "name": "特殊业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.1.3",
+                  "code": "1.1.1.3",
+                  "name": "转汇业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.1.4",
+                  "code": "1.1.1.4",
+                  "name": "储蓄业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.1.5",
+                  "code": "1.1.1.5",
+                  "name": "缴费业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.1.6",
+                  "code": "1.1.1.6",
+                  "name": "通知服务",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.2",
+              "code": "1.1.2",
+              "name": "账户管理(新)",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.2.1",
+                  "code": "1.1.2.1",
+                  "name": "账户中止业务及存量核实账户",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.2.2",
+                  "code": "1.1.2.2",
+                  "name": "个人账户管理费",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.2.3",
+                  "code": "1.1.2.3",
+                  "name": "开户规定",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.2.4",
+                  "code": "1.1.2.4",
+                  "name": "销户规定",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.2.5",
+                  "code": "1.1.2.5",
+                  "name": "开户行变更",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.2.6",
+                  "code": "1.1.2.6",
+                  "name": "支取方式管理",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.2.7",
+                  "code": "1.1.2.7",
+                  "name": "账户分类管理",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.2.8",
+                  "code": "1.1.2.8",
+                  "name": "交易代码",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.3",
+              "code": "1.1.3",
+              "name": "储蓄业务",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.3.1",
+                  "code": "1.1.3.1",
+                  "name": "活期",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.2",
+                  "code": "1.1.3.2",
+                  "name": "整存整取",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.3",
+                  "code": "1.1.3.3",
+                  "name": "零存整取",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.4",
+                  "code": "1.1.3.4",
+                  "name": "个人通知存款",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.5",
+                  "code": "1.1.3.5",
+                  "name": "智能通知存款",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.6",
+                  "code": "1.1.3.6",
+                  "name": "创新型储蓄存款产品",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.7",
+                  "code": "1.1.3.7",
+                  "name": "存本取息",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.8",
+                  "code": "1.1.3.8",
+                  "name": "智能定期存款",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.9",
+                  "code": "1.1.3.9",
+                  "name": "定活两便",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.10",
+                  "code": "1.1.3.10",
+                  "name": "教育储蓄",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.11",
+                  "code": "1.1.3.11",
+                  "name": "整存零取",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.12",
+                  "code": "1.1.3.12",
+                  "name": "专属产品",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.13",
+                  "code": "1.1.3.13",
+                  "name": "存款保险条例",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.3.14",
+                  "code": "1.1.3.14",
+                  "name": "存款利息税",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.4",
+              "code": "1.1.4",
+              "name": "现金存取",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.4.1",
+                  "code": "1.1.4.1",
+                  "name": "柜面现金存取",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.4.2",
+                  "code": "1.1.4.2",
+                  "name": "银联ATM取款",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.4.3",
+                  "code": "1.1.4.3",
+                  "name": "本行ATM存取款",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.4.4",
+                  "code": "1.1.4.4",
+                  "name": "货币基本知识",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.5",
+              "code": "1.1.5",
+              "name": "特殊业务",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.5.1",
+                  "code": "1.1.5.1",
+                  "name": "不同冻结情况下各业务是否受影响的汇总表",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.2",
+                  "code": "1.1.5.2",
+                  "name": "挂失业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.3",
+                  "code": "1.1.5.3",
+                  "name": "凭证更换",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.4",
+                  "code": "1.1.5.4",
+                  "name": "卡通原号换IC卡",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.5",
+                  "code": "1.1.5.5",
+                  "name": "卡片直邮",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.6",
+                  "code": "1.1.5.6",
+                  "name": "卡通未领卡处理",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.7",
+                  "code": "1.1.5.7",
+                  "name": "维护业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.8",
+                  "code": "1.1.5.8",
+                  "name": "I类户降级为II类户",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.9",
+                  "code": "1.1.5.9",
+                  "name": "其他特殊业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.10",
+                  "code": "1.1.5.10",
+                  "name": "异地特殊业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.11",
+                  "code": "1.1.5.11",
+                  "name": "储蓄存款查询",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.12",
+                  "code": "1.1.5.12",
+                  "name": "止付",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.5.13",
+                  "code": "1.1.5.13",
+                  "name": "扣划和过户",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.6",
+              "code": "1.1.6",
+              "name": "代理业务",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.6.1",
+                  "code": "1.1.6.1",
+                  "name": "国债",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.6.2",
+                  "code": "1.1.6.2",
+                  "name": "保管箱业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.6.3",
+                  "code": "1.1.6.3",
+                  "name": "Uber司机线下注册业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.6.4",
+                  "code": "1.1.6.4",
+                  "name": "滴滴司机线下招募业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.6.5",
+                  "code": "1.1.6.5",
+                  "name": "代销纪念币/钞",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.7",
+              "code": "1.1.7",
+              "name": "自助设备",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.7.1",
+                  "code": "1.1.7.1",
+                  "name": "基础知识",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.7.2",
+                  "code": "1.1.7.2",
+                  "name": "有异议纸币处理流程",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.8",
+              "code": "1.1.8",
+              "name": "银联卡境外业务",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.8.1",
+                  "code": "1.1.8.1",
+                  "name": "基本规定",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.8.2",
+                  "code": "1.1.8.2",
+                  "name": "常见问题解答",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.8.3",
+                  "code": "1.1.8.3",
+                  "name": "境外用卡小知识",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.9",
+              "code": "1.1.9",
+              "name": "缴费业务",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.9.1",
+                  "code": "1.1.9.1",
+                  "name": "近期关注(持续更新)",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.9.2",
+                  "code": "1.1.9.2",
+                  "name": "统一生活缴费",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.9.3",
+                  "code": "1.1.9.3",
+                  "name": "全行缴费项目",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.9.4",
+                  "code": "1.1.9.4",
+                  "name": "ETC业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.9.5",
+                  "code": "1.1.9.5",
+                  "name": "常见问题应对话术",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.10",
+              "code": "1.1.10",
+              "name": "商户消费",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.10.1",
+                  "code": "1.1.10.1",
+                  "name": "指定商户消费",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.10.2",
+                  "code": "1.1.10.2",
+                  "name": "POS业务新增“人工核身风险管控策略”",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.10.3",
+                  "code": "1.1.10.3",
+                  "name": "宁波分行老板收款业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.10.4",
+                  "code": "1.1.10.4",
+                  "name": "异常交易处理",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.10.5",
+                  "code": "1.1.10.5",
+                  "name": "拉卡拉功能",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.11",
+              "code": "1.1.11",
+              "name": "POS收付易",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.11.1",
+                  "code": "1.1.11.1",
+                  "name": "POS收单业务介绍",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.11.2",
+                  "code": "1.1.11.2",
+                  "name": "POS收付易经营",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.11.3",
+                  "code": "1.1.11.3",
+                  "name": "POS收付易相关通知",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.11.4",
+                  "code": "1.1.11.4",
+                  "name": "二维码聚合支付",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.12",
+              "code": "1.1.12",
+              "name": "个人通知业务",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.12.1",
+                  "code": "1.1.12.1",
+                  "name": "账务变动通知业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.12.2",
+                  "code": "1.1.12.2",
+                  "name": "通知服务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.12.3",
+                  "code": "1.1.12.3",
+                  "name": "M1/M2/E2说明",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.12.4",
+                  "code": "1.1.12.4",
+                  "name": "特殊业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.12.5",
+                  "code": "1.1.12.5",
+                  "name": "短信发送规则及参考",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.13",
+              "code": "1.1.13",
+              "name": "其它柜面业务",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.1.13.1",
+                  "code": "1.1.13.1",
+                  "name": "存款证明书",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.2",
+                  "code": "1.1.13.2",
+                  "name": "资产证明",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.3",
+                  "code": "1.1.13.3",
+                  "name": "账户证明书",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.4",
+                  "code": "1.1.13.4",
+                  "name": "交易流水打印",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.5",
+                  "code": "1.1.13.5",
+                  "name": "委托冻结业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.6",
+                  "code": "1.1.13.6",
+                  "name": "分行特色业务",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.7",
+                  "code": "1.1.13.7",
+                  "name": "常见问题解答",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.8",
+                  "code": "1.1.13.8",
+                  "name": "综合对账单",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.9",
+                  "code": "1.1.13.9",
+                  "name": "个人存款资金监管业务操作规程",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.1.13.10",
+                  "code": "1.1.13.10",
+                  "name": "柜面单凭证样",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.1.14",
+              "code": "1.1.14",
+              "name": "国际借记卡",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.1.15",
+              "code": "1.1.15",
+              "name": "电子银行业务",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-1.2",
+          "code": "1.2",
+          "name": "资金划转业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-1.2.1",
+              "code": "1.2.1",
+              "name": "转汇基础知识",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.2",
+              "code": "1.2.2",
+              "name": "资金划转业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.3",
+              "code": "1.2.3",
+              "name": "转汇模式及限额",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.4",
+              "code": "1.2.4",
+              "name": "转汇安全风控策略",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.5",
+              "code": "1.2.5",
+              "name": "查询及退汇规定",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.6",
+              "code": "1.2.6",
+              "name": "柜面大额转账证件要求",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.7",
+              "code": "1.2.7",
+              "name": "转汇常用知识解答",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.8",
+              "code": "1.2.8",
+              "name": "涉案/可疑账户信息共享功能",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.9",
+              "code": "1.2.9",
+              "name": "\"飞单”拦截侦测系统",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.10",
+              "code": "1.2.10",
+              "name": "转账汇款解答流程",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.11",
+              "code": "1.2.11",
+              "name": "转账汇款未到账查询",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.12",
+              "code": "1.2.12",
+              "name": "转账汇款查询/退汇应对技巧",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.13",
+              "code": "1.2.13",
+              "name": "转账汇款解答流程客户转错账要求我行代为联系的处理流程",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.14",
+              "code": "1.2.14",
+              "name": "自助转账",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.15",
+              "code": "1.2.15",
+              "name": "临时重点关注转账问题",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.16",
+              "code": "1.2.16",
+              "name": "收款方信息管理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.17",
+              "code": "1.2.17",
+              "name": "转账汇款(向任意账户)",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.18",
+              "code": "1.2.18",
+              "name": "本人协议转账",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.19",
+              "code": "1.2.19",
+              "name": "指定收款人转账",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.20",
+              "code": "1.2.20",
+              "name": "转账操作指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.2.21",
+              "code": "1.2.21",
+              "name": "手机号转账预约转账",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-1.3",
+          "code": "1.3",
+          "name": "电子银行业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-1.3.1",
+              "code": "1.3.1",
+              "name": "基本功能",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.3.1.1",
+                  "code": "1.3.1.1",
+                  "name": "登录安全认证",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.1.2",
+                  "code": "1.3.1.2",
+                  "name": "登录权限设置",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.1.3",
+                  "code": "1.3.1.3",
+                  "name": "账户总览",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.1.4",
+                  "code": "1.3.1.4",
+                  "name": "域名IP对照表",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.3.2",
+              "code": "1.3.2",
+              "name": "一网通用户",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.3.2.1",
+                  "code": "1.3.2.1",
+                  "name": "基本介绍",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.2.2",
+                  "code": "1.3.2.2",
+                  "name": "常见问答",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.2.3",
+                  "code": "1.3.2.3",
+                  "name": "一网通注册绑卡常见报错及指引",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.2.4",
+                  "code": "1.3.2.4",
+                  "name": "手机银行操作流程",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.2.5",
+                  "code": "1.3.2.5",
+                  "name": "网银渠道操作流程",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.2.6",
+                  "code": "1.3.2.6",
+                  "name": "可视柜台渠道操作流程",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.2.7",
+                  "code": "1.3.2.7",
+                  "name": "“掌上生活”用户找回流程",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.2.8",
+                  "code": "1.3.2.8",
+                  "name": "一网通用户虚假注册后集中销户",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.3.3",
+              "code": "1.3.3",
+              "name": "APP第三方小程序",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.3.3.1",
+                  "code": "1.3.3.1",
+                  "name": "基本功能",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.3.2",
+                  "code": "1.3.3.2",
+                  "name": "使用说明",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.3.3",
+                  "code": "1.3.3.3",
+                  "name": "未满14周岁用户使用限制",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.3.4",
+                  "code": "1.3.3.4",
+                  "name": "免责声明",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.3.4",
+              "code": "1.3.4",
+              "name": "个人手机银行",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.3.4.1",
+                  "code": "1.3.4.1",
+                  "name": "首页",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.4.2",
+                  "code": "1.3.4.2",
+                  "name": "社区",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.4.3",
+                  "code": "1.3.4.3",
+                  "name": "财富",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.4.4",
+                  "code": "1.3.4.4",
+                  "name": "生活",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.4.5",
+                  "code": "1.3.4.5",
+                  "name": "我的",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.4.6",
+                  "code": "1.3.4.6",
+                  "name": "隐私政策",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.4.7",
+                  "code": "1.3.4.7",
+                  "name": "搜索功能",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.4.8",
+                  "code": "1.3.4.8",
+                  "name": "常见问答",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.4.9",
+                  "code": "1.3.4.9",
+                  "name": "各版本介绍及维护记录",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.3.5",
+              "code": "1.3.5",
+              "name": "个人网上银行",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.3.5.1",
+                  "code": "1.3.5.1",
+                  "name": "个人银行PC客户端",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.5.2",
+                  "code": "1.3.5.2",
+                  "name": "个人银行PC网页版",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.5.3",
+                  "code": "1.3.5.3",
+                  "name": "网银功能菜单下线/调整记录",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.3.6",
+              "code": "1.3.6",
+              "name": "线上支付",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.3.6.1",
+                  "code": "1.3.6.1",
+                  "name": "暂停商户非居民支付交易的参考话术",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.6.2",
+                  "code": "1.3.6.2",
+                  "name": "网上支付常用信息一览表",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.6.3",
+                  "code": "1.3.6.3",
+                  "name": "支付安全认证策略",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.6.4",
+                  "code": "1.3.6.4",
+                  "name": "一网通支付",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.6.5",
+                  "code": "1.3.6.5",
+                  "name": "直付通/快捷支付",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.6.6",
+                  "code": "1.3.6.6",
+                  "name": "一网通网关支付",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.6.7",
+                  "code": "1.3.6.7",
+                  "name": "银联在线",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.3.7",
+              "code": "1.3.7",
+              "name": "M+会员",
+              "level": 3,
+              "children": [
+                {
+                  "id": "node-1.3.7.1",
+                  "code": "1.3.7.1",
+                  "name": "基本介绍",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.7.2",
+                  "code": "1.3.7.2",
+                  "name": "等级权益",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.7.3",
+                  "code": "1.3.7.3",
+                  "name": "手机银行截图",
+                  "level": 4,
+                  "children": []
+                },
+                {
+                  "id": "node-1.3.7.4",
+                  "code": "1.3.7.4",
+                  "name": "常见问题解答",
+                  "level": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-1.3.8",
+              "code": "1.3.8",
+              "name": "低频业务/下线业务备查",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-1.4",
+          "code": "1.4",
+          "name": "公积金业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-1.4.1",
+              "code": "1.4.1",
+              "name": "公积金基础业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.4.2",
+              "code": "1.4.2",
+              "name": "公积金贷款业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.4.3",
+              "code": "1.4.3",
+              "name": "手机银行APP-公积金查询",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-1.5",
+          "code": "1.5",
+          "name": "视频业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-1.5.1",
+              "code": "1.5.1",
+              "name": "可视柜台",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.5.2",
+              "code": "1.5.2",
+              "name": "行员查询“视频渠道所经办客户资料”操作指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-1.5.3",
+              "code": "1.5.3",
+              "name": "可视柜台业务操作规程",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-1.6",
+          "code": "1.6",
+          "name": "养老金金融业务",
+          "level": 2,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "root-2",
+      "code": "2",
+      "name": "公司业务",
+      "level": 1,
+      "children": [
+        {
+          "id": "node-2.1",
+          "code": "2.1",
+          "name": "公司线上服务平台",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.1.1",
+              "code": "2.1.1",
+              "name": "企业网银与企业APP跨屏协同",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.1.2",
+              "code": "2.1.2",
+              "name": "企业网银",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.1.3",
+              "code": "2.1.3",
+              "name": "企业APP",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.1.4",
+              "code": "2.1.4",
+              "name": "云直联",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.1.5",
+              "code": "2.1.5",
+              "name": "企业电话银行",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.1.6",
+              "code": "2.1.6",
+              "name": "微信银行",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.2",
+          "code": "2.2",
+          "name": "账户服务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.2.1",
+              "code": "2.2.1",
+              "name": "账户开户",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.2.2",
+              "code": "2.2.2",
+              "name": "账户变更",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.2.3",
+              "code": "2.2.3",
+              "name": "单据、对账",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.2.4",
+              "code": "2.2.4",
+              "name": "发票及证明类",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.2.5",
+              "code": "2.2.5",
+              "name": "账户年检",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.2.6",
+              "code": "2.2.6",
+              "name": "账户生命周期",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.2.7",
+              "code": "2.2.7",
+              "name": "查询、扣划、冻结",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.2.8",
+              "code": "2.2.8",
+              "name": "账户销户",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.3",
+          "code": "2.3",
+          "name": "收付结算",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.3.1",
+              "code": "2.3.1",
+              "name": "非柜面转账强频常见问题",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.3.2",
+              "code": "2.3.2",
+              "name": "企业网银支付",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.3.3",
+              "code": "2.3.3",
+              "name": "企业APP移动支付",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.3.4",
+              "code": "2.3.4",
+              "name": "柜面结算",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.3.5",
+              "code": "2.3.5",
+              "name": "公司一卡通",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.3.6",
+              "code": "2.3.6",
+              "name": "聚合收款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.3.7",
+              "code": "2.3.7",
+              "name": "商务支付",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.4",
+          "code": "2.4",
+          "name": "代发业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.4.1",
+              "code": "2.4.1",
+              "name": "协议签订及维护",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.4.2",
+              "code": "2.4.2",
+              "name": "批量开户",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.4.3",
+              "code": "2.4.3",
+              "name": "网银代发",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.4.4",
+              "code": "2.4.4",
+              "name": "柜台代发",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.4.5",
+              "code": "2.4.5",
+              "name": "APP代发",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.4.6",
+              "code": "2.4.6",
+              "name": "电子工资单",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.5",
+          "code": "2.5",
+          "name": "代扣业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.5.1",
+              "code": "2.5.1",
+              "name": "增值税留抵退税",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.5.2",
+              "code": "2.5.2",
+              "name": "缴纳税款业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.5.3",
+              "code": "2.5.3",
+              "name": "代理业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.5.4",
+              "code": "2.5.4",
+              "name": "自助缴费",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.5.5",
+              "code": "2.5.5",
+              "name": "住房公积金",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.5.6",
+              "code": "2.5.6",
+              "name": "特色代理业务",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.6",
+          "code": "2.6",
+          "name": "人行电票",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.6.1",
+              "code": "2.6.1",
+              "name": "电票相关通知",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.2",
+              "code": "2.6.2",
+              "name": "功能申请",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.3",
+              "code": "2.6.3",
+              "name": "协议签署",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.4",
+              "code": "2.6.4",
+              "name": "开票",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.5",
+              "code": "2.6.5",
+              "name": "保证金管理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.6",
+              "code": "2.6.6",
+              "name": "票据收付",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.7",
+              "code": "2.6.7",
+              "name": "票据质押",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.8",
+              "code": "2.6.8",
+              "name": "票据托管",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.9",
+              "code": "2.6.9",
+              "name": "票据贴现",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.10",
+              "code": "2.6.10",
+              "name": "提示付款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.11",
+              "code": "2.6.11",
+              "name": "追索",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.12",
+              "code": "2.6.12",
+              "name": "票据撤销",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.13",
+              "code": "2.6.13",
+              "name": "保证业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.14",
+              "code": "2.6.14",
+              "name": "综合查询",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.15",
+              "code": "2.6.15",
+              "name": "票据池业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.16",
+              "code": "2.6.16",
+              "name": "功能关闭",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.17",
+              "code": "2.6.17",
+              "name": "收票人信息维护",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.18",
+              "code": "2.6.18",
+              "name": "用户权限管理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.6.19",
+              "code": "2.6.19",
+              "name": "常见问题",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.7",
+          "code": "2.7",
+          "name": "对公存款",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.7.1",
+              "code": "2.7.1",
+              "name": "活期存款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.2",
+              "code": "2.7.2",
+              "name": "定期存款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.3",
+              "code": "2.7.3",
+              "name": "大额存单",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.4",
+              "code": "2.7.4",
+              "name": "通知存款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.5",
+              "code": "2.7.5",
+              "name": "协定存款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.6",
+              "code": "2.7.6",
+              "name": "协议存款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.7",
+              "code": "2.7.7",
+              "name": "保证金",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.8",
+              "code": "2.7.8",
+              "name": "C+账户-归集存款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.9",
+              "code": "2.7.9",
+              "name": "C+账户-组合存款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.7.10",
+              "code": "2.7.10",
+              "name": "单位人额外币定期存款",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.8",
+          "code": "2.8",
+          "name": "投资理财",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.8.1",
+              "code": "2.8.1",
+              "name": "风险评估",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.2",
+              "code": "2.8.2",
+              "name": "公司理财",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.3",
+              "code": "2.8.3",
+              "name": "结构性存款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.4",
+              "code": "2.8.4",
+              "name": "同业理财",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.5",
+              "code": "2.8.5",
+              "name": "基金代销",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.6",
+              "code": "2.8.6",
+              "name": "对公代销",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.7",
+              "code": "2.8.7",
+              "name": "第二方存管",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.8",
+              "code": "2.8.8",
+              "name": "外汇买卖业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.9",
+              "code": "2.8.9",
+              "name": "黄金业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.10",
+              "code": "2.8.10",
+              "name": "企业保险",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.8.11",
+              "code": "2.8.11",
+              "name": "其他业务",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.9",
+          "code": "2.9",
+          "name": "企业服务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.9.1",
+              "code": "2.9.1",
+              "name": "销售云",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.9.2",
+              "code": "2.9.2",
+              "name": "发票云",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.9.3",
+              "code": "2.9.3",
+              "name": "视频云链平台",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.9.4",
+              "code": "2.9.4",
+              "name": "视觉识别服务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.9.5",
+              "code": "2.9.5",
+              "name": "企业网银同屏交互",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.9.6",
+              "code": "2.9.6",
+              "name": "异地代理见证",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.9.7",
+              "code": "2.9.7",
+              "name": "产品一点通",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.10",
+          "code": "2.10",
+          "name": "现金管理",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.10.1",
+              "code": "2.10.1",
+              "name": "跨银行现金管理产品",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.2",
+              "code": "2.10.2",
+              "name": "智能现金池",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.3",
+              "code": "2.10.3",
+              "name": "境内资金池",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.4",
+              "code": "2.10.4",
+              "name": "交易管家",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.5",
+              "code": "2.10.5",
+              "name": "公私账户一网通",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.6",
+              "code": "2.10.6",
+              "name": "网贷易",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.7",
+              "code": "2.10.7",
+              "name": "人民币委贷现金池",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.8",
+              "code": "2.10.8",
+              "name": "跨境现金池",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.9",
+              "code": "2.10.9",
+              "name": "外币现金池",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.10",
+              "code": "2.10.10",
+              "name": "本外币现金池",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.11",
+              "code": "2.10.11",
+              "name": "名义现金池",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.12",
+              "code": "2.10.12",
+              "name": "集团资金余额管理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.13",
+              "code": "2.10.13",
+              "name": "集团协议转账业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.10.14",
+              "code": "2.10.14",
+              "name": "联动支付",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.11",
+          "code": "2.11",
+          "name": "贸易融资",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.11.1",
+              "code": "2.11.1",
+              "name": "计息、结息方式",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.2",
+              "code": "2.11.2",
+              "name": "企业信用报告",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.3",
+              "code": "2.11.3",
+              "name": "国内保函",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.4",
+              "code": "2.11.4",
+              "name": "付款代理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.5",
+              "code": "2.11.5",
+              "name": "国内信用证",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.6",
+              "code": "2.11.6",
+              "name": "国内保理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.7",
+              "code": "2.11.7",
+              "name": "云证业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.8",
+              "code": "2.11.8",
+              "name": "中企云链",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.9",
+              "code": "2.11.9",
+              "name": "招企贷",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.10",
+              "code": "2.11.10",
+              "name": "中小企业金融",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.11",
+              "code": "2.11.11",
+              "name": "小企业信贷",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.12",
+              "code": "2.11.12",
+              "name": "流动资金贷款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.13",
+              "code": "2.11.13",
+              "name": "固定资产贷款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.14",
+              "code": "2.11.14",
+              "name": "项目融资贷款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.15",
+              "code": "2.11.15",
+              "name": "房地产贷款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.16",
+              "code": "2.11.16",
+              "name": "商业票据贴现",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.11.17",
+              "code": "2.11.17",
+              "name": "其他贷款种类",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.12",
+          "code": "2.12",
+          "name": "国际业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.12.1",
+              "code": "2.12.1",
+              "name": "业务通知",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.2",
+              "code": "2.12.2",
+              "name": "自贸区业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.3",
+              "code": "2.12.3",
+              "name": "招银避险交易平台",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.4",
+              "code": "2.12.4",
+              "name": "跨境收款通",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.5",
+              "code": "2.12.5",
+              "name": "跨境-智汇通",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.6",
+              "code": "2.12.6",
+              "name": "外汇账户管理及政策",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.7",
+              "code": "2.12.7",
+              "name": "国际结算",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.8",
+              "code": "2.12.8",
+              "name": "国际贸易融资",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.9",
+              "code": "2.12.9",
+              "name": "网上国际业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.12.10",
+              "code": "2.12.10",
+              "name": "综合信息",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.13",
+          "code": "2.13",
+          "name": "离岸业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.13.1",
+              "code": "2.13.1",
+              "name": "临时通知及活动",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.2",
+              "code": "2.13.2",
+              "name": "基本介绍",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.3",
+              "code": "2.13.3",
+              "name": "账户管理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.4",
+              "code": "2.13.4",
+              "name": "离岸传真业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.5",
+              "code": "2.13.5",
+              "name": "结售汇业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.6",
+              "code": "2.13.6",
+              "name": "存款业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.7",
+              "code": "2.13.7",
+              "name": "离岸网银",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.8",
+              "code": "2.13.8",
+              "name": "离岸汇款自助填单",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.9",
+              "code": "2.13.9",
+              "name": "支付密码器",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.10",
+              "code": "2.13.10",
+              "name": "电子回单服务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.11",
+              "code": "2.13.11",
+              "name": "离岸融资",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.12",
+              "code": "2.13.12",
+              "name": "其他业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.13",
+              "code": "2.13.13",
+              "name": "常见问题",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.13.14",
+              "code": "2.13.14",
+              "name": "综合信息",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.14",
+          "code": "2.14",
+          "name": "跨境人民币结算",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.14.1",
+              "code": "2.14.1",
+              "name": "NRA境外机构境内账户",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.14.2",
+              "code": "2.14.2",
+              "name": "外汇账户",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.14.3",
+              "code": "2.14.3",
+              "name": "人民币账户",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.14.4",
+              "code": "2.14.4",
+              "name": "NRA网银业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.14.5",
+              "code": "2.14.5",
+              "name": "常见问题",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.15",
+          "code": "2.15",
+          "name": "其它业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.15.1",
+              "code": "2.15.1",
+              "name": "授权个人查询转账业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.15.2",
+              "code": "2.15.2",
+              "name": "同业金融",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.15.3",
+              "code": "2.15.3",
+              "name": "资产托管",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.15.4",
+              "code": "2.15.4",
+              "name": "融资租赁",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-2.16",
+          "code": "2.16",
+          "name": "综合信息",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-2.16.1",
+              "code": "2.16.1",
+              "name": "联行号、交换号",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.2",
+              "code": "2.16.2",
+              "name": "新系统后台查询",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.3",
+              "code": "2.16.3",
+              "name": "交易码对照表",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.4",
+              "code": "2.16.4",
+              "name": "新、旧系统切换的账户转换前缀对照表",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.5",
+              "code": "2.16.5",
+              "name": "自助查询终端",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.6",
+              "code": "2.16.6",
+              "name": "香港永隆银行开户相关问题",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.7",
+              "code": "2.16.7",
+              "name": "行员咨询行内业务操作问题的话术指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.8",
+              "code": "2.16.8",
+              "name": "办理对公业务出示个人身份证件的要求",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.9",
+              "code": "2.16.9",
+              "name": "短信通知平台与非本人短信处理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.10",
+              "code": "2.16.10",
+              "name": "协助公安机关集中查询操作规定",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.11",
+              "code": "2.16.11",
+              "name": "各类系统简介",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-2.16.12",
+              "code": "2.16.12",
+              "name": "参考文件",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "root-3",
+      "code": "3",
+      "name": "贷款及信用卡业务",
+      "level": 1,
+      "children": [
+        {
+          "id": "node-3.1",
+          "code": "3.1",
+          "name": "个人贷款业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-3.1.1",
+              "code": "3.1.1",
+              "name": "个人资产",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.2",
+              "code": "3.1.2",
+              "name": "LPR利率切换的作答指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.3",
+              "code": "3.1.3",
+              "name": "个人资产常用短信模板",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.4",
+              "code": "3.1.4",
+              "name": "关于零售贷款贷中用途管控服务工作指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.5",
+              "code": "3.1.5",
+              "name": "贷款基础知识",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.6",
+              "code": "3.1.6",
+              "name": "零售信贷基本产品",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.7",
+              "code": "3.1.7",
+              "name": "零售信贷业务功能",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.8",
+              "code": "3.1.8",
+              "name": "通知服务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.9",
+              "code": "3.1.9",
+              "name": "贷前申请解答思路指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.10",
+              "code": "3.1.10",
+              "name": "个人贷款业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.11",
+              "code": "3.1.11",
+              "name": "网银/手机银行操作指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.12",
+              "code": "3.1.12",
+              "name": "内部操作指引逾期应对指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.13",
+              "code": "3.1.13",
+              "name": "征信服务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.14",
+              "code": "3.1.14",
+              "name": "学习资料",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.15",
+              "code": "3.1.15",
+              "name": "个贷公告",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.16",
+              "code": "3.1.16",
+              "name": "关于首套房抵扣个税政策的相关作答指引",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.17",
+              "code": "3.1.17",
+              "name": "闪电贷",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.1.18",
+              "code": "3.1.18",
+              "name": "掌上理财",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-3.2",
+          "code": "3.2",
+          "name": "信用卡业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-3.2.1",
+              "code": "3.2.1",
+              "name": "常见业务知识",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.2.2",
+              "code": "3.2.2",
+              "name": "高端信用卡基础知识",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.2.3",
+              "code": "3.2.3",
+              "name": "司法机关查询客户资料",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-3.2.4",
+              "code": "3.2.4",
+              "name": "行内业务规范",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "root-4",
+      "code": "4",
+      "name": "外汇及境外机构",
+      "level": 1,
+      "children": [
+        {
+          "id": "node-4.1",
+          "code": "4.1",
+          "name": "个人外汇业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-4.1.1",
+              "code": "4.1.1",
+              "name": "个人外汇业务基本常识",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.1.2",
+              "code": "4.1.2",
+              "name": "现钞存取现",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.1.3",
+              "code": "4.1.3",
+              "name": "结售汇",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.1.4",
+              "code": "4.1.4",
+              "name": "外汇划转",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.1.5",
+              "code": "4.1.5",
+              "name": "跨境人民币业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.1.6",
+              "code": "4.1.6",
+              "name": "外币票据业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.1.7",
+              "code": "4.1.7",
+              "name": "境外个人特殊外汇管理",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.1.8",
+              "code": "4.1.8",
+              "name": "外汇交易类产品",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.1.9",
+              "code": "4.1.9",
+              "name": "外汇金融拓展知识",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-4.2",
+          "code": "4.2",
+          "name": "香港一卡通",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-4.2.1",
+              "code": "4.2.1",
+              "name": "香港分行基本介绍",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.2",
+              "code": "4.2.2",
+              "name": "境内分行见证网点列表",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.3",
+              "code": "4.2.3",
+              "name": "开、销户",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.4",
+              "code": "4.2.4",
+              "name": "客户资料维护",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.5",
+              "code": "4.2.5",
+              "name": "转账汇款业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.6",
+              "code": "4.2.6",
+              "name": "货币兑换及外汇买卖",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.7",
+              "code": "4.2.7",
+              "name": "储蓄及存取款",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.8",
+              "code": "4.2.8",
+              "name": "香港ATM及POS业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.9",
+              "code": "4.2.9",
+              "name": "其他特殊业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.10",
+              "code": "4.2.10",
+              "name": "代缴代扣",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.11",
+              "code": "4.2.11",
+              "name": "通知服务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.12",
+              "code": "4.2.12",
+              "name": "票据业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.13",
+              "code": "4.2.13",
+              "name": "香港手机APP",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.14",
+              "code": "4.2.14",
+              "name": "香港网银专业版",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.15",
+              "code": "4.2.15",
+              "name": "香港证券服务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.16",
+              "code": "4.2.16",
+              "name": "香港一卡通紧急挂失",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.17",
+              "code": "4.2.17",
+              "name": "香港一卡通服务支持",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.18",
+              "code": "4.2.18",
+              "name": "法案法规",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-4.2.19",
+              "code": "4.2.19",
+              "name": "综合信息",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "root-5",
+      "code": "5",
+      "name": "财富管理",
+      "level": 1,
+      "children": [
+        {
+          "id": "node-5.1",
+          "code": "5.1",
+          "name": "理财业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.1.1",
+              "code": "5.1.1",
+              "name": "购买",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.1.2",
+              "code": "5.1.2",
+              "name": "赎回",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-5.2",
+          "code": "5.2",
+          "name": "结构性存款业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.2.1",
+              "code": "5.2.1",
+              "name": "交易及撤单",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.2.2",
+              "code": "5.2.2",
+              "name": "移存业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.2.3",
+              "code": "5.2.3",
+              "name": "到期收益",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-5.3",
+          "code": "5.3",
+          "name": "基金业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.3.1",
+              "code": "5.3.1",
+              "name": "购买",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.3.2",
+              "code": "5.3.2",
+              "name": "赎回",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.3.3",
+              "code": "5.3.3",
+              "name": "基金系统改造",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.3.4",
+              "code": "5.3.4",
+              "name": "银基通交易码",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.3.5",
+              "code": "5.3.5",
+              "name": "手机银行APP-持仓收益",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-5.4",
+          "code": "5.4",
+          "name": "证券业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.4.1",
+              "code": "5.4.1",
+              "name": "证券业务短信模板",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.4.2",
+              "code": "5.4.2",
+              "name": "第三方存管",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.4.3",
+              "code": "5.4.3",
+              "name": "新版B股银证转账",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.4.4",
+              "code": "5.4.4",
+              "name": "老版B股银证转账",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.4.5",
+              "code": "5.4.5",
+              "name": "股票期权银行转账",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.4.6",
+              "code": "5.4.6",
+              "name": "集中式外币银证转账业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.4.7",
+              "code": "5.4.7",
+              "name": "融资融券信用资金存管业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.4.8",
+              "code": "5.4.8",
+              "name": "“沪港通”介绍",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.4.9",
+              "code": "5.4.9",
+              "name": "证券知识",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-5.5",
+          "code": "5.5",
+          "name": "贵金属业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.5.1",
+              "code": "5.5.1",
+              "name": "积存金",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.5.2",
+              "code": "5.5.2",
+              "name": "实物金",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-5.6",
+          "code": "5.6",
+          "name": "国债业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.6.1",
+              "code": "5.6.1",
+              "name": "储蓄国债",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.6.2",
+              "code": "5.6.2",
+              "name": "记账式国债",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.6.3",
+              "code": "5.6.3",
+              "name": "国开债/地方债",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-5.7",
+          "code": "5.7",
+          "name": "大宗商品及新兴市场",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.7.1",
+              "code": "5.7.1",
+              "name": "银商转账",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.7.2",
+              "code": "5.7.2",
+              "name": "银期转账",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-5.8",
+          "code": "5.8",
+          "name": "保险业务",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.8.1",
+              "code": "5.8.1",
+              "name": "保险基础知识",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.8.2",
+              "code": "5.8.2",
+              "name": "网银/手机银保通业务",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.8.3",
+              "code": "5.8.3",
+              "name": "APP保险小程序",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.8.4",
+              "code": "5.8.4",
+              "name": "银保系统操作流程",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-5.9",
+          "code": "5.9",
+          "name": "跨境理财通",
+          "level": 2,
+          "children": [
+            {
+              "id": "node-5.9.1",
+              "code": "5.9.1",
+              "name": "北向通",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "node-5.9.2",
+              "code": "5.9.2",
+              "name": "南向通",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
