@@ -11,6 +11,7 @@ import java.util.List;
 public interface SceneAssembler {
 
     @Mapping(target = "domainName", source = "domain")
+    @Mapping(target = "snapshotId", expression = "java(null)")
     SceneDTO toDTO(Scene scene);
 
     List<SceneDTO> toDTOList(List<Scene> scenes);

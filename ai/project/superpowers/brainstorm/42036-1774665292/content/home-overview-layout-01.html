@@ -1,0 +1,102 @@
+<h2>首页总览结构方向</h2>
+<p class="subtitle">目标已固定为“指挥页 + 快捷工作页”。下面只比较首屏结构，不比较视觉风格。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">A. 状态优先型</div>
+        <div class="mockup-body">
+          <div class="mock-nav">Logo | 首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:14px 0 10px;font-weight:600;">页面标题 + 当前版本 + 风险摘要</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+            <div class="placeholder" style="height:62px;">系统状态</div>
+            <div class="placeholder" style="height:62px;">发布风险</div>
+            <div class="placeholder" style="height:62px;">审批积压</div>
+            <div class="placeholder" style="height:62px;">运行健康</div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;">
+            <div>
+              <div class="placeholder" style="height:88px;margin-bottom:8px;">待处理任务总表</div>
+              <div class="placeholder" style="height:88px;margin-bottom:8px;">最近风险 / 告警</div>
+              <div class="placeholder" style="height:88px;">最近变更 / 发布动态</div>
+            </div>
+            <div>
+              <div class="placeholder" style="height:124px;margin-bottom:8px;">快捷入口</div>
+              <div class="placeholder" style="height:148px;">我的最近操作</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 状态优先型</h3>
+      <p>适合把首页当“总控指挥台”，先看风险、积压、健康，再进入操作。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">B. 任务优先型</div>
+        <div class="mockup-body">
+          <div class="mock-nav">Logo | 首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:14px 0 10px;font-weight:600;">页面标题 + 角色提示 + 今日重点</div>
+          <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="placeholder" style="height:150px;">继续处理事项</div>
+            <div class="placeholder" style="height:150px;">快捷入口</div>
+            <div class="placeholder" style="height:150px;">常用查询 / 最近访问</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+            <div class="placeholder" style="height:62px;">系统状态</div>
+            <div class="placeholder" style="height:62px;">发布风险</div>
+            <div class="placeholder" style="height:62px;">审批积压</div>
+            <div class="placeholder" style="height:62px;">运行健康</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="placeholder" style="height:110px;">最近变更</div>
+            <div class="placeholder" style="height:110px;">风险与告警</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 任务优先型</h3>
+      <p>更像个人工作台，先让用户继续干活，再补充系统全局态势。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">C. 双轴混合型</div>
+        <div class="mockup-body">
+          <div class="mock-nav">Logo | 首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:14px 0 10px;font-weight:600;">页面标题 + 环境状态条 + 角色摘要</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="placeholder" style="height:86px;">顶部态势条：版本 / 发布 / 审批 / 健康 / 告警</div>
+            <div class="placeholder" style="height:86px;">快捷操作</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1.3fr 1.3fr 1fr;gap:10px;">
+            <div>
+              <div class="placeholder" style="height:96px;margin-bottom:8px;">我的待办</div>
+              <div class="placeholder" style="height:96px;">继续处理事项</div>
+            </div>
+            <div>
+              <div class="placeholder" style="height:96px;margin-bottom:8px;">风险与阻断</div>
+              <div class="placeholder" style="height:96px;">最近发布 / 审批动态</div>
+            </div>
+            <div>
+              <div class="placeholder" style="height:96px;margin-bottom:8px;">常用入口</div>
+              <div class="placeholder" style="height:96px;">最近访问</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 双轴混合型</h3>
+      <p>上面先给系统态势，下面把“待办 / 风险 / 快捷入口”并列，兼顾总控与工作流。</p>
+    </div>
+  </div>
+</div>

@@ -24,8 +24,7 @@ public class SceneAuditLogPO {
     @Column(name = "operator", nullable = false, length = 64)
     private String operator;
 
-    @Lob
-    @Column(name = "detail_json")
+    @Column(name = "detail_json", columnDefinition = "LONGTEXT")
     private String detailJson;
 
     @Column(name = "created_at", nullable = false)

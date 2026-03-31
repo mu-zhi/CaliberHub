@@ -1,0 +1,101 @@
+<h2>B 方案细化：首屏第一视觉该给谁</h2>
+<p class="subtitle">首页总览已经确定偏“任务优先型”。下面只比较首屏最大模块应该是什么。</p>
+
+<div class="cards">
+  <div class="card" data-choice="b1" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">B1. 待办主导型</div>
+        <div class="mockup-body">
+          <div class="mock-nav">首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:14px 0 10px;font-weight:600;">页面标题 + 今日重点</div>
+          <div style="display:grid;grid-template-columns:1.8fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="placeholder" style="height:162px;">继续处理事项（最大主区）</div>
+            <div>
+              <div class="placeholder" style="height:76px;margin-bottom:8px;">快捷入口</div>
+              <div class="placeholder" style="height:76px;">最近访问</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+            <div class="placeholder" style="height:58px;">系统状态</div>
+            <div class="placeholder" style="height:58px;">发布风险</div>
+            <div class="placeholder" style="height:58px;">审批积压</div>
+            <div class="placeholder" style="height:58px;">运行健康</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="placeholder" style="height:92px;">最近变更</div>
+            <div class="placeholder" style="height:92px;">风险与告警</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B1. 待办主导型</h3>
+      <p>首页最先解决“我接下来该做什么”，适合高频跟单、复核、发布推进场景。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b2" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">B2. 快捷操作主导型</div>
+        <div class="mockup-body">
+          <div class="mock-nav">首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:14px 0 10px;font-weight:600;">页面标题 + 今日重点</div>
+          <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="placeholder" style="height:150px;">快捷入口矩阵（最大主区）</div>
+            <div class="placeholder" style="height:150px;">继续处理事项</div>
+            <div class="placeholder" style="height:150px;">最近访问</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+            <div class="placeholder" style="height:58px;">系统状态</div>
+            <div class="placeholder" style="height:58px;">发布风险</div>
+            <div class="placeholder" style="height:58px;">审批积压</div>
+            <div class="placeholder" style="height:58px;">运行健康</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="placeholder" style="height:92px;">最近变更</div>
+            <div class="placeholder" style="height:92px;">风险与告警</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B2. 快捷操作主导型</h3>
+      <p>首页最先解决“我要去哪里开始”，适合系统入口多、跨工作台跳转频繁的场景。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b3" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">B3. 续办上下文主导型</div>
+        <div class="mockup-body">
+          <div class="mock-nav">首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:14px 0 10px;font-weight:600;">页面标题 + 今日重点</div>
+          <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="placeholder" style="height:162px;">最近访问 + 最近处理中对象（最大主区）</div>
+            <div>
+              <div class="placeholder" style="height:76px;margin-bottom:8px;">快捷入口</div>
+              <div class="placeholder" style="height:76px;">继续处理事项</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+            <div class="placeholder" style="height:58px;">系统状态</div>
+            <div class="placeholder" style="height:58px;">发布风险</div>
+            <div class="placeholder" style="height:58px;">审批积压</div>
+            <div class="placeholder" style="height:58px;">运行健康</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="placeholder" style="height:92px;">最近变更</div>
+            <div class="placeholder" style="height:92px;">风险与告警</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B3. 续办上下文主导型</h3>
+      <p>首页最先帮用户回到上次处理中对象，适合任务链长、跨天衔接频繁的场景。</p>
+    </div>
+  </div>
+</div>

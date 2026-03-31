@@ -3,8 +3,13 @@ package com.cmbchina.datadirect.caliber.application.service.command;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.CreateSceneCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.PublishSceneCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.GraphProjectionStatusDTO;
 import com.cmbchina.datadirect.caliber.application.assembler.SceneAssembler;
 import com.cmbchina.datadirect.caliber.application.exception.ResourceNotFoundException;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.CanonicalSnapshotBindingService;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.GraphProjectionAppService;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.SceneGraphAssetSyncService;
+import com.cmbchina.datadirect.caliber.application.service.query.graphrag.ScenePublishGateAppService;
 import com.cmbchina.datadirect.caliber.domain.model.Scene;
 import com.cmbchina.datadirect.caliber.domain.model.SceneStatus;
 import com.cmbchina.datadirect.caliber.domain.support.CaliberDomainSupport;
@@ -25,8 +30,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.ArgumentCaptor;
@@ -44,19 +47,110 @@ class SceneCommandAppServiceTest {
     private SceneAssembler sceneAssembler;
 
     @Mock
-    private AlignmentReportAppService alignmentReportAppService;
-
-    @Mock
     private SceneAuditLogMapper sceneAuditLogMapper;
 
+    @Mock
+    private CanonicalSnapshotBindingService canonicalSnapshotBindingService;
+
+    private AlignmentReportAppService alignmentReportAppService;
+    private SceneGraphAssetSyncService sceneGraphAssetSyncService;
+    private ScenePublishGateAppService scenePublishGateAppService;
+    private SceneVersionAppService sceneVersionAppService;
+    private GraphProjectionAppService graphProjectionAppService;
     private SceneCommandAppService sceneCommandAppService;
 
     @BeforeEach
     void setUp() {
+        ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
         CaliberDictSyncService noopDictSyncService = new CaliberDictSyncService(null, null) {
             @Override
             public void syncFromScene(Long sceneId, Long domainId, String codeMappingsJson) {
                 // no-op for unit test
+            }
+        };
+        alignmentReportAppService = new AlignmentReportAppService(null, null, objectMapper) {
+            @Override
+            public void assertPublishAllowed(Long sceneId) {
+                // no-op for unit test
+            }
+        };
+        sceneGraphAssetSyncService = new SceneGraphAssetSyncService(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null) {
+            @Override
+            public void ensureGovernanceAssets(Long sceneId, String operator) {
+                // no-op for unit test
+            }
+
+            @Override
+            public void syncSceneAssetsFromLegacy(Long sceneId, String operator) {
+                // no-op for unit test
+            }
+
+            @Override
+            public void syncAssetStatuses(Long sceneId, String sceneStatus, String operator) {
+                // no-op for unit test
+            }
+        };
+        scenePublishGateAppService = new ScenePublishGateAppService(null, null, null, null, null, null, null, null, null, null, null, null) {
+            @Override
+            public void assertPublishable(Scene scene) {
+                // no-op for unit test
+            }
+        };
+        sceneVersionAppService = new SceneVersionAppService(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                objectMapper
+        ) {
+            @Override
+            public com.cmbchina.datadirect.caliber.application.api.dto.response.SceneVersionDTO createPublishedSnapshot(Long sceneId, String changeSummary, String operator) {
+                return new com.cmbchina.datadirect.caliber.application.api.dto.response.SceneVersionDTO(
+                        99L,
+                        sceneId,
+                        1,
+                        "SCN-TEST-V001",
+                        "{}",
+                        "{}",
+                        changeSummary,
+                        "PUBLISHED",
+                        operator,
+                        OffsetDateTime.now(),
+                        operator,
+                        OffsetDateTime.now()
+                );
+            }
+        };
+        graphProjectionAppService = new GraphProjectionAppService(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                objectMapper,
+                java.util.Optional.empty(),
+                null,
+                null,
+                null,
+                null
+        ) {
+            @Override
+            public GraphProjectionStatusDTO refreshProjection(Long sceneId, String sceneCode, String operator) {
+                return null;
             }
         };
         sceneCommandAppService = new SceneCommandAppService(
@@ -65,21 +159,27 @@ class SceneCommandAppServiceTest {
                 sceneAssembler,
                 noopDictSyncService,
                 alignmentReportAppService,
+                sceneGraphAssetSyncService,
+                scenePublishGateAppService,
+                sceneVersionAppService,
+                canonicalSnapshotBindingService,
+                graphProjectionAppService,
                 new SimpleMeterRegistry(),
-                new ObjectMapper(),
+                objectMapper,
                 sceneAuditLogMapper
         );
     }
 
     @Test
     void shouldCreateDraftScene() {
-        CreateSceneCmd cmd = new CreateSceneCmd("客户查询", null, "零售金融", "raw", "tester");
+        CreateSceneCmd cmd = new CreateSceneCmd("客户查询", null, "零售金融", "FACT_DETAIL", "raw", "tester");
         OffsetDateTime now = OffsetDateTime.now();
         Scene savedScene = Scene.builder()
                 .id(1L)
                 .sceneCode("SCN-TEST000001")
                 .sceneTitle("客户查询")
                 .domain("零售金融")
+                .sceneType("FACT_DETAIL")
                 .status(SceneStatus.DRAFT)
                 .createdBy("tester")
                 .createdAt(now)
@@ -92,6 +192,7 @@ class SceneCommandAppServiceTest {
                 null,
                 "零售金融",
                 "零售金融",
+                "FACT_DETAIL",
                 "DRAFT",
                 null,
                 null,
@@ -115,7 +216,8 @@ class SceneCommandAppServiceTest {
                 now,
                 null,
                 null,
-                0L
+                0L,
+                null
         );
 
         when(sceneDomainSupport.save(any(Scene.class))).thenReturn(savedScene);
@@ -159,15 +261,39 @@ class SceneCommandAppServiceTest {
         when(sceneDomainSupport.findById(7L)).thenReturn(Optional.of(scene));
         when(sceneDomainSupport.save(any(Scene.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(sceneAssembler.toDTO(any(Scene.class))).thenReturn(new SceneDTO(
-                7L, "SCN-WARN000001", "发布软门禁测试",
-                1L, "零售金融", "零售金融", "PUBLISHED",
-                "用于测试发布", null, null, null,
-                null, null, "[{\"sql_text\":\"select 1\"}]", "[{\"code\":\"AGN_STS_CD\"}]",
-                null, null, null, null, null, null, null,
-                now, "发布", "tester", now, now, "reviewer", now, 1L
+                7L,
+                "SCN-WARN000001",
+                "发布软门禁测试",
+                1L,
+                "零售金融",
+                "零售金融",
+                "FACT_DETAIL",
+                "PUBLISHED",
+                "用于测试发布",
+                null,
+                null,
+                null,
+                null,
+                null,
+                "[{\"sql_text\":\"select 1\"}]",
+                "[{\"code\":\"AGN_STS_CD\"}]",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                now,
+                "发布",
+                "tester",
+                now,
+                now,
+                "reviewer",
+                now,
+                1L,
+                null
         ));
-        doNothing().when(alignmentReportAppService).assertPublishAllowed(eq(7L));
-
         sceneCommandAppService.publish(7L, new PublishSceneCmd(now, "发布", "reviewer"));
 
         ArgumentCaptor<SceneAuditLogPO> captor = ArgumentCaptor.forClass(SceneAuditLogPO.class);

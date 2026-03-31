@@ -1,0 +1,77 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: datadirect-app:local
+    container_name: datadirect-app
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    environment:
+      CALIBER_DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      CALIBER_DB_USERNAME: ${MYSQL_USER}
+      CALIBER_DB_PASSWORD: ${MYSQL_PASSWORD}
+      CALIBER_REDIS_HOST: redis
+      CALIBER_REDIS_PORT: 6379
+      CALIBER_NEO4J_URI: bolt://neo4j:7687
+      CALIBER_NEO4J_DATABASE: neo4j
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8082/actuator/health | grep -q '\"status\":\"UP\"'"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  mysql:
+    image: mysql:8.0
+    container_name: datadirect-mysql
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - datadirect_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: datadirect-redis
+    restart: unless-stopped
+    profiles: ["redis"]
+    ports:
+      - "6379:6379"
+
+  neo4j:
+    image: neo4j:5
+    container_name: datadirect-neo4j
+    restart: unless-stopped
+    profiles: ["neo4j"]
+    env_file:
+      - .env.docker
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - datadirect_neo4j_data:/data
+
+volumes:
+  datadirect_mysql_data:
+  datadirect_neo4j_data:

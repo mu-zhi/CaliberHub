@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -22,8 +21,7 @@ public class PlanIrAuditPO {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
-    @Column(name = "query_text", nullable = false)
+    @Column(name = "query_text", nullable = false, columnDefinition = "LONGTEXT")
     private String queryText;
 
     @Column(name = "scene_id")
@@ -35,8 +33,7 @@ public class PlanIrAuditPO {
     @Column(name = "risk_level", nullable = false, length = 16)
     private String riskLevel;
 
-    @Lob
-    @Column(name = "plan_json", nullable = false)
+    @Column(name = "plan_json", nullable = false, columnDefinition = "LONGTEXT")
     private String planJson;
 
     @Column(name = "created_by", length = 64)

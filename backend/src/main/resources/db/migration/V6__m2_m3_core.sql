@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS caliber_semantic_view (
     view_code VARCHAR(64) NOT NULL,
     view_name VARCHAR(200) NOT NULL,
     domain_id BIGINT,
-    description CLOB,
-    field_definitions_json CLOB,
+    description LONGTEXT,
+    field_definitions_json LONGTEXT,
     created_by VARCHAR(64) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_by VARCHAR(64) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS caliber_semantic_view (
     CONSTRAINT uk_semantic_view_code UNIQUE (view_code)
 );
 
-CREATE INDEX IF NOT EXISTS idx_semantic_view_domain_id
+CREATE INDEX idx_semantic_view_domain_id
     ON caliber_semantic_view (domain_id);
 
 CREATE TABLE IF NOT EXISTS caliber_scene_reference (
@@ -26,34 +26,34 @@ CREATE TABLE IF NOT EXISTS caliber_scene_reference (
     CONSTRAINT uk_scene_reference UNIQUE (scene_id, ref_type, ref_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_scene_reference_ref
+CREATE INDEX idx_scene_reference_ref
     ON caliber_scene_reference (ref_type, ref_id);
 
 CREATE TABLE IF NOT EXISTS caliber_scene_version (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     scene_id BIGINT NOT NULL,
     version_no INT NOT NULL,
-    snapshot_json CLOB NOT NULL,
-    change_summary CLOB,
+    snapshot_json LONGTEXT NOT NULL,
+    change_summary LONGTEXT,
     created_by VARCHAR(64) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     CONSTRAINT uk_scene_version UNIQUE (scene_id, version_no)
 );
 
-CREATE INDEX IF NOT EXISTS idx_scene_version_scene_created
+CREATE INDEX idx_scene_version_scene_created
     ON caliber_scene_version (scene_id, created_at);
 
 CREATE TABLE IF NOT EXISTS caliber_alignment_report (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     scene_id BIGINT NOT NULL,
     status VARCHAR(16) NOT NULL,
-    report_json CLOB,
-    message CLOB,
+    report_json LONGTEXT,
+    message LONGTEXT,
     checked_by VARCHAR(64) NOT NULL,
     checked_at TIMESTAMP NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_alignment_scene_checked
+CREATE INDEX idx_alignment_scene_checked
     ON caliber_alignment_report (scene_id, checked_at);
 
 CREATE TABLE IF NOT EXISTS caliber_service_spec (
@@ -61,27 +61,27 @@ CREATE TABLE IF NOT EXISTS caliber_service_spec (
     scene_id BIGINT NOT NULL,
     spec_code VARCHAR(64) NOT NULL,
     spec_version INT NOT NULL,
-    spec_json CLOB NOT NULL,
+    spec_json LONGTEXT NOT NULL,
     exported_by VARCHAR(64) NOT NULL,
     exported_at TIMESTAMP NOT NULL,
     CONSTRAINT uk_service_spec_version UNIQUE (spec_code, spec_version)
 );
 
-CREATE INDEX IF NOT EXISTS idx_service_spec_scene
+CREATE INDEX idx_service_spec_scene
     ON caliber_service_spec (scene_id, exported_at);
 
 CREATE TABLE IF NOT EXISTS caliber_plan_ir_audit (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    query_text CLOB NOT NULL,
+    query_text LONGTEXT NOT NULL,
     scene_id BIGINT,
     decision VARCHAR(16) NOT NULL,
     risk_level VARCHAR(16) NOT NULL,
-    plan_json CLOB NOT NULL,
+    plan_json LONGTEXT NOT NULL,
     created_by VARCHAR(64),
     created_at TIMESTAMP NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_plan_ir_scene_created
+CREATE INDEX idx_plan_ir_scene_created
     ON caliber_plan_ir_audit (scene_id, created_at);
 
 CREATE TABLE IF NOT EXISTS caliber_execution_feedback (
@@ -89,10 +89,10 @@ CREATE TABLE IF NOT EXISTS caliber_execution_feedback (
     plan_audit_id BIGINT NOT NULL,
     scene_id BIGINT,
     success BOOLEAN NOT NULL,
-    reason CLOB,
+    reason LONGTEXT,
     selected_plan VARCHAR(128),
     created_at TIMESTAMP NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_feedback_scene_created
+CREATE INDEX idx_feedback_scene_created
     ON caliber_execution_feedback (scene_id, created_at);

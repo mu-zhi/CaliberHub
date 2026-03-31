@@ -83,6 +83,21 @@ class DomainApiIntegrationTest {
                 .andExpect(jsonPath("$[?(@.domainCode == 'RETAIL_API')]").isArray());
     }
 
+    @Test
+    void shouldBootstrapDomainsFromBusinessCategories() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+
+        mockMvc.perform(post("/api/domains/bootstrap-from-categories")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalCount").value(org.hamcrest.Matchers.greaterThanOrEqualTo(5)))
+                .andExpect(jsonPath("$.domains[?(@.domainName == '零售基础业务')]").isArray())
+                .andExpect(jsonPath("$.domains[?(@.domainName == '公司业务')]").isArray())
+                .andExpect(jsonPath("$.domains[?(@.domainName == '贷款及信用卡业务')]").isArray())
+                .andExpect(jsonPath("$.domains[?(@.domainName == '外汇及境外机构')]").isArray())
+                .andExpect(jsonPath("$.domains[?(@.domainName == '财富管理')]").isArray());
+    }
+
     private String loginAndGetToken(String username, String password) throws Exception {
         String loginBody = """
                 {

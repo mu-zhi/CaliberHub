@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS caliber_dict (
     code VARCHAR(128) NOT NULL,
     value_code VARCHAR(128) NOT NULL,
     value_name VARCHAR(500),
-    description CLOB,
+    description LONGTEXT,
     last_scene_id BIGINT,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,

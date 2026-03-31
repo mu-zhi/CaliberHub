@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -31,12 +30,10 @@ public class SemanticViewPO {
     @Column(name = "domain_id")
     private Long domainId;
 
-    @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "LONGTEXT")
     private String description;
 
-    @Lob
-    @Column(name = "field_definitions_json")
+    @Column(name = "field_definitions_json", columnDefinition = "LONGTEXT")
     private String fieldDefinitionsJson;
 
     @Column(name = "created_by", nullable = false, length = 64)

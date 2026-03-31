@@ -4,6 +4,7 @@ public record SceneDraftUpdate(
         String sceneTitle,
         Long domainId,
         String domain,
+        String sceneType,
         String sceneDescription,
         String caliberDefinition,
         String applicability,

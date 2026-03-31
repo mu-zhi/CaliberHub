@@ -1,0 +1,161 @@
+{
+  "version": "2.0",
+  "workflow_routes": {
+    "feature_doc_authoring": {
+      "target": "补充特性文档 / 新建特性文档",
+      "primary": {
+        "runtime": "codex",
+        "model": "gpt-5.4",
+        "reasoning_effort": "xhigh"
+      },
+      "fallback": {
+        "runtime": "claude_code",
+        "provider": "wenwen",
+        "model": "claude-sonnet-4-6-20260218",
+        "entrypoint": "bash scripts/claude_mux.sh wenwen claude-sonnet-4-6-20260218"
+      },
+      "review": {
+        "runtime": "claude_code",
+        "provider": "wenwen",
+        "model": "claude-sonnet-4-6-20260218",
+        "entrypoint": "bash scripts/claude_review.sh",
+        "preferred_skill": "review"
+      },
+      "review_fallback": {
+        "runtime": "codex",
+        "model": "gpt-5.4",
+        "reasoning_effort": "xhigh",
+        "preferred_skill": "review"
+      }
+    },
+    "plan_authoring": {
+      "target": "实施计划生成 / 计划修订",
+      "primary": {
+        "runtime": "codex",
+        "model": "gpt-5.4",
+        "reasoning_effort": "xhigh"
+      },
+      "fallback": {
+        "runtime": "claude_code",
+        "provider": "wenwen",
+        "model": "claude-sonnet-4-6-20260218",
+        "entrypoint": "bash scripts/claude_mux.sh wenwen claude-sonnet-4-6-20260218"
+      },
+      "review": {
+        "runtime": "claude_code",
+        "provider": "wenwen",
+        "model": "claude-sonnet-4-6-20260218",
+        "entrypoint": "bash scripts/claude_review.sh",
+        "preferred_skill": "review"
+      },
+      "review_fallback": {
+        "runtime": "codex",
+        "model": "gpt-5.4",
+        "reasoning_effort": "xhigh",
+        "preferred_skill": "review"
+      }
+    },
+    "plan_execution": {
+      "target": "推进开发计划 / 单任务实现 / 批量执行",
+      "primary": {
+        "runtime": "codex",
+        "model": "gpt-5.2-codex",
+        "reasoning_effort": "high"
+      },
+      "escalated_primary": {
+        "runtime": "codex",
+        "model": "gpt-5.2-codex",
+        "reasoning_effort": "xhigh"
+      },
+      "fallback": {
+        "runtime": "claude_code",
+        "provider": "bailian",
+        "model": "qwen3-coder-plus",
+        "entrypoint": "bash scripts/claude-coder.sh"
+      },
+      "escalation_conditions": [
+        "跨 5 个以上文件",
+        "同一问题两轮修复仍失败",
+        "涉及公共接口、数据契约或核心状态机",
+        "需要先读大量上下文再改动"
+      ]
+    },
+    "code_review": {
+      "target": "任务间代码审查 / 整体代码检视",
+      "primary": {
+        "runtime": "claude_code",
+        "provider": "wenwen",
+        "model": "claude-sonnet-4-6-20260218",
+        "entrypoint": "bash scripts/claude_review.sh",
+        "preferred_skill": "review"
+      },
+      "fallback": {
+        "runtime": "codex",
+        "model": "gpt-5.4",
+        "reasoning_effort": "xhigh",
+        "preferred_skill": "review"
+      }
+    }
+  },
+  "build_subagent_routing": {
+    "default_route": {
+      "model": "gpt-5.2-codex",
+      "reasoning_effort": "high"
+    },
+    "score_rule": {
+      "range": "0-10",
+      "weights": {
+        "ambiguity": 1,
+        "changeScope": 1,
+        "coupling": 1,
+        "risk": 1
+      },
+      "blocking_bug_bonus": 1,
+      "max_score": 10,
+      "dimensions": {
+        "ambiguity": "0-3",
+        "changeScope": "0-3",
+        "coupling": "0-2",
+        "risk": "0-2"
+      }
+    },
+    "routes": [
+      {
+        "score_min": 0,
+        "score_max": 6,
+        "model": "gpt-5.2-codex",
+        "reasoning_effort": "high",
+        "target": "日常编码与中复杂度子任务"
+      },
+      {
+        "score_min": 7,
+        "score_max": 10,
+        "model": "gpt-5.2-codex",
+        "reasoning_effort": "xhigh",
+        "target": "高风险编码子任务"
+      }
+    ],
+    "fallback": {
+      "runtime": "claude_code",
+      "provider": "bailian",
+      "model": "qwen3-coder-plus",
+      "entrypoint": "bash scripts/claude-coder.sh"
+    },
+    "escalation": {
+      "on_failed_result": {
+        "strategy": "switch_to_fallback_once",
+        "max_retry": 1
+      },
+      "on_timeout": {
+        "strategy": "increase_reasoning_effort_then_retry",
+        "max_retry": 1
+      }
+    }
+  },
+  "notes": [
+    "workflow_routes 用于补特性文档、写实施计划、推进开发计划与代码检视的阶段级自动化约定。",
+    "build_subagent_routing 只覆盖 Codex 可直接 spawn_agent 的编码子任务。",
+    "只有 runtime=codex 的条目可以直接传给 spawn_agent；runtime=claude_code 的条目需通过本地脚本执行。",
+    "代码检视优先使用本地 Claude Code review 入口；若额度不足或 provider 不可用，再退回 Codex gpt-5.4 + xhigh。"
+  ]
+}

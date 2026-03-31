@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -28,12 +27,10 @@ public class AlignmentReportPO {
     @Column(name = "status", nullable = false, length = 16)
     private String status;
 
-    @Lob
-    @Column(name = "report_json")
+    @Column(name = "report_json", columnDefinition = "LONGTEXT")
     private String reportJson;
 
-    @Lob
-    @Column(name = "message")
+    @Column(name = "message", columnDefinition = "LONGTEXT")
     private String message;
 
     @Column(name = "checked_by", nullable = false, length = 64)
@@ -98,4 +95,3 @@ public class AlignmentReportPO {
         this.checkedAt = checkedAt;
     }
 }
-

@@ -11,6 +11,12 @@ import com.cmbchina.datadirect.caliber.application.service.command.SceneCommandA
 import com.cmbchina.datadirect.caliber.application.service.query.SceneQueryAppService;
 import com.cmbchina.datadirect.caliber.infrastructure.common.security.SecurityOperator;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/scenes")
 @Validated
+@Tag(name = "场景设计", description = "场景定义、版本发布与最小单位定义")
 public class SceneController {
 
     private final SceneCommandAppService sceneCommandAppService;
@@ -32,11 +39,21 @@ public class SceneController {
     }
 
     @PostMapping
+    @Operation(summary = "创建场景", operationId = "createScene")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "场景创建成功",
+                    content = @Content(schema = @Schema(implementation = SceneDTO.class))),
+            @ApiResponse(responseCode = "400", description = "参数错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class))),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<SceneDTO> create(@Valid @RequestBody CreateSceneCmd cmd) {
         CreateSceneCmd payload = new CreateSceneCmd(
                 cmd.sceneTitle(),
                 cmd.domainId(),
                 cmd.domain(),
+                cmd.sceneType(),
                 cmd.rawInput(),
                 SecurityOperator.currentOperator(cmd.operator())
         );
@@ -44,6 +61,13 @@ public class SceneController {
     }
 
     @GetMapping
+    @Operation(summary = "查询场景列表", operationId = "listScenes")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "返回场景列表",
+                    content = @Content(schema = @Schema(implementation = SceneDTO.class))),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<List<SceneDTO>> list(@RequestParam(required = false) Long domainId,
                                                 @RequestParam(required = false) String domain,
                                                 @RequestParam(required = false) String status,
@@ -52,26 +76,59 @@ public class SceneController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "查询场景详情", operationId = "getSceneById")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "返回场景详情",
+                    content = @Content(schema = @Schema(implementation = SceneDTO.class))),
+            @ApiResponse(responseCode = "400", description = "参数错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class))),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<SceneDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(sceneQueryAppService.getById(id));
     }
 
     @GetMapping("/minimum-unit")
+    @Operation(summary = "查询最小单位定义", operationId = "getMinimumUnitDefinition")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "返回最小单位定义",
+                    content = @Content(schema = @Schema(implementation = SceneMinimumUnitDefinitionDTO.class))),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<SceneMinimumUnitDefinitionDTO> minimumUnitDefinition() {
         return ResponseEntity.ok(sceneQueryAppService.minimumUnitDefinition());
     }
 
     @GetMapping("/{id}/minimum-unit-check")
+    @Operation(summary = "检查场景最小单位", operationId = "checkMinimumUnit")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "返回场景最小单位检查结果",
+                    content = @Content(schema = @Schema(implementation = SceneMinimumUnitCheckDTO.class))),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<SceneMinimumUnitCheckDTO> minimumUnitCheck(@PathVariable Long id) {
         return ResponseEntity.ok(sceneQueryAppService.checkMinimumUnit(id));
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "更新场景", operationId = "updateScene")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "场景更新成功",
+                    content = @Content(schema = @Schema(implementation = SceneDTO.class))),
+            @ApiResponse(responseCode = "400", description = "参数错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class))),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<SceneDTO> update(@PathVariable Long id, @Valid @RequestBody UpdateSceneCmd cmd) {
         UpdateSceneCmd payload = new UpdateSceneCmd(
                 cmd.sceneTitle(),
                 cmd.domainId(),
                 cmd.domain(),
+                cmd.sceneType(),
                 cmd.sceneDescription(),
                 cmd.caliberDefinition(),
                 cmd.applicability(),
@@ -94,6 +151,15 @@ public class SceneController {
     }
 
     @PostMapping("/{id}/publish")
+    @Operation(summary = "发布场景", operationId = "publishScene")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "场景发布成功",
+                    content = @Content(schema = @Schema(implementation = SceneDTO.class))),
+            @ApiResponse(responseCode = "400", description = "参数错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class))),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<SceneDTO> publish(@PathVariable Long id, @Valid @RequestBody PublishSceneCmd cmd) {
         PublishSceneCmd payload = new PublishSceneCmd(
                 cmd.verifiedAt(),
@@ -104,12 +170,25 @@ public class SceneController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "删除草稿场景", operationId = "deleteDraftScene")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "场景删除成功"),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<Void> deleteDraft(@PathVariable Long id) {
         sceneCommandAppService.deleteDraft(id, SecurityOperator.currentOperator(""));
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/discard")
+    @Operation(summary = "废弃场景", operationId = "discardScene")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "场景废弃成功",
+                    content = @Content(schema = @Schema(implementation = SceneDTO.class))),
+            @ApiResponse(responseCode = "500", description = "系统内部错误",
+                    content = @Content(schema = @Schema(implementation = ApiErrorDTO.class)))
+    })
     public ResponseEntity<SceneDTO> discard(@PathVariable Long id) {
         return ResponseEntity.ok(sceneCommandAppService.discard(id, SecurityOperator.currentOperator("")));
     }

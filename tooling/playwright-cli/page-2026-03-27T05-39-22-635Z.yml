@@ -1,0 +1,483 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - link "跳转到主内容" [ref=e2] [cursor=pointer]:
+      - /url: "#mainContent"
+    - banner [ref=e3]:
+      - heading "数据 直通车 让用户没有难取的数据" [level=1] [ref=e5]:
+        - img [ref=e6]
+        - generic [ref=e13]:
+          - generic [ref=e14]: 数据
+          - generic [ref=e15]: 直通车
+        - generic [ref=e16]: 让用户没有难取的数据
+      - navigation "一级模块导航" [ref=e17]:
+        - link "首页总览" [ref=e18] [cursor=pointer]:
+          - /url: "#/overview"
+        - link "数据地图" [ref=e19] [cursor=pointer]:
+          - /url: "#/map"
+        - link "知识生产台" [ref=e20] [cursor=pointer]:
+          - /url: "#/production"
+        - link "发布中心" [ref=e21] [cursor=pointer]:
+          - /url: "#/publish"
+        - link "运行决策台" [ref=e22] [cursor=pointer]:
+          - /url: "#/runtime"
+        - link "审批与导出" [ref=e23] [cursor=pointer]:
+          - /url: "#/approval"
+        - link "监控与审计" [ref=e24] [cursor=pointer]:
+          - /url: "#/monitoring"
+      - generic [ref=e25]:
+        - generic "全局工具区" [ref=e26]:
+          - link "个人协作" [ref=e27] [cursor=pointer]:
+            - /url: "#/workspace/todo"
+          - link "系统设置" [ref=e28] [cursor=pointer]:
+            - /url: "#/system/guide"
+        - generic [ref=e29]:
+          - generic [ref=e30]: 当前角色
+          - combobox "当前角色" [ref=e31]:
+            - option "系统管理员"
+            - option "数据支持" [selected]
+            - option "数据专家"
+            - option "治理专员"
+            - option "一线用户"
+            - option "合规审计"
+    - main [ref=e33]:
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - heading "材料接入与解析" [level=2] [ref=e38]
+              - paragraph [ref=e39]: 默认空态启动，先上传或粘贴材料，再进入抽取识别、图谱构建和草稿生成。
+            - generic [ref=e40]:
+              - link "下载样例材料" [ref=e41] [cursor=pointer]:
+                - /url: /samples/ingest/代发明细查询-上传样例材料.txt
+              - button "去数据地图" [ref=e42] [cursor=pointer]
+              - button "去运行决策台" [ref=e43] [cursor=pointer]
+          - paragraph [ref=e44]: 当前正式工作台已接入真实导入链路。未上传材料前保持空态；样例只在你主动载入或下载后参与流程。
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - img [ref=e204]
+              - paragraph [ref=e207]: ✓ 01 导入口径草稿 | 来源：粘贴文本（约 817 字）
+            - button "修改" [ref=e208] [cursor=pointer]
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - generic [ref=e55]: 导入内容类型
+              - radiogroup [ref=e209]:
+                - radio [checked] [ref=e210] [cursor=pointer]:
+                  - strong [ref=e58]: 粘贴文本
+                  - generic [ref=e59]: 粘贴内容
+                - radio [ref=e211] [cursor=pointer]:
+                  - strong [ref=e61]: Markdown 文件
+                  - generic [ref=e62]: 上传文件
+                - radio [ref=e212] [cursor=pointer]:
+                  - strong [ref=e64]: 文本文件
+                  - generic [ref=e65]: 上传文件
+                - radio [ref=e213] [cursor=pointer]:
+                  - strong [ref=e67]: SQL 文件
+                  - generic [ref=e68]: 上传文件
+                - radio [ref=e214] [cursor=pointer]:
+                  - strong [ref=e70]: 图片 OCR 文本（后续建设）
+                  - generic [ref=e71]: 粘贴内容
+            - generic [ref=e72]:
+              - generic [ref=e73]: 导入策略
+              - radiogroup [ref=e215]:
+                - radio [checked] [ref=e216] [cursor=pointer]:
+                  - strong [ref=e76]: 直接导入（不走大模型）
+                  - generic [ref=e77]: 标准模板优先，速度最快，适合结构化口径文档。
+                - radio [ref=e217] [cursor=pointer]:
+                  - strong [ref=e79]: AI 预处理后导入
+                  - generic [ref=e80]: 适合 Word/Excel/邮件等非结构化文本，耗时更长。
+            - generic [ref=e81]:
+              - generic [ref=e82]:
+                - generic [ref=e83]: 粘贴内容
+                - textbox [ref=e218]:
+                  - /placeholder: "### 场景标题：请填写业务场景名称\n- 场景描述：请描述该场景的业务目标与查询口径。\n- 口径提供人：姓名/一事通\n- 结果字段：字段1、字段2、字段3\n- 注意事项：请填写取数边界、历史数据差异或风险提示。\n- SQL 语句\n-- Step 1：请描述本步骤的查询目标\nSELECT ...\nFROM ...\nWHERE ...;\n\n-- Step 2：如有历史表或补充查询，请继续追加"
+                  - text: "### 场景 1：根据公司户口号查询代发协议号 - 场景描述：先定位代发协议号，再关联后续批次或明细查询。 - 口径提供人：张三/80000001 - 结果字段：合作方协议号、公司户口号、客户号、协议状态 - 注意事项：历史系统与当前系统字段命名不同，跨系统联查前需先确认客户主键。 - SQL 语句 -- Step 1：根据公司户口号查询代发协议号 SELECT PROTOCOL_NBR, CARD_NBR, CLIENT_NBR FROM NDS_VHIS.NLJ54_AGF_PROTOCOL_PAY_CARD_T WHERE CARD_NBR IN ('${CORP_CARD_NBR}'); ### 场景 2：根据代发协议号查询代发明细 - 场景描述：按协议号查询代发明细，支持当前主表与历史补数表双通道。 - 口径提供人：李四/80000002 - 结果字段：代发批次号、收款户口号、交易金额、代发状态代码 - 注意事项：2014 年前建议优先使用历史表；跨年查询需拆分时间段执行。 - SQL 语句 -- Step 1：查询 2014 年至今主表明细 -- 码值：AGN_STS_CD=01(成功),02(失败),03(处理中) SELECT AGN_BCH_SEQ, EAC_NBR, TRX_AMT, AGN_STS_CD, TRX_DT FROM PDM_VHIS.T05_AGN_DTL WHERE TRX_DT >= DATE '2014-01-01' AND MCH_AGR_NBR = '${PROTOCOL_NBR}'; -- Step 2：按需补查历史明细表 SELECT EPXTRXDAT, EPXEACNBR, EPXTRXAMT, EPXTRXSTS FROM LGC_EAM.ETL_FE_EPHISTRXP WHERE EPXCNVNBR = '${PROTOCOL_NBR}';"
+                - paragraph [ref=e87]: 当前为粘贴内容模式，请直接粘贴口径文档文本。
+              - complementary [ref=e88]:
+                - paragraph [ref=e89]: 标准文档格式
+                - generic [ref=e90]:
+                  - paragraph [ref=e91]: 必备段落
+                  - list [ref=e92]:
+                    - listitem [ref=e93]:
+                      - strong [ref=e94]:
+                        - img [ref=e176]
+                        - generic [ref=e98]: 场景标题
+                      - generic [ref=e99]: 例如：### 场景标题：根据公司户口号查询代发协议号
+                    - listitem [ref=e100]:
+                      - strong [ref=e101]:
+                        - img [ref=e179]
+                        - generic [ref=e105]: 场景描述
+                      - generic [ref=e106]: 例如：- 场景描述：先定位协议号，再查询批次或明细
+                    - listitem [ref=e107]:
+                      - strong [ref=e108]:
+                        - img [ref=e182]
+                        - generic [ref=e112]: 口径提供人
+                      - generic [ref=e113]: 例如：- 口径提供人：张三/80000001
+                    - listitem [ref=e114]:
+                      - strong [ref=e115]:
+                        - img [ref=e185]
+                        - generic [ref=e119]: 结果字段
+                      - generic [ref=e120]: 例如：- 结果字段：代发批次号、交易金额、代发状态
+                    - listitem [ref=e121]:
+                      - strong [ref=e122]:
+                        - img [ref=e188]
+                        - generic [ref=e126]: 注意事项
+                      - generic [ref=e127]: 例如：- 注意事项：跨年查询需拆分时间段
+                    - listitem [ref=e128]:
+                      - strong [ref=e129]:
+                        - img [ref=e191]
+                        - generic [ref=e133]: SQL 语句
+                      - generic [ref=e134]: 例如：- SQL 语句 + 至少一段 SELECT
+                - generic [ref=e135]:
+                  - paragraph [ref=e136]: 建议增强
+                  - list [ref=e137]:
+                    - listitem [ref=e138]:
+                      - strong [ref=e139]:
+                        - img [ref=e194]
+                        - generic [ref=e143]: Step 注释
+                      - generic [ref=e144]: 例如：-- Step 1：根据公司户口号查询代发协议号
+                    - listitem [ref=e145]:
+                      - strong [ref=e146]:
+                        - img [ref=e197]
+                        - generic [ref=e150]: 码值映射
+                      - generic [ref=e151]: 例如：-- 码值：01=成功，02=失败
+                    - listitem [ref=e152]:
+                      - strong [ref=e153]:
+                        - img [ref=e200]
+                        - generic [ref=e157]: 时段/边界
+                      - generic [ref=e158]: 例如：2014 年至今、2009-2013 历史表
+            - generic [ref=e159]:
+              - button [ref=e219] [cursor=pointer]: 导入并生成草稿
+              - button [ref=e220] [cursor=pointer]: 填入最佳实践样例
+              - link [ref=e221] [cursor=pointer]:
+                - /url: /samples/ingest/代发明细查询-上传样例材料.txt
+                - text: 下载样例材料
+              - button [ref=e222] [cursor=pointer]: 清空输入
+            - status [ref=e203]: 导入完成 · 模式 rule_generated · 共识别 3 个场景
+            - status [ref=e164]:
+              - generic [ref=e165]:
+                - strong [ref=e166]: 导入执行明细
+                - generic [ref=e167]: 总耗时 455ms · 批次 eccf93a0 · 状态 QUALITY_REVIEWING
+              - paragraph [ref=e169]: 当前阶段：导入与草稿生成完成
+              - list [ref=e224]:
+                - listitem [ref=e225]:
+                  - generic [ref=e226]: 文档分块
+                  - generic [ref=e227]: 0ms
+                  - generic [ref=e228]: 5%
+                - listitem [ref=e229]:
+                  - generic [ref=e230]: 抽取识别
+                  - generic [ref=e231]: 22ms
+                  - generic [ref=e232]: 70%
+                - listitem [ref=e233]:
+                  - generic [ref=e234]: 结果合并
+                  - generic [ref=e235]: 0ms
+                  - generic [ref=e236]: 85%
+                - listitem [ref=e237]:
+                  - generic [ref=e238]: 结果归一
+                  - generic [ref=e239]: 0ms
+                  - generic [ref=e240]: 90%
+                - listitem [ref=e241]:
+                  - generic [ref=e242]: 草稿入库
+                  - generic [ref=e243]: 414ms
+                  - generic [ref=e244]: 95%
+                - listitem [ref=e245]:
+                  - generic [ref=e246]: 导入完成
+                  - generic [ref=e247]: 455ms
+                  - generic [ref=e248]: 100%
+            - generic [ref=e170]:
+              - generic [ref=e171]:
+                - strong [ref=e172]: 导入任务队列（草稿生命周期）
+                - button [ref=e249] [cursor=pointer]: 刷新队列
+              - list [ref=e250]:
+                - listitem [ref=e251]:
+                  - generic [ref=e252]:
+                    - strong [ref=e253]: 最佳实践样例
+                    - paragraph [ref=e254]: 批次 eccf93a0 · 状态 QUALITY_REVIEWING · 步骤 2 · 更新于 2026-03-27 13:39
+                    - paragraph [ref=e255]: 草稿总数 3 · 待处理 3 · 已发布 0 · 已弃用 0
+                  - button [ref=e257] [cursor=pointer]: 恢复处理
+        - generic [ref=e258]:
+          - generic [ref=e260]:
+            - generic [ref=e261]: "02"
+            - generic [ref=e262]:
+              - heading "02 抽取质量判断" [level=2] [ref=e263]
+              - paragraph [ref=e264]: 基于抽取结果快速判断可发布性
+          - generic [ref=e266]:
+            - generic [ref=e267]:
+              - generic [ref=e268]:
+                - generic [ref=e269]: "3"
+                - generic [ref=e270]: 识别场景
+              - generic [ref=e271]:
+                - paragraph [ref=e272]: 共识别 3 个场景，当前应用第 1 个；置信度 85%（高）
+                - paragraph [ref=e273]: 待处理 3 · 已发布 0 · 已弃用 0
+            - group [ref=e274]:
+              - generic "批次未识别内容" [ref=e275] [cursor=pointer]
+            - button "确认质检，进入对照" [ref=e277] [cursor=pointer]
+        - generic:
+          - generic:
+            - generic:
+              - generic: "03"
+              - generic:
+                - heading "03 抽取结果与原文对照" [level=2]
+                - paragraph: ✓ 03 结果与原文对照 | 已确认场景 0 个
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - heading [level=2]: 场景队列
+                  - paragraph: 支持批量处理与快速切换
+                - generic:
+                  - generic: 筛选场景
+                  - textbox:
+                    - /placeholder: 按场景标题筛选
+                - generic:
+                  - button:
+                    - generic:
+                      - strong: 1. Step 1：根据公司户口号查询代发协议号
+                      - generic: 草稿
+                    - paragraph: "#1 · 85%"
+                  - button:
+                    - generic:
+                      - strong: 2. Step 1：查询 2014 年至今主表明细
+                      - generic: 草稿
+                    - paragraph: "#2 · 85%"
+                  - button:
+                    - generic:
+                      - strong: 3. Step 2：按需补查历史明细表
+                      - generic: 草稿
+                    - paragraph: "#3 · 85%"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 识别场景
+                    - strong: "3"
+                  - generic:
+                    - generic: 当前场景
+                    - strong: Step 1：根据公司户口号查询代发协议号
+                  - generic:
+                    - generic: 取数方案
+                    - strong: "1"
+                  - generic:
+                    - generic: 高亮行数
+                    - strong: "3"
+                - generic:
+                  - generic:
+                    - heading [level=3]: 原文定位预览
+                    - generic:
+                      - list:
+                        - listitem:
+                          - generic: "1"
+                          - generic: "### 场景 1：根据公司户口号查询代发协议号"
+                        - listitem:
+                          - generic: "2"
+                          - generic: "- 场景描述：先定位代发协议号，再关联后续批次或明细查询。"
+                        - listitem:
+                          - generic: "3"
+                          - generic: "- 口径提供人：张三/80000001"
+                        - listitem:
+                          - generic: "4"
+                          - generic: "- 结果字段：合作方协议号、公司户口号、客户号、协议状态"
+                        - listitem:
+                          - generic: "5"
+                          - generic: "- 注意事项：历史系统与当前系统字段命名不同，跨系统联查前需先确认客户主键。"
+                        - listitem:
+                          - generic: "6"
+                          - generic: "- SQL 语句"
+                        - listitem:
+                          - generic: "7"
+                          - generic: "-- Step 1：根据公司户口号查询代发协议号"
+                        - listitem:
+                          - generic: "8"
+                          - generic: SELECT PROTOCOL_NBR, CARD_NBR, CLIENT_NBR
+                        - listitem:
+                          - generic: "9"
+                          - generic: FROM NDS_VHIS.NLJ54_AGF_PROTOCOL_PAY_CARD_T
+                        - listitem:
+                          - generic: "10"
+                          - generic: "WHERE CARD_NBR IN ('${CORP_CARD_NBR}');"
+                        - listitem:
+                          - generic: "11"
+                        - listitem:
+                          - generic: "12"
+                          - generic: "### 场景 2：根据代发协议号查询代发明细"
+                        - listitem:
+                          - generic: "13"
+                          - generic: "- 场景描述：按协议号查询代发明细，支持当前主表与历史补数表双通道。"
+                        - listitem:
+                          - generic: "14"
+                          - generic: "- 口径提供人：李四/80000002"
+                        - listitem:
+                          - generic: "15"
+                          - generic: "- 结果字段：代发批次号、收款户口号、交易金额、代发状态代码"
+                        - listitem:
+                          - generic: "16"
+                          - generic: "- 注意事项：2014 年前建议优先使用历史表；跨年查询需拆分时间段执行。"
+                        - listitem:
+                          - generic: "17"
+                          - generic: "- SQL 语句"
+                        - listitem:
+                          - generic: "18"
+                          - generic: "-- Step 1：查询 2014 年至今主表明细"
+                        - listitem:
+                          - generic: "19"
+                          - generic: "-- 码值：AGN_STS_CD=01(成功),02(失败),03(处理中)"
+                        - listitem:
+                          - generic: "20"
+                          - generic: SELECT AGN_BCH_SEQ, EAC_NBR, TRX_AMT, AGN_STS_CD, TRX_DT
+                        - listitem:
+                          - generic: "21"
+                          - generic: FROM PDM_VHIS.T05_AGN_DTL
+                        - listitem:
+                          - generic: "22"
+                          - generic: WHERE TRX_DT >= DATE '2014-01-01'
+                        - listitem:
+                          - generic: "23"
+                          - generic: "AND MCH_AGR_NBR = '${PROTOCOL_NBR}';"
+                        - listitem:
+                          - generic: "24"
+                        - listitem:
+                          - generic: "25"
+                          - generic: "-- Step 2：按需补查历史明细表"
+                        - listitem:
+                          - generic: "26"
+                          - generic: SELECT EPXTRXDAT, EPXEACNBR, EPXTRXAMT, EPXTRXSTS
+                        - listitem:
+                          - generic: "27"
+                          - generic: FROM LGC_EAM.ETL_FE_EPHISTRXP
+                        - listitem:
+                          - generic: "28"
+                          - generic: "WHERE EPXCNVNBR = '${PROTOCOL_NBR}';"
+                    - paragraph: 高亮来自场景证据行和 SQL 来源行段；若无行段则按 SQL 文本自动定位。
+                  - generic:
+                    - heading [level=3]: 结构化预览
+                    - generic:
+                      - generic:
+                        - strong: 场景标题
+                        - generic: Step 1：根据公司户口号查询代发协议号
+                      - generic:
+                        - strong: 场景描述
+                        - generic: "场景 1：根据公司户口号查询代发协议号 场景描述：先定位代发协议号，再关联后续批次或明细查询。 口径提供人：张三/80000001 结果字段：合作方协议号、公司户口号、客户号、协议状态 注意事项：历史系统与当前系统字段命名不同，跨系统联查前需先确认客户主键。 Step 1：根据公司户口号查询代发协议号 场景 2：根据代发协议号查询代发明细 场景描述：按协议号查询代发明细，支持当前主表与历史补数表双通道。 口径提供人：李四/80000002 结果字段：代发批次号、收款户口号、交易金额、代发状态代码 注意事项：2014 年前建议优先使用历史表；跨年查询需拆分时间段执行。 Step 1：查询 2014 年至今主表明细 码值：AGN_STS_CD=01(成功),02(失败),03(处理中) AND MCH_AGR_NBR = '${PROTOCOL_NBR}'; Step 2：按需补查历史明细表"
+                      - generic:
+                        - strong: 输入参数数
+                        - generic: "1"
+                      - generic:
+                        - strong: 输出字段数
+                        - generic: "3"
+                      - generic:
+                        - strong: 证据行
+                        - generic: 未提供
+                    - generic:
+                      - button:
+                        - generic:
+                          - heading [level=4]: 取数方案1
+                          - generic: 行段：8-10
+                        - paragraph: 适用时段：未标注 · 来源表：NDS_VHIS.NLJ54_AGF_PROTOCOL_PAY_CARD_T
+                - group:
+                  - generic: 查看完整结构化 JSON
+            - generic:
+              - button [disabled]: 确认对照，进入发布
+        - generic:
+          - generic:
+            - generic:
+              - generic: "04"
+              - generic:
+                - heading "04 场景编辑与发布" [level=2]
+                - paragraph: ✓ 04 场景编辑与发布 | 待发布 3 个（当前#1·草稿）
+          - generic:
+            - generic:
+              - generic: 场景标题
+              - textbox: Step 1：根据公司户口号查询代发协议号
+            - generic:
+              - generic: 业务领域
+              - generic:
+                - combobox
+                - generic:
+                  - button: 重载业务领域
+              - paragraph: 保存和发布前请先选择业务领域。
+            - generic: 场景描述
+            - textbox: "场景 1：根据公司户口号查询代发协议号 场景描述：先定位代发协议号，再关联后续批次或明细查询。 口径提供人：张三/80000001 结果字段：合作方协议号、公司户口号、客户号、协议状态 注意事项：历史系统与当前系统字段命名不同，跨系统联查前需先确认客户主键。 Step 1：根据公司户口号查询代发协议号 场景 2：根据代发协议号查询代发明细 场景描述：按协议号查询代发明细，支持当前主表与历史补数表双通道。 口径提供人：李四/80000002 结果字段：代发批次号、收款户口号、交易金额、代发状态代码 注意事项：2014 年前建议优先使用历史表；跨年查询需拆分时间段执行。 Step 1：查询 2014 年至今主表明细 码值：AGN_STS_CD=01(成功),02(失败),03(处理中) AND MCH_AGR_NBR = '${PROTOCOL_NBR}'; Step 2：按需补查历史明细表"
+            - generic: 口径定义
+            - textbox
+            - group:
+              - generic: 输入参数（默认折叠）
+            - group:
+              - generic: 输出字段（默认折叠）
+            - generic: 取数方案
+            - paragraph: 一个场景可有多个取数方案；请按适用时段和来源表选择。
+            - generic:
+              - article:
+                - generic:
+                  - heading [level=4]: 取数方案1
+                  - button: 删除
+                - generic:
+                  - generic:
+                    - generic: 取数方案名称
+                    - textbox:
+                      - /placeholder: 取数方案1
+                      - text: 取数方案1
+                  - generic:
+                    - generic: 适用时段
+                    - generic:
+                      - textbox
+                      - generic: 至
+                      - textbox
+                      - generic:
+                        - checkbox
+                        - text: 至今
+                - generic:
+                  - generic: 来源表（逗号分隔）
+                  - textbox:
+                    - /placeholder: 例如：T_CUST_INFO, T_CUST_INFO_BAK
+                    - text: NDS_VHIS.NLJ54_AGF_PROTOCOL_PAY_CARD_T
+                - generic:
+                  - generic: 备注
+                  - textbox:
+                    - /placeholder: 可选：版本差异说明
+                - generic:
+                  - generic: SQL 原文
+                  - textbox:
+                    - /placeholder: 粘贴该取数方案 SQL 原文
+                    - text: "SELECT PROTOCOL_NBR, CARD_NBR, CLIENT_NBR FROM NDS_VHIS.NLJ54_AGF_PROTOCOL_PAY_CARD_T WHERE CARD_NBR IN ('${CORP_CARD_NBR}');"
+            - generic:
+              - button: 新增取数方案
+            - group:
+              - generic: 查看取数方案 JSON
+            - generic: 码值说明
+            - paragraph: 先录入码值字段，再逐条补充取值映射。
+            - generic:
+              - paragraph: 暂无码值说明，请新增后补充映射。
+            - generic:
+              - button: 新增码值组
+            - group:
+              - generic: 查看码值说明 JSON
+            - generic: 风险与注意事项
+            - textbox: "[]"
+            - generic: 质量备注
+            - textbox: "{ \"confidence\": 0.85, \"warnings\": [], \"errors\": [] }"
+            - generic:
+              - generic:
+                - strong: 最小单元校验
+                - button: 重新校验
+              - generic:
+                - generic:
+                  - generic: ✓
+                  - generic: 场景标题：已满足
+                - generic:
+                  - generic: "!"
+                  - generic: 业务领域：发布前必须绑定业务领域（domainId）
+                - generic:
+                  - generic: ✓
+                  - generic: 场景描述：已满足
+                - generic:
+                  - generic: ✓
+                  - generic: 查询方案：已满足
+            - generic:
+              - generic: 验证时间
+              - textbox: 2026-03-27T13:37
+              - generic: 变更摘要
+              - textbox:
+                - /placeholder: 发布前必须填写… 例如：补充风险说明
+            - generic:
+              - button [disabled]: 保存当前场景
+              - button [disabled]: 发布当前场景
+              - button: 弃用当前场景
+            - paragraph: 当前场景：#1 · 状态：DRAFT

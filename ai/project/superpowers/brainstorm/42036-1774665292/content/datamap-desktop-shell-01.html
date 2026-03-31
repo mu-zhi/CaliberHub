@@ -1,0 +1,85 @@
+<h2>数据地图：桌面端骨架 + 主视图切换规则</h2>
+<p class="subtitle">下面比较的是“用户先切内容，还是先切布局”。都默认运行在桌面端双层顶部壳之下。</p>
+
+<div class="cards">
+  <div class="card" data-choice="m1" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">M1. 内容主切换，布局次级</div>
+        <div class="mockup-body">
+          <div class="placeholder" style="height:30px;margin-bottom:6px;">全局状态条</div>
+          <div class="mock-nav">首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:10px 0 8px;font-weight:600;">数据地图</div>
+          <div class="placeholder" style="height:36px;margin-bottom:8px;">顶部工具栏：搜索 / 领域筛选 / 状态筛选 / 快照 / 导出</div>
+          <div class="placeholder" style="height:34px;margin-bottom:10px;">主视图切换：业务视图 | 路径视图 | 覆盖视图</div>
+          <div style="display:grid;grid-template-columns:260px 1fr 360px;gap:10px;">
+            <div class="placeholder" style="height:250px;">左侧导航树</div>
+            <div>
+              <div class="placeholder" style="height:34px;margin-bottom:8px;">次级布局切换：图谱 | 双栏 | 工作台</div>
+              <div class="placeholder" style="height:208px;">中央主区</div>
+            </div>
+            <div class="placeholder" style="height:250px;">右侧详情 / 操作面板</div>
+          </div>
+          <div class="placeholder" style="height:56px;margin-top:10px;">底部联动区：证据 / 差异 / 影响 / 路径</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>M1. 内容主切换，布局次级</h3>
+      <p>先决定“看业务 / 看路径 / 看覆盖”，图谱 / 双栏 / 工作台只是当前主视图的呈现方式。最接近业务用户思维。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="m2" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">M2. 布局主切换，内容内嵌</div>
+        <div class="mockup-body">
+          <div class="placeholder" style="height:30px;margin-bottom:6px;">全局状态条</div>
+          <div class="mock-nav">首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:10px 0 8px;font-weight:600;">数据地图</div>
+          <div class="placeholder" style="height:36px;margin-bottom:8px;">顶部工具栏：搜索 / 领域筛选 / 状态筛选 / 快照 / 导出</div>
+          <div class="placeholder" style="height:34px;margin-bottom:10px;">主布局切换：图谱 | 双栏 | 工作台</div>
+          <div style="display:grid;grid-template-columns:260px 1fr 360px;gap:10px;">
+            <div class="placeholder" style="height:250px;">左侧导航树</div>
+            <div>
+              <div class="placeholder" style="height:34px;margin-bottom:8px;">内容切换：业务 / 路径 / 覆盖</div>
+              <div class="placeholder" style="height:208px;">中央主区</div>
+            </div>
+            <div class="placeholder" style="height:250px;">右侧详情 / 操作面板</div>
+          </div>
+          <div class="placeholder" style="height:56px;margin-top:10px;">底部联动区：证据 / 差异 / 影响 / 路径</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>M2. 布局主切换，内容内嵌</h3>
+      <p>先决定“图谱怎么摆”，再决定看什么内容。更贴近当前实现，但对业务用户会更技术化。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="m3" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">M3. 任务主切换，视图随任务变化</div>
+        <div class="mockup-body">
+          <div class="placeholder" style="height:30px;margin-bottom:6px;">全局状态条</div>
+          <div class="mock-nav">首页总览 | 数据地图 | 知识生产台 | 发布中心 | 运行决策台 | 审批与导出 | 监控与审计</div>
+          <div style="padding:10px 0 8px;font-weight:600;">数据地图</div>
+          <div class="placeholder" style="height:36px;margin-bottom:8px;">顶部工具栏：搜索 / 领域筛选 / 状态筛选 / 快照 / 导出</div>
+          <div class="placeholder" style="height:34px;margin-bottom:10px;">任务切换：浏览结构 | 查证据 | 看影响 | 查覆盖</div>
+          <div style="display:grid;grid-template-columns:260px 1fr 360px;gap:10px;">
+            <div class="placeholder" style="height:250px;">左侧导航树</div>
+            <div class="placeholder" style="height:250px;">中央主区（根据任务自动切图谱/双栏/工作台）</div>
+            <div class="placeholder" style="height:250px;">右侧详情 / 操作面板</div>
+          </div>
+          <div class="placeholder" style="height:56px;margin-top:10px;">底部联动区：证据 / 差异 / 影响 / 路径</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>M3. 任务主切换，视图随任务变化</h3>
+      <p>把“业务视图 / 路径视图 / 覆盖视图”重写成任务语言，上手更自然，但实现和文档口径要同步重构。</p>
+    </div>
+  </div>
+</div>

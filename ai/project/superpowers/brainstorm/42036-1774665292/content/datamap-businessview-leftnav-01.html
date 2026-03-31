@@ -1,0 +1,90 @@
+<h2>业务视图：左侧导航树节点层级</h2>
+<p class="subtitle">只比较左侧导航树怎么分层，不比较中央主区和右侧面板。</p>
+
+<div class="cards">
+  <div class="card" data-choice="l1" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">L1. 领域 → 场景</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:260px 1fr;gap:10px;">
+            <div class="placeholder" style="height:280px;text-align:left;padding:10px;">
+              零售业务域
+              <br>├─ 客户基础信息查询
+              <br>├─ 客户信息变更追踪
+              <br>├─ 代发明细查询
+              <br>└─ 财富交易查询
+              <br><br>公司业务域
+              <br>├─ 对公账户流水查询
+              <br>└─ 授信额度核查
+            </div>
+            <div class="placeholder" style="height:280px;">中央主区预留</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>L1. 领域 → 场景</h3>
+      <p>最简单，业务用户最好理解。进入树后直接看到场景，但方案资产和覆盖对象都放到中央主区再讲。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="l2" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">L2. 领域 → 场景组 → 场景</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:260px 1fr;gap:10px;">
+            <div class="placeholder" style="height:280px;text-align:left;padding:10px;">
+              零售业务域
+              <br>├─ 客户信息类
+              <br>│  ├─ 客户基础信息查询
+              <br>│  └─ 客户信息变更追踪
+              <br>├─ 交易明细类
+              <br>│  ├─ 代发明细查询
+              <br>│  └─ 财富交易查询
+              <br><br>公司业务域
+              <br>└─ 授信核查类
+              <br>&nbsp;&nbsp;&nbsp;└─ 授信额度核查
+            </div>
+            <div class="placeholder" style="height:280px;">中央主区预留</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>L2. 领域 → 场景组 → 场景</h3>
+      <p>更利于规模扩张。先按业务意图分组，再进具体场景，适合后续场景数量变多的地图。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="l3" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">L3. 领域 → 主对象 → 场景</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:260px 1fr;gap:10px;">
+            <div class="placeholder" style="height:280px;text-align:left;padding:10px;">
+              零售业务域
+              <br>├─ 客户
+              <br>│  ├─ 客户基础信息查询
+              <br>│  └─ 客户信息变更追踪
+              <br>├─ 代发记录
+              <br>│  └─ 代发明细查询
+              <br>└─ 财富产品
+              <br>&nbsp;&nbsp;&nbsp;└─ 财富交易查询
+              <br><br>公司业务域
+              <br>└─ 授信主体
+              <br>&nbsp;&nbsp;&nbsp;└─ 授信额度核查
+            </div>
+            <div class="placeholder" style="height:280px;">中央主区预留</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>L3. 领域 → 主对象 → 场景</h3>
+      <p>和对象模型更一致，利于后续从场景回到治理对象，但业务用户第一次看会稍技术一些。</p>
+    </div>
+  </div>
+</div>

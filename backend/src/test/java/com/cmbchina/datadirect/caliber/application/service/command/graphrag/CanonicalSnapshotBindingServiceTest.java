@@ -1,0 +1,418 @@
+package com.cmbchina.datadirect.caliber.application.service.command.graphrag;
+
+import com.cmbchina.datadirect.caliber.application.api.dto.request.PublishSceneCmd;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
+import com.cmbchina.datadirect.caliber.application.assembler.SceneAssembler;
+import com.cmbchina.datadirect.caliber.application.service.command.AlignmentReportAppService;
+import com.cmbchina.datadirect.caliber.application.service.command.CaliberDictSyncService;
+import com.cmbchina.datadirect.caliber.application.service.command.SceneCommandAppService;
+import com.cmbchina.datadirect.caliber.application.service.command.SceneVersionAppService;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.GraphProjectionAppService;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.SceneGraphAssetSyncService;
+import com.cmbchina.datadirect.caliber.application.service.query.graphrag.ScenePublishGateAppService;
+import com.cmbchina.datadirect.caliber.domain.model.SceneStatus;
+import com.cmbchina.datadirect.caliber.domain.support.CaliberDomainSupport;
+import com.cmbchina.datadirect.caliber.domain.support.SceneDomainSupport;
+import com.cmbchina.datadirect.caliber.infrastructure.module.converter.CaliberDomainConverter;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneAuditLogMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneVersionMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ScenePO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityMembershipPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(classes = {
+        CanonicalEntityTestApplication.class,
+        CanonicalSnapshotBindingServiceTest.TestSupportConfiguration.class
+})
+@ActiveProfiles("test")
+@Transactional
+class CanonicalSnapshotBindingServiceTest {
+
+    @Autowired
+    private SceneCommandAppService sceneCommandAppService;
+
+    @Autowired
+    private SceneMapper sceneMapper;
+
+    @Autowired
+    private CanonicalEntityMapper canonicalEntityMapper;
+
+    @Autowired
+    private CanonicalEntityMembershipMapper canonicalEntityMembershipMapper;
+
+    @Autowired
+    private CanonicalSnapshotMembershipMapper canonicalSnapshotMembershipMapper;
+
+    @MockBean
+    private CaliberDictSyncService caliberDictSyncService;
+
+    @MockBean
+    private AlignmentReportAppService alignmentReportAppService;
+
+    @MockBean
+    private SceneGraphAssetSyncService sceneGraphAssetSyncService;
+
+    @MockBean
+    private ScenePublishGateAppService scenePublishGateAppService;
+
+    @MockBean
+    private GraphProjectionAppService graphProjectionAppService;
+
+    @MockBean
+    private SceneAuditLogMapper sceneAuditLogMapper;
+
+    @Test
+    void shouldFreezeActiveCanonicalMembershipsIntoSnapshotWhenPublishingScene() {
+        Long sceneId = seedScene();
+        CanonicalEntityPO canonicalEntity = seedCanonicalEntity();
+        CanonicalEntityMembershipPO activeMembership = seedMembership(sceneId, canonicalEntity.getId(), 101L, true);
+        seedMembership(sceneId, canonicalEntity.getId(), 102L, false);
+
+        SceneDTO published = sceneCommandAppService.publish(sceneId, new PublishSceneCmd(
+                OffsetDateTime.now(),
+                "首次发布",
+                "publisher"
+        ));
+
+        List<CanonicalSnapshotMembershipPO> frozenMemberships =
+                canonicalSnapshotMembershipMapper.findBySnapshotIdAndSceneIdOrderByUpdatedAtDesc(published.snapshotId(), sceneId);
+
+        assertThat(published.snapshotId()).isNotNull();
+        assertThat(frozenMemberships).hasSize(1);
+        assertThat(frozenMemberships.get(0).getCanonicalEntityId()).isEqualTo(canonicalEntity.getId());
+        assertThat(frozenMemberships.get(0).getSourceMembershipId()).isEqualTo(activeMembership.getId());
+        assertThat(frozenMemberships.get(0).getSceneAssetType()).isEqualTo("SOURCE_CONTRACT");
+        assertThat(frozenMemberships.get(0).getSceneAssetId()).isEqualTo(101L);
+    }
+
+    private Long seedScene() {
+        OffsetDateTime now = OffsetDateTime.now();
+        ScenePO scene = new ScenePO();
+        scene.setSceneCode("SCN-FREEZE-0001");
+        scene.setSceneTitle("冻结成员归属");
+        scene.setDomain("零售金融");
+        scene.setSceneType("FACT_DETAIL");
+        scene.setStatus(SceneStatus.DRAFT);
+        scene.setSceneDescription("用于验证发布时冻结 canonical memberships");
+        scene.setCaliberDefinition("definition");
+        scene.setApplicability("2024-至今");
+        scene.setBoundaries("boundaries");
+        scene.setInputsJson("{\"params\":[]}");
+        scene.setOutputsJson("{\"summary\":\"summary\",\"fields\":[]}");
+        scene.setSqlVariantsJson("[]");
+        scene.setSqlBlocksJson("[]");
+        scene.setCodeMappingsJson("[]");
+        scene.setContributors("tester");
+        scene.setSourceTablesJson("[]");
+        scene.setCaveatsJson("[]");
+        scene.setUnmappedText("");
+        scene.setQualityJson("{}");
+        scene.setRawInput("raw");
+        scene.setCreatedBy("tester");
+        scene.setCreatedAt(now);
+        scene.setUpdatedAt(now);
+        return sceneMapper.save(scene).getId();
+    }
+
+    private CanonicalEntityPO seedCanonicalEntity() {
+        OffsetDateTime now = OffsetDateTime.now();
+        CanonicalEntityPO entity = new CanonicalEntityPO();
+        entity.setEntityType("SOURCE_CONTRACT");
+        entity.setCanonicalKey("SRC::PAYROLL::T05_AGN_DTL");
+        entity.setDisplayName("T05_AGN_DTL");
+        entity.setResolutionStatus("ACTIVE");
+        entity.setLifecycleStatus("ACTIVE");
+        entity.setProfileJson("{\"normalizedPhysicalTable\":\"T05_AGN_DTL\"}");
+        entity.setCreatedBy("tester");
+        entity.setCreatedAt(now);
+        entity.setUpdatedBy("tester");
+        entity.setUpdatedAt(now);
+        return canonicalEntityMapper.save(entity);
+    }
+
+    private CanonicalEntityMembershipPO seedMembership(Long sceneId, Long canonicalEntityId, Long sceneAssetId, boolean active) {
+        OffsetDateTime now = OffsetDateTime.now();
+        CanonicalEntityMembershipPO membership = new CanonicalEntityMembershipPO();
+        membership.setCanonicalEntityId(canonicalEntityId);
+        membership.setSceneAssetType("SOURCE_CONTRACT");
+        membership.setSceneAssetId(sceneAssetId);
+        membership.setSceneId(sceneId);
+        membership.setMatchBasis("canonical_key");
+        membership.setConfidenceScore(1.0d);
+        membership.setManualOverride(false);
+        membership.setActiveFlag(active);
+        membership.setCreatedBy("tester");
+        membership.setCreatedAt(now);
+        membership.setUpdatedBy("tester");
+        membership.setUpdatedAt(now);
+        return canonicalEntityMembershipMapper.save(membership);
+    }
+
+    @TestConfiguration
+    static class TestSupportConfiguration {
+
+        @Bean
+        SceneDomainSupport sceneDomainSupport(SceneMapper sceneMapper) {
+            return new SceneDomainSupport() {
+                @Override
+                public com.cmbchina.datadirect.caliber.domain.model.Scene save(com.cmbchina.datadirect.caliber.domain.model.Scene scene) {
+                    ScenePO po = new ScenePO();
+                    po.setId(scene.getId());
+                    po.setSceneCode(scene.getSceneCode());
+                    po.setSceneTitle(scene.getSceneTitle());
+                    po.setDomainId(scene.getDomainId());
+                    po.setDomain(scene.getDomain());
+                    po.setSceneType(scene.getSceneType());
+                    po.setStatus(scene.getStatus());
+                    po.setSceneDescription(scene.getSceneDescription());
+                    po.setCaliberDefinition(scene.getCaliberDefinition());
+                    po.setApplicability(scene.getApplicability());
+                    po.setBoundaries(scene.getBoundaries());
+                    po.setInputsJson(scene.getInputsJson());
+                    po.setOutputsJson(scene.getOutputsJson());
+                    po.setSqlVariantsJson(scene.getSqlVariantsJson());
+                    po.setCodeMappingsJson(scene.getCodeMappingsJson());
+                    po.setContributors(scene.getContributors());
+                    po.setSqlBlocksJson(scene.getSqlBlocksJson());
+                    po.setSourceTablesJson(scene.getSourceTablesJson());
+                    po.setCaveatsJson(scene.getCaveatsJson());
+                    po.setUnmappedText(scene.getUnmappedText());
+                    po.setQualityJson(scene.getQualityJson());
+                    po.setRawInput(scene.getRawInput());
+                    po.setVerifiedAt(scene.getVerifiedAt());
+                    po.setChangeSummary(scene.getChangeSummary());
+                    po.setCreatedBy(scene.getCreatedBy());
+                    po.setCreatedAt(scene.getCreatedAt());
+                    po.setUpdatedAt(scene.getUpdatedAt());
+                    po.setPublishedBy(scene.getPublishedBy());
+                    po.setPublishedAt(scene.getPublishedAt());
+                    po.setRowVersion(scene.getRowVersion());
+                    ScenePO saved = sceneMapper.save(po);
+                    return toScene(saved);
+                }
+
+                @Override
+                public java.util.Optional<com.cmbchina.datadirect.caliber.domain.model.Scene> findById(Long id) {
+                    return sceneMapper.findById(id).map(this::toScene);
+                }
+
+                @Override
+                public java.util.List<com.cmbchina.datadirect.caliber.domain.model.Scene> findByCondition(com.cmbchina.datadirect.caliber.domain.model.SceneQueryCondition condition) {
+                    return sceneMapper.findByCondition(condition.domainId(), condition.domain(), condition.status(), condition.keyword())
+                            .stream()
+                            .map(this::toScene)
+                            .toList();
+                }
+
+                @Override
+                public void deleteById(Long id) {
+                    sceneMapper.deleteById(id);
+                }
+
+                private com.cmbchina.datadirect.caliber.domain.model.Scene toScene(ScenePO po) {
+                    return com.cmbchina.datadirect.caliber.domain.model.Scene.builder()
+                            .id(po.getId())
+                            .sceneCode(po.getSceneCode())
+                            .sceneTitle(po.getSceneTitle())
+                            .domainId(po.getDomainId())
+                            .domain(po.getDomain())
+                            .sceneType(po.getSceneType())
+                            .status(po.getStatus())
+                            .sceneDescription(po.getSceneDescription())
+                            .caliberDefinition(po.getCaliberDefinition())
+                            .applicability(po.getApplicability())
+                            .boundaries(po.getBoundaries())
+                            .inputsJson(po.getInputsJson())
+                            .outputsJson(po.getOutputsJson())
+                            .sqlVariantsJson(po.getSqlVariantsJson())
+                            .codeMappingsJson(po.getCodeMappingsJson())
+                            .contributors(po.getContributors())
+                            .sqlBlocksJson(po.getSqlBlocksJson())
+                            .sourceTablesJson(po.getSourceTablesJson())
+                            .caveatsJson(po.getCaveatsJson())
+                            .unmappedText(po.getUnmappedText())
+                            .qualityJson(po.getQualityJson())
+                            .rawInput(po.getRawInput())
+                            .verifiedAt(po.getVerifiedAt())
+                            .changeSummary(po.getChangeSummary())
+                            .createdBy(po.getCreatedBy())
+                            .createdAt(po.getCreatedAt())
+                            .updatedAt(po.getUpdatedAt())
+                            .publishedBy(po.getPublishedBy())
+                            .publishedAt(po.getPublishedAt())
+                            .rowVersion(po.getRowVersion())
+                            .build();
+                }
+            };
+        }
+
+        @Bean
+        CaliberDomainSupport caliberDomainSupport() {
+            return new CaliberDomainSupport() {
+                @Override
+                public com.cmbchina.datadirect.caliber.domain.model.CaliberDomain save(com.cmbchina.datadirect.caliber.domain.model.CaliberDomain domain) {
+                    return domain;
+                }
+
+                @Override
+                public java.util.Optional<com.cmbchina.datadirect.caliber.domain.model.CaliberDomain> findById(Long id) {
+                    return java.util.Optional.empty();
+                }
+
+                @Override
+                public java.util.List<com.cmbchina.datadirect.caliber.domain.model.CaliberDomain> findAllOrderBySortOrder() {
+                    return java.util.List.of();
+                }
+
+                @Override
+                public boolean existsByDomainCode(String domainCode) {
+                    return false;
+                }
+
+                @Override
+                public boolean existsByDomainCodeAndIdNot(String domainCode, Long id) {
+                    return false;
+                }
+            };
+        }
+
+        @Bean
+        SceneAssembler sceneAssembler() {
+            return new SceneAssembler() {
+                @Override
+                public com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO toDTO(com.cmbchina.datadirect.caliber.domain.model.Scene scene) {
+                    return new com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO(
+                            scene.getId(),
+                            scene.getSceneCode(),
+                            scene.getSceneTitle(),
+                            scene.getDomainId(),
+                            scene.getDomain(),
+                            scene.getDomain(),
+                            scene.getSceneType(),
+                            scene.getStatus() == null ? null : scene.getStatus().name(),
+                            scene.getSceneDescription(),
+                            scene.getCaliberDefinition(),
+                            scene.getApplicability(),
+                            scene.getBoundaries(),
+                            scene.getInputsJson(),
+                            scene.getOutputsJson(),
+                            scene.getSqlVariantsJson(),
+                            scene.getCodeMappingsJson(),
+                            scene.getContributors(),
+                            scene.getSqlBlocksJson(),
+                            scene.getSourceTablesJson(),
+                            scene.getCaveatsJson(),
+                            scene.getUnmappedText(),
+                            scene.getQualityJson(),
+                            scene.getRawInput(),
+                            scene.getVerifiedAt(),
+                            scene.getChangeSummary(),
+                            scene.getCreatedBy(),
+                            scene.getCreatedAt(),
+                            scene.getUpdatedAt(),
+                            scene.getPublishedBy(),
+                            scene.getPublishedAt(),
+                            scene.getRowVersion(),
+                            null
+                    );
+                }
+
+                @Override
+                public java.util.List<com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO> toDTOList(java.util.List<com.cmbchina.datadirect.caliber.domain.model.Scene> scenes) {
+                    return scenes.stream().map(this::toDTO).toList();
+                }
+            };
+        }
+
+        @Bean
+        @Primary
+        SceneVersionAppService testSceneVersionAppService(SceneMapper sceneMapper,
+                                                          SceneVersionMapper sceneVersionMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanMapper planMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.OutputContractMapper outputContractMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CoverageDeclarationMapper coverageDeclarationMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PolicyMapper policyMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanPolicyRefMapper planPolicyRefMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceIntakeContractMapper sourceIntakeContractMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.EvidenceFragmentMapper evidenceFragmentMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.InputSlotSchemaMapper inputSlotSchemaMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ContractViewMapper contractViewMapper,
+                                                          com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceContractMapper sourceContractMapper,
+                                                          com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
+            return new SceneVersionAppService(
+                    sceneMapper,
+                    sceneVersionMapper,
+                    planMapper,
+                    outputContractMapper,
+                    coverageDeclarationMapper,
+                    policyMapper,
+                    planPolicyRefMapper,
+                    sourceIntakeContractMapper,
+                    evidenceFragmentMapper,
+                    inputSlotSchemaMapper,
+                    contractViewMapper,
+                    sourceContractMapper,
+                    objectMapper
+            );
+        }
+
+        @Bean
+        @Primary
+        SceneCommandAppService sceneCommandAppService(SceneDomainSupport sceneDomainSupport,
+                                                      CaliberDomainSupport caliberDomainSupport,
+                                                      SceneAssembler sceneAssembler,
+                                                      CaliberDictSyncService caliberDictSyncService,
+                                                      AlignmentReportAppService alignmentReportAppService,
+                                                      SceneGraphAssetSyncService sceneGraphAssetSyncService,
+                                                      ScenePublishGateAppService scenePublishGateAppService,
+                                                      SceneVersionAppService sceneVersionAppService,
+                                                      CanonicalSnapshotBindingService canonicalSnapshotBindingService,
+                                                      GraphProjectionAppService graphProjectionAppService,
+                                                      MeterRegistry meterRegistry,
+                                                      com.fasterxml.jackson.databind.ObjectMapper objectMapper,
+                                                      SceneAuditLogMapper sceneAuditLogMapper) {
+            return new SceneCommandAppService(
+                    sceneDomainSupport,
+                    caliberDomainSupport,
+                    sceneAssembler,
+                    caliberDictSyncService,
+                    alignmentReportAppService,
+                    sceneGraphAssetSyncService,
+                    scenePublishGateAppService,
+                    sceneVersionAppService,
+                    canonicalSnapshotBindingService,
+                    graphProjectionAppService,
+                    meterRegistry,
+                    objectMapper,
+                    sceneAuditLogMapper
+            );
+        }
+
+        @Bean
+        @Primary
+        MeterRegistry meterRegistry() {
+            return new SimpleMeterRegistry();
+        }
+    }
+}

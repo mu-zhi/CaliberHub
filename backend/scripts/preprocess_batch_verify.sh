@@ -21,7 +21,7 @@ ELASTIC_RETRY_PER_FAIL="${ELASTIC_RETRY_PER_FAIL:-1}"
 RUNS_PER_GROUP="${RUNS_PER_GROUP:-4}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-DOC_DIR="${PROJECT_ROOT}/03-其他文档"
+DOC_DIR="${PROJECT_ROOT}/research/source-materials/sql-samples"
 
 DOC09="${DOC_DIR}/03-口径文档现状-零售客户信息查询.sql"
 DOC10="${DOC_DIR}/04-口径文档现状-零售客户信息变更.sql"

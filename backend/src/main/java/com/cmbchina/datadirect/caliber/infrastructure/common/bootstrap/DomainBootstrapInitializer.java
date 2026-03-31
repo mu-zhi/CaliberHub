@@ -1,5 +1,6 @@
 package com.cmbchina.datadirect.caliber.infrastructure.common.bootstrap;
 
+import com.cmbchina.datadirect.caliber.application.service.command.DomainCommandAppService;
 import com.cmbchina.datadirect.caliber.domain.model.CaliberDomain;
 import com.cmbchina.datadirect.caliber.domain.support.CaliberDomainSupport;
 import org.springframework.boot.ApplicationArguments;
@@ -10,9 +11,12 @@ import org.springframework.stereotype.Component;
 public class DomainBootstrapInitializer implements ApplicationRunner {
 
     private final CaliberDomainSupport caliberDomainSupport;
+    private final DomainCommandAppService domainCommandAppService;
 
-    public DomainBootstrapInitializer(CaliberDomainSupport caliberDomainSupport) {
+    public DomainBootstrapInitializer(CaliberDomainSupport caliberDomainSupport,
+                                      DomainCommandAppService domainCommandAppService) {
         this.caliberDomainSupport = caliberDomainSupport;
+        this.domainCommandAppService = domainCommandAppService;
     }
 
     @Override
@@ -20,15 +24,6 @@ public class DomainBootstrapInitializer implements ApplicationRunner {
         if (!caliberDomainSupport.findAllOrderBySortOrder().isEmpty()) {
             return;
         }
-        CaliberDomain fallbackDomain = CaliberDomain.create(
-                "UNCLASSIFIED",
-                "未分类业务领域",
-                "系统启动时自动创建的默认业务领域，建议在业务领域管理中维护正式业务领域后再迁移场景。",
-                "",
-                "",
-                9999,
-                "system"
-        );
-        caliberDomainSupport.save(fallbackDomain);
+        domainCommandAppService.bootstrapFromBusinessCategories("system");
     }
 }

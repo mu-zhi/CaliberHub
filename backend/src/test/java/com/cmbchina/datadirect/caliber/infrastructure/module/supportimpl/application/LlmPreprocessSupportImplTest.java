@@ -577,7 +577,8 @@ class LlmPreprocessSupportImplTest {
 
     @Test
     void shouldGenerateAtLeastSixScenesForDoc11WhenFallback() throws Exception {
-        Path doc11Path = Path.of("..", "03-其他文档", "05-口径文档现状-代发明细查询.sql");
+        Path doc11Path = Path.of(
+                "..", "research", "source-materials", "sql-samples", "05-口径文档现状-代发明细查询.sql");
         assumeTrue(Files.exists(doc11Path), "doc11 fixture is required for this test");
         String rawText = Files.readString(doc11Path, StandardCharsets.UTF_8);
 

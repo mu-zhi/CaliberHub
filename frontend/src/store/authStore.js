@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { apiRequest } from "../api/client";
+import { API_CONTRACTS } from "../api/contracts";
 
 const TOKEN_KEY = "dd_auth_token";
 const TOKEN_EXPIRE_AT_KEY = "dd_auth_token_expire_at";
@@ -155,7 +156,7 @@ export const useAuthStore = create((set, get) => ({
       return false;
     }
     try {
-      const result = await apiRequest("/system/auth/token", {
+      const result = await apiRequest(API_CONTRACTS.authToken, {
         method: "POST",
         body: { username, password: safePassword },
       });

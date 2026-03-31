@@ -1,24 +1,46 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { HomePage } from "./pages/HomePage";
-import { KnowledgePage } from "./pages/KnowledgePage";
 import { DomainManagementPage } from "./pages/DomainManagementPage";
 import { AssetsPage } from "./pages/AssetsPage";
+import { ApprovalExportPage } from "./pages/ApprovalExportPage";
+import { MonitoringAuditPage } from "./pages/MonitoringAuditPage";
+import { PublishCenterPage } from "./pages/PublishCenterPage";
 import { WorkspacePage } from "./pages/WorkspacePage";
 import { SystemPage } from "./pages/SystemPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { PrototypeIndexPage } from "./pages/PrototypeIndexPage";
+import { KnowledgePage } from "./pages/KnowledgePage";
+import { KnowledgePackageWorkbenchPage } from "./pages/KnowledgePackageWorkbenchPage";
 import { BrandMark } from "./components/BrandMark";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
-import { findRoute, routesByTop, TOP_MODULES } from "./routes";
+import { findRoute, isTopModuleAccessible, LEGACY_ROUTE_REDIRECTS, routesByTop, TOP_MODULES } from "./routes";
 import { useAuthStore } from "./store/authStore";
 import { useAppStore } from "./store/appStore";
+import { PrototypeIngestGraphPage } from "./pages/prototypes/PrototypeIngestGraphPage";
+import { PrototypeModelingDualPanePage } from "./pages/prototypes/PrototypeModelingDualPanePage";
+import { PrototypeRuntimePublishPage } from "./pages/prototypes/PrototypeRuntimePublishPage";
 
 function routeLabel(pathname) {
-  return findRoute(pathname)?.label || "首页";
+  return findRoute(pathname)?.label || "首页总览";
 }
 
-function topKey(pathname) {
-  return findRoute(pathname)?.topKey || "home";
+function routeNotice(route) {
+  if (route?.maturity === "prototype") {
+    return {
+      tone: "prototype",
+      title: "原型评审态",
+      message: "当前页面用于结构评审与交互定型，不计入正式交付范围。",
+    };
+  }
+  if (route?.maturity === "sample") {
+    return {
+      tone: "sample",
+      title: "样例数据页",
+      message: "当前页面仍以样例数据表达流程边界，需和真实审批/审计链路分开理解。",
+    };
+  }
+  return null;
 }
 
 const ROLE_OPTIONS = [
@@ -94,16 +116,20 @@ function AppShell({ children }) {
     }
   }, []);
 
-  const currentTopKey = topKey(location.pathname);
-  const isMainContentFocus = currentTopKey === "home" || currentTopKey === "knowledge" || currentTopKey === "assets";
+  const currentRoute = findRoute(location.pathname);
+  const currentTopKey = currentRoute?.topKey || "overview";
+  const isMainContentFocus = currentTopKey !== "tools";
+  const maturityNotice = routeNotice(currentRoute);
   const isAdmin = useMemo(
     () => roles.some((item) => `${item || ""}`.replace(/^ROLE_/, "").toUpperCase() === "ADMIN"),
     [roles],
   );
-  const sideRoutes = useMemo(() => routesByTop(currentTopKey, isAdmin), [currentTopKey, isAdmin]);
+  const sideRoutes = useMemo(() => routesByTop(currentTopKey, isAdmin, role), [currentTopKey, isAdmin, role]);
   const topModules = useMemo(
-    () => TOP_MODULES.filter((item) => item.inTopNav !== false && (!item.adminOnly || isAdmin)),
-    [isAdmin],
+    () => TOP_MODULES
+      .filter((item) => item.inTopNav !== false && (!item.adminOnly || isAdmin))
+      .map((item) => ({ ...item, accessible: isTopModuleAccessible(item.key, role) })),
+    [isAdmin, role],
   );
 
   return (
@@ -124,16 +150,41 @@ function AppShell({ children }) {
         </div>
         <nav className="mast-main-nav" aria-label="一级模块导航">
           {topModules.map((item) => (
-            <NavLink
-              key={item.key}
-              to={item.path}
-              className={({ isActive }) => `mini-link top-link ${isActive || item.key === currentTopKey ? "is-active" : ""}`}
-            >
-              {item.label}
-            </NavLink>
+            item.accessible ? (
+              <NavLink
+                key={item.key}
+                to={item.path}
+                className={({ isActive }) => `mini-link top-link ${isActive || item.key === currentTopKey ? "is-active" : ""}`}
+              >
+                {item.label}
+              </NavLink>
+            ) : (
+              <span
+                key={item.key}
+                className="mini-link top-link is-disabled"
+                aria-disabled="true"
+                title="当前角色无权限进入该工作台"
+              >
+                {item.label}
+              </span>
+            )
           ))}
         </nav>
         <div className="mast-tools">
+          <div className="mast-tool-links" aria-label="全局工具区">
+            <NavLink
+              to="/workspace/todo"
+              className={() => `mini-link mast-tool-link ${location.pathname.startsWith("/workspace") ? "is-active" : ""}`}
+            >
+              个人协作
+            </NavLink>
+            <NavLink
+              to="/system/guide"
+              className={() => `mini-link mast-tool-link ${location.pathname.startsWith("/system") ? "is-active" : ""}`}
+            >
+              系统设置
+            </NavLink>
+          </div>
           <div className="role-switch">
             <label htmlFor="topRoleSwitch">当前角色</label>
             <select
@@ -167,19 +218,29 @@ function AppShell({ children }) {
             </div>
             <p className="subtle-note" id="sideNavDesc">导航入口固定，右侧内容独立滚动。</p>
             <div className="side-nav-list">
-              {sideRoutes.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) => `module-nav-btn side-route-btn ${isActive ? "is-active" : ""}`}
-                >
-                  <span className="route-label">{item.label}</span>
-                  <span className="route-short" aria-hidden="true">{item.label.slice(0, 2)}</span>
-                  {!item.implemented ? (
-                    <span className="route-tag route-tag-future">[后续建设]</span>
-                  ) : null}
-                </NavLink>
-              ))}
+              {sideRoutes.map((item) => {
+                let tagClass = "";
+                if (item.maturity === "future") {
+                  tagClass = "route-tag-future";
+                } else if (item.maturity === "sample") {
+                  tagClass = "route-tag-sample";
+                } else if (item.maturity === "prototype") {
+                  tagClass = "route-tag-prototype";
+                }
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={({ isActive }) => `module-nav-btn side-route-btn ${isActive ? "is-active" : ""}`}
+                  >
+                    <span className="route-label">{item.label}</span>
+                    <span className="route-short" aria-hidden="true">{item.label.slice(0, 2)}</span>
+                    {item.maturity !== "implemented" ? (
+                      <span className={`route-tag ${tagClass}`}>[{item.statusLabel}]</span>
+                    ) : null}
+                  </NavLink>
+                );
+              })}
             </div>
           </aside>
         ) : null}
@@ -190,7 +251,15 @@ function AppShell({ children }) {
           </p>
         ) : null}
 
-        <main id="mainContent" className="workspace-main" tabIndex={-1}>{children}</main>
+        <main id="mainContent" className="workspace-main" tabIndex={-1}>
+          {maturityNotice ? (
+            <div className={`workbench-route-notice ${maturityNotice.tone}`} role="note">
+              <strong>{maturityNotice.title}</strong>
+              <span>{maturityNotice.message}</span>
+            </div>
+          ) : null}
+          {children}
+        </main>
       </div>
       <div className="toast-holder" aria-live="polite">
         <div className={`toast ${toast.show ? "show" : ""} ${toast.tone}`}>{toast.message}</div>
@@ -200,26 +269,42 @@ function AppShell({ children }) {
 }
 
 function PageContainer() {
+  const legacyRedirectRoutes = Object.entries(LEGACY_ROUTE_REDIRECTS).map(([path, target]) => (
+    <Route key={path} path={path} element={<Navigate to={target} replace />} />
+  ));
+
   return (
     <AppShell>
       <Routes>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/knowledge/import" element={<KnowledgePage preset="import" />} />
-        <Route path="/knowledge/manual" element={<KnowledgePage preset="manual" />} />
-        <Route path="/knowledge/domains" element={<DomainManagementPage />} />
-        <Route path="/knowledge/feedback" element={<KnowledgePage preset="feedback" />} />
+        <Route path="/overview" element={<HomePage />} />
 
-        <Route path="/assets/map" element={<AssetsPage view="map" />} />
-        <Route path="/assets/scenes" element={<AssetsPage view="scenes" />} />
-        <Route path="/assets/views" element={<AssetsPage view="views" />} />
-        <Route path="/assets/dicts" element={<AssetsPage view="dicts" />} />
-        <Route path="/assets/rules" element={<AssetsPage view="rules" />} />
-        <Route path="/assets/topics" element={<AssetsPage view="topics" />} />
-        <Route path="/assets/services" element={<AssetsPage view="services" />} />
-        <Route path="/assets/guide" element={<AssetsPage view="guide" />} />
-        <Route path="/assets/market" element={<AssetsPage view="market" />} />
-        <Route path="/assets/lineage" element={<AssetsPage view="lineage" />} />
-        <Route path="/assets" element={<Navigate to="/assets/map" replace />} />
+        <Route path="/map" element={<AssetsPage view="map" />} />
+        <Route path="/map/scenes" element={<AssetsPage view="scenes" />} />
+        <Route path="/map/lineage" element={<AssetsPage view="lineage" />} />
+        <Route path="/map/views" element={<AssetsPage view="views" />} />
+        <Route path="/map/dicts" element={<AssetsPage view="dicts" />} />
+        <Route path="/map/rules" element={<AssetsPage view="rules" />} />
+        <Route path="/map/topics" element={<AssetsPage view="topics" />} />
+        <Route path="/map/services" element={<AssetsPage view="services" />} />
+        <Route path="/map/guide" element={<AssetsPage view="guide" />} />
+        <Route path="/map/market" element={<AssetsPage view="market" />} />
+
+        <Route path="/production" element={<Navigate to="/production/ingest" replace />} />
+        <Route
+          path="/production/ingest"
+          element={<KnowledgePage preset="import" entry="ingest" />}
+        />
+        <Route
+          path="/production/modeling"
+          element={<KnowledgePage preset="import" entry="modeling" />}
+        />
+        <Route path="/production/domains" element={<DomainManagementPage />} />
+        <Route path="/production/feedback" element={<Navigate to="/production/modeling" replace />} />
+
+        <Route path="/publish" element={<PublishCenterPage />} />
+        <Route path="/runtime" element={<KnowledgePackageWorkbenchPage />} />
+        <Route path="/approval" element={<ApprovalExportPage />} />
+        <Route path="/monitoring" element={<MonitoringAuditPage />} />
 
         <Route path="/workspace/todo" element={<WorkspacePage view="todo" />} />
         <Route path="/workspace/notice" element={<WorkspacePage view="notice" />} />
@@ -229,8 +314,14 @@ function PageContainer() {
         <Route path="/system/guide" element={<SystemPage view="guide" />} />
         <Route path="/system/llm" element={<SystemPage view="llm" />} />
         <Route path="/system/prompts" element={<SystemPage view="prompts" />} />
-        <Route path="/system" element={<Navigate to="/system/guide" replace />} />
-        <Route path="/" element={<Navigate to="/home" replace />} />
+
+        <Route path="/prototype" element={<PrototypeIndexPage />} />
+        <Route path="/prototype/ingest-graph" element={<PrototypeIngestGraphPage />} />
+        <Route path="/prototype/modeling-dual-pane" element={<PrototypeModelingDualPanePage />} />
+        <Route path="/prototype/runtime-publish" element={<PrototypeRuntimePublishPage />} />
+
+        {legacyRedirectRoutes}
+        <Route path="/" element={<Navigate to="/overview" replace />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppShell>

@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -35,16 +34,13 @@ public class CaliberDomainPO {
     @Column(name = "domain_name", nullable = false, length = 120)
     private String domainName;
 
-    @Lob
-    @Column(name = "domain_overview")
+    @Column(name = "domain_overview", columnDefinition = "LONGTEXT")
     private String domainOverview;
 
-    @Lob
-    @Column(name = "common_tables")
+    @Column(name = "common_tables", columnDefinition = "LONGTEXT")
     private String commonTables;
 
-    @Lob
-    @Column(name = "contacts")
+    @Column(name = "contacts", columnDefinition = "LONGTEXT")
     private String contacts;
 
     @Column(name = "sort_order", nullable = false)

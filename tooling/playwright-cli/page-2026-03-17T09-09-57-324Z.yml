@@ -1,0 +1,351 @@
+- generic [ref=e1]:
+  - img [ref=e11]
+  - generic [ref=e12]:
+    - table [ref=e13]:
+      - rowgroup [ref=e14]:
+        - row "形状 最小化关闭" [ref=e15]:
+          - cell "形状 最小化关闭" [ref=e16]:
+            - text: 形状
+            - generic [ref=e17]:
+              - img "最小化" [ref=e18] [cursor=pointer]
+              - img "关闭" [ref=e19] [cursor=pointer]
+        - row "搜索 通用 杂项 高级 基本 箭头 流程图 实体关系 UML + 更多图形 新增库 从...打开库" [ref=e20]:
+          - cell "搜索 通用 杂项 高级 基本 箭头 流程图 实体关系 UML + 更多图形 新增库 从...打开库" [ref=e21]:
+            - generic [ref=e22]:
+              - generic [ref=e23]:
+                - generic [ref=e24]:
+                  - generic [ref=e27]:
+                    - textbox "键入 / 进行搜索" [ref=e28]
+                    - img "搜索" [ref=e29] [cursor=pointer]
+                  - generic "单击以展开。将图形拖拽至绘图中。Shift+单击以改变所选内容。Alt+单击以插入及连接。" [ref=e30] [cursor=pointer]:
+                    - generic [ref=e31]: 通用
+                  - generic [ref=e33]:
+                    - generic [ref=e34] [cursor=pointer]:
+                      - img
+                    - generic [ref=e35] [cursor=pointer]:
+                      - img
+                    - generic [ref=e36] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Text
+                    - generic [ref=e37] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic:
+                                        - heading "Heading" [level=1]
+                                        - paragraph: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    - generic [ref=e38] [cursor=pointer]:
+                      - img
+                    - generic [ref=e39] [cursor=pointer]:
+                      - img
+                    - generic [ref=e40] [cursor=pointer]:
+                      - img
+                    - generic [ref=e41] [cursor=pointer]:
+                      - img
+                    - generic [ref=e42] [cursor=pointer]:
+                      - img
+                    - generic [ref=e43] [cursor=pointer]:
+                      - img
+                    - generic [ref=e44] [cursor=pointer]:
+                      - img
+                    - generic [ref=e45] [cursor=pointer]:
+                      - img
+                    - generic [ref=e46] [cursor=pointer]:
+                      - img
+                    - generic [ref=e47] [cursor=pointer]:
+                      - img
+                    - generic [ref=e48] [cursor=pointer]:
+                      - img
+                    - generic [ref=e49] [cursor=pointer]:
+                      - img
+                    - generic [ref=e50] [cursor=pointer]:
+                      - img
+                    - generic [ref=e51] [cursor=pointer]:
+                      - img
+                    - generic [ref=e52] [cursor=pointer]:
+                      - img
+                    - generic [ref=e53] [cursor=pointer]:
+                      - img
+                    - generic [ref=e54] [cursor=pointer]:
+                      - img
+                    - generic [ref=e55] [cursor=pointer]:
+                      - img
+                    - generic [ref=e56] [cursor=pointer]:
+                      - img
+                    - generic [ref=e57] [cursor=pointer]:
+                      - img
+                    - generic [ref=e58] [cursor=pointer]:
+                      - img
+                    - generic [ref=e59] [cursor=pointer]:
+                      - img
+                    - generic [ref=e60] [cursor=pointer]:
+                      - img
+                    - generic [ref=e61] [cursor=pointer]:
+                      - img
+                    - generic [ref=e62] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Vertical Container
+                    - generic [ref=e63] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Horizontal Container
+                    - generic [ref=e64] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: List
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Item 1
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Item 2
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Item 3
+                    - generic [ref=e65] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: List Item
+                    - generic [ref=e66] [cursor=pointer]:
+                      - img
+                    - generic [ref=e67] [cursor=pointer]:
+                      - img
+                    - generic [ref=e68] [cursor=pointer]:
+                      - img
+                    - generic [ref=e69] [cursor=pointer]:
+                      - img
+                    - generic [ref=e70] [cursor=pointer]:
+                      - img
+                    - generic [ref=e71] [cursor=pointer]:
+                      - img
+                    - generic [ref=e72] [cursor=pointer]:
+                      - img
+                    - generic [ref=e73] [cursor=pointer]:
+                      - img
+                    - generic [ref=e74] [cursor=pointer]:
+                      - img
+                    - generic [ref=e75] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Label
+                    - generic [ref=e76] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Label
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Source
+                    - generic [ref=e77] [cursor=pointer]:
+                      - img:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Label
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Source
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - generic: Target
+                    - generic [ref=e78] [cursor=pointer]:
+                      - img
+                  - generic "单击以展开。将图形拖拽至绘图中。Shift+单击以改变所选内容。Alt+单击以插入及连接。" [ref=e79] [cursor=pointer]:
+                    - generic [ref=e80]: 杂项
+                  - generic "单击以展开。将图形拖拽至绘图中。Shift+单击以改变所选内容。Alt+单击以插入及连接。" [ref=e81] [cursor=pointer]:
+                    - generic [ref=e82]: 高级
+                  - generic "单击以展开。将图形拖拽至绘图中。Shift+单击以改变所选内容。Alt+单击以插入及连接。" [ref=e83] [cursor=pointer]:
+                    - generic [ref=e84]: 基本
+                  - generic "单击以展开。将图形拖拽至绘图中。Shift+单击以改变所选内容。Alt+单击以插入及连接。" [ref=e85] [cursor=pointer]:
+                    - generic [ref=e86]: 箭头
+                  - generic "单击以展开。将图形拖拽至绘图中。Shift+单击以改变所选内容。Alt+单击以插入及连接。" [ref=e87] [cursor=pointer]:
+                    - generic [ref=e88]: 流程图
+                  - generic "单击以展开。将图形拖拽至绘图中。Shift+单击以改变所选内容。Alt+单击以插入及连接。" [ref=e89] [cursor=pointer]:
+                    - generic [ref=e90]: 实体关系
+                  - generic "单击以展开。将图形拖拽至绘图中。Shift+单击以改变所选内容。Alt+单击以插入及连接。" [ref=e91] [cursor=pointer]:
+                    - generic [ref=e92]: UML
+                - button "+ 更多图形" [ref=e94]:
+                  - generic [ref=e95]: +
+                  - text: 更多图形
+              - generic "新增库" [ref=e96] [cursor=pointer]:
+                - generic [ref=e97]: 新增库
+              - generic "从...打开库" [ref=e98] [cursor=pointer]:
+                - generic [ref=e99]: 从...打开库
+    - img [ref=e100]
+  - generic [ref=e101]:
+    - table [ref=e102]:
+      - rowgroup [ref=e103]:
+        - row "格式 最小化关闭" [ref=e104]:
+          - cell "格式 最小化关闭" [ref=e105]:
+            - text: 格式
+            - generic [ref=e106]:
+              - img "最小化" [ref=e107] [cursor=pointer]
+              - img "关闭" [ref=e108] [cursor=pointer]
+        - row "绘图 样式 查看 网格 网格 10 pt 页面视图 页面视图 背景 更改... 背景色 背景色 阴影 阴影 选项 连接箭头 连接箭头 连接点 连接点 参考线 参考线 数学排版 数学排版 帮助 (https://www.drawio.com/doc/faq/math-typesetting) 纸张尺寸 A4 (210 mm x 297 mm) 竖向 横向 编辑数据... 清除默认风格" [ref=e109]:
+          - cell "绘图 样式 查看 网格 网格 10 pt 页面视图 页面视图 背景 更改... 背景色 背景色 阴影 阴影 选项 连接箭头 连接箭头 连接点 连接点 参考线 参考线 数学排版 数学排版 帮助 (https://www.drawio.com/doc/faq/math-typesetting) 纸张尺寸 A4 (210 mm x 297 mm) 竖向 横向 编辑数据... 清除默认风格" [ref=e110]:
+            - generic [ref=e112]:
+              - generic [ref=e113]:
+                - generic "绘图" [ref=e114] [cursor=pointer]:
+                  - generic [ref=e115]: 绘图
+                - generic "样式" [ref=e116] [cursor=pointer]:
+                  - generic [ref=e117]: 样式
+              - generic [ref=e118]:
+                - generic [ref=e119]:
+                  - generic "查看" [ref=e120]
+                  - generic [ref=e121]:
+                    - checkbox "网格" [checked] [ref=e122]
+                    - generic "网格" [ref=e123]
+                    - 'button "light-dark(#d0d0d0, #424242)" [ref=e124]':
+                      - img [ref=e126] [cursor=pointer]
+                    - textbox "网格大小" [ref=e127]: 10 pt
+                  - generic [ref=e131]:
+                    - checkbox "页面视图" [checked] [ref=e132]
+                    - generic "页面视图" [ref=e133]
+                  - generic [ref=e134]:
+                    - generic "背景" [ref=e135]
+                    - button "更改..." [ref=e136]
+                  - generic [ref=e137]:
+                    - checkbox "背景色" [ref=e138]
+                    - generic "背景色" [ref=e139]
+                  - generic [ref=e140]:
+                    - checkbox "阴影" [ref=e141]
+                    - generic "阴影" [ref=e142]
+                - generic [ref=e143]:
+                  - generic "选项" [ref=e144]
+                  - generic [ref=e145]:
+                    - checkbox "连接箭头" [checked] [ref=e146]
+                    - generic "连接箭头" [ref=e147]
+                  - generic [ref=e148]:
+                    - checkbox "连接点" [checked] [ref=e149]
+                    - generic "连接点" [ref=e150]
+                  - generic [ref=e151]:
+                    - checkbox "参考线" [checked] [ref=e152]
+                    - generic "参考线" [ref=e153]
+                  - generic [ref=e154]:
+                    - checkbox "数学排版" [ref=e155]
+                    - generic "数学排版" [ref=e156]
+                    - img "帮助 (https://www.drawio.com/doc/faq/math-typesetting)" [ref=e157]
+                - generic [ref=e158]:
+                  - generic "纸张尺寸" [ref=e159]
+                  - combobox [ref=e160]:
+                    - option "US-Letter (8,5\" x 11\")"
+                    - option "US-Legal (8,5\" x 14\")"
+                    - option "US-Tabloid (11\" x 17\")"
+                    - option "US-Executive (7\" x 10\")"
+                    - option "A0 (841 mm x 1189 mm)"
+                    - option "A1 (594 mm x 841 mm)"
+                    - option "A2 (420 mm x 594 mm)"
+                    - option "A3 (297 mm x 420 mm)"
+                    - option "A4 (210 mm x 297 mm)" [selected]
+                    - option "A5 (148 mm x 210 mm)"
+                    - option "A6 (105 mm x 148 mm)"
+                    - option "A7 (74 mm x 105 mm)"
+                    - option "B4 (250 mm x 353 mm)"
+                    - option "B5 (176 mm x 250 mm)"
+                    - option "16:9 (1600 x 900)"
+                    - option "16:10 (1920 x 1200)"
+                    - option "4:3 (1600 x 1200)"
+                    - option "自定义"
+                  - generic [ref=e161]:
+                    - radio [checked] [ref=e162]
+                    - text: 竖向
+                    - radio [ref=e163]
+                    - text: 横向
+                - generic [ref=e164]:
+                  - button "编辑数据..." [ref=e165]
+                  - button "清除默认风格" [ref=e166]
+    - img [ref=e167]
+  - generic [ref=e168]:
+    - generic "插入页面" [ref=e169]
+    - generic "页面" [ref=e171]
+    - generic "第 1 页 (DsfcN9To4RMZfU35aS87) [1]" [ref=e174]:
+      - generic [ref=e175]: 第 1 页
+    - link "jgraph/drawio" [ref=e177] [cursor=pointer]:
+      - /url: https://github.com/jgraph/drawio
+      - img "jgraph/drawio" [ref=e178]
+    - textbox "缩放 (Alt+Mousewheel)" [ref=e179]: 100%
+  - generic "未命名绘图" [ref=e180]:
+    - generic [ref=e181]:
+      - generic "绘图" [ref=e182] [cursor=pointer]
+      - generic "形状" [ref=e183] [cursor=pointer]
+      - generic "格式 (⌘+⇧+P)" [ref=e184] [cursor=pointer]: 格式
+    - generic [ref=e185]:
+      - generic "插入" [ref=e186] [cursor=pointer]
+      - generic "删除" [ref=e187]
+    - generic [ref=e188]:
+      - generic "撤销 (⌘+Z)" [ref=e189]
+      - generic "重做 (⌘+⇧+Z)" [ref=e190]
+    - generic [ref=e191]:
+      - generic "适应大小 (⌘+H)" [ref=e192] [cursor=pointer]
+      - generic "放大 (⌘ +)" [ref=e193] [cursor=pointer]
+      - generic "缩小 (⌘ -)" [ref=e194] [cursor=pointer]

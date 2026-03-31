@@ -1,0 +1,179 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - link "跳转到主内容" [ref=e2] [cursor=pointer]:
+      - /url: "#mainContent"
+    - banner [ref=e3]:
+      - heading "数据 直通车 让用户没有难取的数据" [level=1] [ref=e5]:
+        - img [ref=e6]
+        - generic [ref=e13]:
+          - generic [ref=e14]: 数据
+          - generic [ref=e15]: 直通车
+        - generic [ref=e16]: 让用户没有难取的数据
+      - navigation "一级模块导航" [ref=e17]:
+        - link "首页总览" [ref=e18] [cursor=pointer]:
+          - /url: "#/overview"
+        - link "数据地图" [ref=e19] [cursor=pointer]:
+          - /url: "#/map"
+        - link "知识生产台" [ref=e20] [cursor=pointer]:
+          - /url: "#/production"
+        - link "发布中心" [ref=e21] [cursor=pointer]:
+          - /url: "#/publish"
+        - link "运行决策台" [ref=e22] [cursor=pointer]:
+          - /url: "#/runtime"
+        - link "审批与导出" [ref=e23] [cursor=pointer]:
+          - /url: "#/approval"
+        - link "监控与审计" [ref=e24] [cursor=pointer]:
+          - /url: "#/monitoring"
+      - generic [ref=e25]:
+        - generic "全局工具区" [ref=e26]:
+          - link "个人协作" [ref=e27] [cursor=pointer]:
+            - /url: "#/workspace/todo"
+          - link "系统设置" [ref=e28] [cursor=pointer]:
+            - /url: "#/system/guide"
+        - generic [ref=e29]:
+          - generic [ref=e30]: 当前角色
+          - combobox "当前角色" [ref=e31]:
+            - option "系统管理员"
+            - option "数据支持" [selected]
+            - option "数据专家"
+            - option "治理专员"
+            - option "一线用户"
+            - option "合规审计"
+    - main [ref=e33]:
+      - article "双模态数据地图容器" [ref=e818]:
+        - generic [ref=e819]:
+          - generic [ref=e820]:
+            - generic [ref=e821]:
+              - generic [ref=e822]: 搜索节点
+              - textbox "搜索节点" [ref=e825]:
+                - /placeholder: 搜索业务领域、场景、来源表
+            - navigation "数据地图分析模式切换" [ref=e826]:
+              - button "浏览模式" [pressed] [ref=e827] [cursor=pointer]
+              - button "血缘模式" [ref=e828] [cursor=pointer]
+            - navigation "图谱布局切换" [ref=e829]:
+              - button "图谱" [ref=e830] [cursor=pointer]
+              - button "双栏" [pressed] [ref=e831] [cursor=pointer]
+              - button "工作台" [ref=e832] [cursor=pointer]
+          - paragraph [ref=e833]: 当前入口：数据图谱 · Step 1/5 · 进度 0%
+        - generic [ref=e834]:
+          - region "图谱画布区" [ref=e835]:
+            - toolbar "图谱操作区" [ref=e836]:
+              - button "刷新" [ref=e837] [cursor=pointer]:
+                - img [ref=e838]
+                - generic [ref=e843]: 刷新
+              - button "最大化" [ref=e844] [cursor=pointer]:
+                - img [ref=e845]
+                - generic [ref=e850]: 最大化
+              - generic [ref=e851]:
+                - checkbox "显示关系标签" [checked] [disabled] [ref=e852]
+                - generic [ref=e853]: 显示关系标签
+            - generic [ref=e854]:
+              - region "浏览模式" [ref=e856]:
+                - region "米勒列-1" [ref=e858]:
+                  - generic [ref=e859]:
+                    - heading "根主题" [level=3] [ref=e860]
+                    - generic [ref=e861]: "3"
+                  - navigation "列1节点" [ref=e862]:
+                    - list [ref=e863]:
+                      - listitem [ref=e864]:
+                        - button "代发样板域" [ref=e865] [cursor=pointer]:
+                          - generic [ref=e867]: 代发样板域
+                          - img [ref=e869]
+                      - listitem [ref=e871]:
+                        - button "未分类业务领域" [ref=e872] [cursor=pointer]:
+                          - generic [ref=e874]: 未分类业务领域
+                          - img [ref=e876]
+                      - listitem [ref=e878]:
+                        - button "未归属业务领域" [ref=e879] [cursor=pointer]:
+                          - generic [ref=e881]: 未归属业务领域
+                          - img [ref=e883]
+              - complementary "实体类型图例" [ref=e885]:
+                - button "收起图例" [ref=e886] [cursor=pointer]
+                - generic [ref=e888]:
+                  - emphasis [ref=e890]: ROOT
+                  - generic [ref=e891]: "3"
+          - complementary "数据地图工作台" [ref=e892]:
+            - generic [ref=e893]:
+              - generic [ref=e894]:
+                - paragraph [ref=e895]: Step 1/5 数据地图流程
+                - heading "图谱工作台" [level=3] [ref=e896]
+                - paragraph [ref=e897]: 围绕场景定位、关系核验和影响判断的可观测分析面板。
+              - generic [ref=e898]:
+                - generic [ref=e899]: 0%
+                - generic [ref=e900]: 待继续
+            - region "数据来源与刷新口径" [ref=e901]:
+              - article [ref=e902]:
+                - heading "数据来源" [level=4] [ref=e903]
+                - paragraph [ref=e904]: 数据图谱 · 目录节点数据
+              - article [ref=e905]:
+                - heading "刷新口径" [level=4] [ref=e906]
+                - paragraph [ref=e907]: 基于关键词与路径刷新节点视图
+              - article [ref=e908]:
+                - heading "最近更新时间" [level=4] [ref=e909]
+                - paragraph [ref=e910]: 13:47:27
+            - region "图谱关键指标" [ref=e911]:
+              - article [ref=e912]:
+                - strong [ref=e913]: "3"
+                - generic [ref=e914]: 节点数
+              - article [ref=e915]:
+                - strong [ref=e916]: "0"
+                - generic [ref=e917]: 关系数
+              - article [ref=e918]:
+                - strong [ref=e919]: "1"
+                - generic [ref=e920]: 类型数
+            - region "类型和关系标签" [ref=e921]:
+              - generic [ref=e922]:
+                - heading "节点类型" [level=4] [ref=e923]
+                - generic [ref=e925]: ROOT
+              - generic [ref=e926]:
+                - heading "关系标签" [level=4] [ref=e927]
+                - generic [ref=e929]: 暂无
+            - region "流程步骤" [ref=e930]:
+              - article [ref=e931]:
+                - generic [ref=e932]:
+                  - generic [ref=e933]: "01"
+                  - heading "场景定位" [level=4] [ref=e934]
+                  - generic [ref=e935]: 进行中
+                - paragraph [ref=e936]: 定位当前业务场景与目标节点。
+                - paragraph [ref=e937]: 等待选择业务场景
+                - generic [ref=e939]: 未选择场景
+              - article [ref=e940]:
+                - generic [ref=e941]:
+                  - generic [ref=e942]: "02"
+                  - heading "路径筛选" [level=4] [ref=e943]
+                  - generic [ref=e944]: 待处理
+                - paragraph [ref=e945]: 通过关键词和层级路径收敛分析范围。
+                - paragraph [ref=e946]: 建议先输入关键词或点击节点
+                - generic [ref=e947]:
+                  - generic [ref=e948]: 无关键词
+                  - generic [ref=e949]: 路径：0
+              - article [ref=e950]:
+                - generic [ref=e951]:
+                  - generic [ref=e952]: "03"
+                  - heading "关系核验" [level=4] [ref=e953]
+                  - generic [ref=e954]: 待处理
+                - paragraph [ref=e955]: 进入血缘视图核验关键关系与连线。
+                - paragraph [ref=e956]: 切换到血缘模式后开始核验
+                - generic [ref=e958]: 浏览模式
+              - article [ref=e959]:
+                - generic [ref=e960]:
+                  - generic [ref=e961]: "04"
+                  - heading "影响判断" [level=4] [ref=e962]
+                  - generic [ref=e963]: 待处理
+                - paragraph [ref=e964]: 基于关系数量评估链路影响范围。
+                - paragraph [ref=e965]: 等待关系链路数据
+                - generic [ref=e967]: 关系待补充
+              - article [ref=e968]:
+                - generic [ref=e969]:
+                  - generic [ref=e970]: "05"
+                  - heading "行动建议" [level=4] [ref=e971]
+                  - generic [ref=e972]: 待处理
+                - paragraph [ref=e973]: 依据场景详情形成下一步处理动作。
+                - paragraph [ref=e974]: 先加载场景详情后再给建议
+                - generic [ref=e976]: 详情加载中
+            - region "系统日志面板" [ref=e977]:
+              - generic [ref=e978]:
+                - generic [ref=e979]:
+                  - strong [ref=e980]: SYSTEM DASHBOARD
+                  - paragraph [ref=e981]: 默认折叠，按需查看排障与行为轨迹。
+                - button "展开" [ref=e982] [cursor=pointer]

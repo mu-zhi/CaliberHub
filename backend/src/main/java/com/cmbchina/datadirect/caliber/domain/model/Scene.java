@@ -13,6 +13,7 @@ public class Scene {
     private String sceneTitle;
     private Long domainId;
     private String domain;
+    private String sceneType;
     private SceneStatus status;
     private String sceneDescription;
     private String caliberDefinition;
@@ -59,6 +60,7 @@ public class Scene {
         scene.sceneTitle = sceneTitle;
         scene.domainId = domainId;
         scene.domain = domain;
+        scene.sceneType = "FACT_DETAIL";
         scene.status = SceneStatus.DRAFT;
         scene.rawInput = rawInput;
         scene.createdBy = operator;
@@ -80,6 +82,7 @@ public class Scene {
         this.sceneTitle = update.sceneTitle();
         this.domainId = update.domainId();
         this.domain = update.domain();
+        this.sceneType = firstNotBlank(update.sceneType(), firstNotBlank(this.sceneType, "FACT_DETAIL"));
         this.sceneDescription = update.sceneDescription();
         this.caliberDefinition = update.caliberDefinition();
         this.applicability = update.applicability();
@@ -178,6 +181,11 @@ public class Scene {
 
         public Builder domain(String domain) {
             instance.domain = domain;
+            return this;
+        }
+
+        public Builder sceneType(String sceneType) {
+            instance.sceneType = sceneType;
             return this;
         }
 
@@ -326,6 +334,10 @@ public class Scene {
         return domain;
     }
 
+    public String getSceneType() {
+        return sceneType;
+    }
+
     public SceneStatus getStatus() {
         return status;
     }
@@ -420,5 +432,9 @@ public class Scene {
 
     public Long getRowVersion() {
         return rowVersion;
+    }
+
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
     }
 }

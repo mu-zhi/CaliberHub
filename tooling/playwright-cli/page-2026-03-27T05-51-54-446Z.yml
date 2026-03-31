@@ -1,0 +1,45 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - link "跳转到主内容" [ref=e2] [cursor=pointer]:
+      - /url: "#mainContent"
+    - banner [ref=e3]:
+      - heading "数据 直通车 让用户没有难取的数据" [level=1] [ref=e5]:
+        - img [ref=e6]
+        - generic [ref=e13]:
+          - generic [ref=e14]: 数据
+          - generic [ref=e15]: 直通车
+        - generic [ref=e16]: 让用户没有难取的数据
+      - navigation "一级模块导航" [ref=e17]:
+        - link "首页总览" [ref=e18] [cursor=pointer]:
+          - /url: "#/overview"
+        - link "数据地图" [ref=e19] [cursor=pointer]:
+          - /url: "#/map"
+        - link "知识生产台" [ref=e20] [cursor=pointer]:
+          - /url: "#/production"
+        - link "发布中心" [ref=e21] [cursor=pointer]:
+          - /url: "#/publish"
+        - link "运行决策台" [ref=e22] [cursor=pointer]:
+          - /url: "#/runtime"
+        - link "审批与导出" [ref=e23] [cursor=pointer]:
+          - /url: "#/approval"
+        - link "监控与审计" [ref=e24] [cursor=pointer]:
+          - /url: "#/monitoring"
+      - generic [ref=e25]:
+        - generic "全局工具区" [ref=e26]:
+          - link "个人协作" [ref=e27] [cursor=pointer]:
+            - /url: "#/workspace/todo"
+          - link "系统设置" [ref=e28] [cursor=pointer]:
+            - /url: "#/system/guide"
+        - generic [ref=e29]:
+          - generic [ref=e30]: 当前角色
+          - combobox "当前角色" [ref=e31]:
+            - option "系统管理员" [selected]
+            - option "数据支持"
+            - option "数据专家"
+            - option "治理专员"
+            - option "一线用户"
+            - option "合规审计"
+    - main [ref=e33]:
+      - generic [ref=e36]:
+        - heading "运行决策台" [level=2] [ref=e37]
+        - paragraph [ref=e38]: 正在加载已发布的代发明细场景与知识包样板资产…

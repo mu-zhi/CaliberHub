@@ -2,7 +2,7 @@
 """Download full-paper PDFs for NL2SQL / Knowledge Graph / Data Governance research.
 
 This script builds a local full-paper archive under:
-03-其他文档/13-数据直通车-跨平台论文全集
+research/papers/collection
 
 It prioritizes platforms with accessible open PDFs in this environment:
 - arXiv
@@ -311,7 +311,7 @@ def write_readme(output_dir: Path) -> None:
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    output_dir = repo_root / "03-其他文档" / "13-数据直通车-跨平台论文全集"
+    output_dir = repo_root / "research" / "papers" / "collection"
     papers_root = output_dir / "papers"
     output_dir.mkdir(parents=True, exist_ok=True)
     papers_root.mkdir(parents=True, exist_ok=True)

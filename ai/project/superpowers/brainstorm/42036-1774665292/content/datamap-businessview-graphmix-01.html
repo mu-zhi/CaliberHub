@@ -1,0 +1,89 @@
+<h2>业务视图：图谱主导后的中区排版</h2>
+<p class="subtitle">前提已经固定：左侧树只有领域，中央主区以该领域的局部业务图谱为主。下面只比较摘要和场景说明应该贴在图谱的哪里。</p>
+
+<div class="cards">
+  <div class="card" data-choice="g1" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">G1. 顶部摘要条 + 主图 + 底部场景带</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:180px 1fr;gap:10px;">
+            <div class="placeholder" style="height:300px;text-align:left;padding:10px;">
+              零售业务域
+              <br><span style="color:#94a3b8;">公司业务域</span>
+              <br><span style="color:#94a3b8;">风险管理域</span>
+            </div>
+            <div>
+              <div class="placeholder" style="height:46px;margin-bottom:8px;">领域摘要条：场景数 / 覆盖率 / 风险对象 / 最近变更</div>
+              <div class="placeholder" style="height:188px;margin-bottom:8px;">领域局部业务图谱（主区最大）</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                <div class="placeholder" style="height:50px;">重点场景 A</div>
+                <div class="placeholder" style="height:50px;">重点场景 B</div>
+                <div class="placeholder" style="height:50px;">重点场景 C</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>G1. 顶部摘要条 + 主图 + 底部场景带</h3>
+      <p>阅读路径最稳定。先看一句话领域摘要，再看图谱，再从底部场景带进入具体对象，业务理解和地图感比较平衡。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="g2" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">G2. 左摘要卡列 + 右主图</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:180px 1fr;gap:10px;">
+            <div class="placeholder" style="height:300px;text-align:left;padding:10px;">
+              零售业务域
+              <br><span style="color:#94a3b8;">公司业务域</span>
+              <br><span style="color:#94a3b8;">风险管理域</span>
+            </div>
+            <div style="display:grid;grid-template-columns:0.42fr 0.58fr;gap:8px;">
+              <div>
+                <div class="placeholder" style="height:64px;margin-bottom:8px;">领域摘要</div>
+                <div class="placeholder" style="height:64px;margin-bottom:8px;">重点场景</div>
+                <div class="placeholder" style="height:64px;margin-bottom:8px;">覆盖提示</div>
+                <div class="placeholder" style="height:64px;">风险提醒</div>
+              </div>
+              <div class="placeholder" style="height:280px;">领域局部业务图谱（主区最大）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>G2. 左摘要卡列 + 右主图</h3>
+      <p>摘要信息更集中，但中区会出现“左树 + 左摘要列 + 右图”的三段连续竖列，横向切割感更强。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="g3" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">G3. 纯主图优先，摘要按需展开</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:180px 1fr;gap:10px;">
+            <div class="placeholder" style="height:300px;text-align:left;padding:10px;">
+              零售业务域
+              <br><span style="color:#94a3b8;">公司业务域</span>
+              <br><span style="color:#94a3b8;">风险管理域</span>
+            </div>
+            <div>
+              <div class="placeholder" style="height:248px;margin-bottom:8px;">领域局部业务图谱（主区最大）</div>
+              <div class="placeholder" style="height:42px;">点击节点或场景后，再展开底部摘要抽屉</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>G3. 纯主图优先，摘要按需展开</h3>
+      <p>最忠于“先有图谱”的原则，首屏地图感最强，但业务用户第一次进入会少一点解释和落脚点。</p>
+    </div>
+  </div>
+</div>

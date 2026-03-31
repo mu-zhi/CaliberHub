@@ -1,0 +1,47 @@
+# R2 证据目录（Evidence Catalog）
+
+> 目标：为 R2-240 题库提供可回放证据锚点（行号+原文摘录）。
+
+| evidence_id | source_doc | anchor | start_line | end_line | excerpt | topic_tag |
+|---|---|---|---:|---:|---|---|
+| EVID-09-001 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 业务定义 | 6 | 9 | ...按开户人不同,可以分为个人户口和单位户口。个人户口按账户的性质,可以分为借记户口和贷记户口。借记户口包括借记卡一卡通、存折、存单以及财富账户。 借记卡具有转账结算、存取现金、购物消费、理财等功能,存款计算利息,但不能透支... | 业务定义 |
+| EVID-09-002 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 术语释义 | 93 | 96 |  ### 术语释义 #### 卡片等级 | 术语释义 |
+| EVID-09-003 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 常见数据表 | 132 | 135 |  ## 常见数据表 零售客户开户信息查询及零售客户管理 | 常见数据表 |
+| EVID-09-004 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 查询户口信息场景 | 185 | 188 |  - 场景描述：查询零售客户的开户信息,包括旧 400 开户（1G）和 2G 以来开户信息。 - 口径提供人：[姓名]/[一事通] - 结果字段：[该业务场景下必需的所有结果字段] | 查询户口信息场景 |
+| EVID-09-005 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 历史开户路径 | 193 | 196 | --历史开户：这部分数据可分为 1G换卡、1G开户 -- 1G开户信息(20060101之前) SELECT DISTINCT EAC_ID,CURGCD `区域码`,CUCUNO `客户号`,CUBRNO `部门号`,... | 历史开户路径 |
+| EVID-09-006 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 1G换卡路径 | 200 | 203 | -- 1G换卡(20060101之前) SELECT SPACRG `区域码`,SPBRNO `部门号`,SPACNO `参照号`,SPPSBK `8 位凭证`,SPPSBN `16 位凭证`,SPPSCG `16 位新... | 1G换卡路径 |
+| EVID-09-007 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 条件占位检查 | 197 | 200 | FROM LITC_991176.VVCUIFP_LEAN WHERE TRIM(EAC_ID) = ''; -- 1G换卡(20060101之前) | 条件占位检查 |
+| EVID-09-008 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 字段口径一致性 | 195 | 198 | SELECT DISTINCT EAC_ID,CURGCD `区域码`,CUCUNO `客户号`,CUBRNO `部门号`,CUCUTP `客户类别`,CUIDNO `证件号`,CUIDTP `证件类别`,CUCUTL ... | 字段口径一致性 |
+| EVID-09-009 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 时间边界 | 257 | 260 | ...RRENT_DATE - 2 WHERE B.DW_SNSH_DT = CURRENT_DATE - 1 AND B.DOC_NBR IN ('9999') | 时间边界 |
+| EVID-09-010 | research/source-materials/sql-samples/03-口径文档现状-零售客户信息查询.sql | 敏感字段识别 | 195 | 198 | ...NO `客户号`,CUBRNO `部门号`,CUCUTP `客户类别`,CUIDNO `证件号`,CUIDTP `证件类别`,CUCUTL `客户称谓`,CUNAME `客户名称`,CUCNCD `国家码`,CUPSCD... | 敏感字段识别 |
+| EVID-10-001 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 开户行变更记录 | 1 | 3 | # 开户行变更记录 - 场景描述：未提供（待补充） | 开户行变更记录 |
+| EVID-10-002 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 客户密码修改 | 40 | 43 |  # 客户密码修改 ## 客户密码修改 | 客户密码修改 |
+| EVID-10-003 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 维护日志场景 | 102 | 105 |  # 零售客户信息变更（含：零售客户维护日志/维护记录） 零售客户信息变更 | 维护日志场景 |
+| EVID-10-004 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 1G-2G分段 | 199 | 202 |  --2G数据：2013年6月以后的日志，柜面查询代码：1192 --TOPIC：LU50_P_CFC_CIFCORDB_COR_M3LGTRSD_CDC_SZ --CIF客户信息维护事件 | 1G-2G分段 |
+| EVID-10-005 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 任务实例链路 | 152 | 155 | ...DTAP表，得到产品实例号 2、用产品实例号查PTTSKISTP表，得到任务实例号及其维护任务概要（这里有时间，渠道，操作人等信息） 3、用任务实例号查PTTTSKFLDP表，得到维护的字段明细（其中，新增加删除操作这块... | 任务实例链路 |
+| EVID-10-006 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 维护字段明细 | 158 | 161 | ...到对应的任务实例号（这里有时间，渠道，操作人等信息） 3、用任务实例号在PTTSKFLDP里找到维护前后值（其中，新增加删除操作这块的维护前后值） 如果是新上线2G系统客户数据，要回溯才有途径到，后续补充查询路径 | 维护字段明细 |
+| EVID-10-007 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 来源系统码值 | 212 | 215 | ...Opr_Typ_Cd A:新增 C:确认 D:删除 E:失效 U:修改 来源系统： Src_Sys_Cd 零售客户平台 ADS:证券A ADS2:证券A AD3:维护模块 ADS:CMBRU AE3:查询模块 API:4... | 来源系统码值 |
+| EVID-10-008 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 操作类型码值 | 211 | 214 | 一些相关的码值映射 操作类型代码 Opr_Typ_Cd A:新增 C:确认 D:删除 E:失效 U:修改 来源系统： Src_Sys_Cd 零售客户平台 ADS:证券A ADS2:证券A AD3:维护模块 ADS:CMB... | 操作类型码值 |
+| EVID-10-009 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 缺失字段补全 | 4 | 7 | - 口径提供人：胡彦冰、谢午勇 - 结果字段：未提供（待补充） - 注意事项：未提供（待补充） - SQL语句 | 缺失字段补全 |
+| EVID-10-010 | research/source-materials/sql-samples/04-口径文档现状-零售客户信息变更.sql | 审计追踪补证 | 33 | 36 | ...E_UPD_DT 记录最后更新日期,RCD_LATE_UPD_EDTN 记录最后更新版本 FROM PDM_VHIS.T03_CORE_EAC_MDF_OPN_BNK_CTRL_INP --核心户口变更开户行控制信息 源... | 审计追踪补证 |
+| EVID-11-001 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 业务场景描述 | 3 | 6 | ==================== 代发数据的查询需要先查询客户名下的代发协议号，通过代发协议号来查询对应的代发批次或代发明细。 如果需要某一个客户的代发明细，就需要查询代发明细表； 如果需要查询某一个代发批次的代... | 业务场景描述 |
+| EVID-11-002 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 协议号查询 | 82 | 85 | -- 方法 1：根据公司户口号查询代发协议号 SELECT PROTOCOL_NBR AS "合作方协议号", CARD_TYPE AS "户口类型", CARD_INTERNAL_NBR AS "户口内码", CARD... | 协议号查询 |
+| EVID-11-003 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 批次明细关联 | 69 | 72 | ...： EVT_ID AS "事件编号", AGN_BCH_SEQ AS "代发批次号", DTL_SEQ_NBR AS "明细序号", ORIG_EAC_NBR AS "原户口号码", EAC_NBR AS "户口号码",... | 批次明细关联 |
+| EVID-11-004 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 历史表时间段 | 34 | 37 | 表名： LGC_EAM.CORINFO_PKTRSLOGP_YEAR 数据日期范围： 20030923-20041231,日数据最高94262，最低2,总数4013453 明细字段： 限制字段： | 历史表时间段 |
+| EVID-11-005 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 数据不连续说明 | 99 | 102 | ...0061124,日数据最高1234554，最低1,总数11964561，数据不连续，且SDEYDT 大部分为空 SELECT * FROM LGC_EAM.ETL_FE_NBSADAP | 数据不连续说明 |
+| EVID-11-006 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 代发明细查询 | 93 | 96 |  -- Step 2: 根据代发协议号查询代发明细 -- Step 3: 根据代发协议号查询代发批次 | 代发明细查询 |
+| EVID-11-007 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 代发批次查询 | 174 | 177 | 代发批次 SELECT EVT_ID 事件编号,AUTO_PAY_ARG_ID 自动缴费合约编号,AUTO_PAY_ARG_MDF 自动缴费合约修饰符,AGN_BCH_SEQ 代发批次号,BCH_TYP_CD 批次类型代... | 代发批次查询 |
+| EVID-11-008 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 增值税场景 | 180 | 183 | 代发增值税 SELECT BATCH_MAIN_NBR 批次号,FEE_AMOUNT 总费用,ADD_VAL_AMOUNT 增值税金额,(FEE_AMOUNT-ADD_VAL_AMOUNT) 实际费用 FROM NDS_... | 增值税场景 |
+| EVID-11-009 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 空条件阻断 | 103 | 106 | ... 20050721 AND SDEYDT < 20080501 AND TRIM(SDRBAC) = ''; --注 数据日期:20030923-20041231,日数据最高94262，最低2,总数4013453 | 空条件阻断 |
+| EVID-11-010 | research/source-materials/sql-samples/05-口径文档现状-代发明细查询.sql | 跨表聚合去重 | 112 | 115 | FROM LGC_EAM.ETL_FE_EPHISTRXP GROUP BY EPXTRXDAT ORDER BY EPXTRXDAT;  | 跨表聚合去重 |
+| EVID-12-001 | research/source-materials/01-当前业务侧的业务场景分类.md | 一级分类 | 1 | 1 | 业务分类 一、零售基础业务 1.1 普通个人业务 1.1.1 业务短信发送模板 1.1.1.1 账务管理 1.1.1.2 特殊业务 1.1.1.3 转汇业务 1.1.1.4 储蓄业务 1.1.1.5 缴费业务 1.1.1... | 一级分类 |
+| EVID-12-002 | research/source-materials/01-当前业务侧的业务场景分类.md | 二级分类 | 1 | 1 | 业务分类 一、零售基础业务 1.1 普通个人业务 1.1.1 业务短信发送模板 1.1.1.1 账务管理 1.1.1.2 特殊业务 1.1.1.3 转汇业务 1.1.1.4 储蓄业务 1.1.1.5 缴费业务 1.1.1... | 二级分类 |
+| EVID-12-003 | research/source-materials/01-当前业务侧的业务场景分类.md | 零售基础业务 | 1 | 1 | 业务分类 一、零售基础业务 1.1 普通个人业务 1.1.1 业务短信发送模板 1.1.1.1 账务管理 1.1.1.2 特殊业务 1.1.1.3 转汇业务 1.1.1.4 储蓄业务 1.1.1.5 缴费业务 1.1.1... | 零售基础业务 |
+| EVID-12-004 | research/source-materials/01-当前业务侧的业务场景分类.md | 公司业务 | 1 | 1 | ...操作指引 1.5.3 可视柜台业务操作规程 1.6 养老金金融业务 二、公司业务 2.1 公司线上服务平台 2.1.1 企业网银与企业APP跨屏协同 2.1.2 企业网银 2.1.3 企业APP 2.1.4 云直联 2.... | 公司业务 |
+| EVID-12-005 | research/source-materials/01-当前业务侧的业务场景分类.md | 贷款及信用卡业务 | 1 | 1 | ...询操作规定 2.16.11 各类系统简介 2.16.12 参考文件 三、贷款及信用卡业务 3.1 个人贷款业务 3.1.1 个人资产 3.1.2 LPR利率切换的作答指引 3.1.3 个人资产常用短信模板 3.1.4 关... | 贷款及信用卡业务 |
+| EVID-12-006 | research/source-materials/01-当前业务侧的业务场景分类.md | 外汇及境外机构 | 1 | 1 | ...础知识 3.2.3 司法机关查询客户资料 3.2.4 行内业务规范 四、外汇及境外机构 4.1 个人外汇业务 4.1.1 个人外汇业务基本常识 4.1.2 现钞存取现 4.1.3 结售汇 4.1.4 外汇划转 4.1.5... | 外汇及境外机构 |
+| EVID-12-007 | research/source-materials/01-当前业务侧的业务场景分类.md | 财富管理 | 1 | 1 | ...香港一卡通服务支持 4.2.18 法案法规 4.2.19 综合信息 五、财富管理 5.1 理财业务 5.1.1 购买 5.1.2 赎回 5.2 结构性存款业务 5.2.1 交易及撤单 5.2.2 移存业务 5.2.3 到... | 财富管理 |
+| EVID-12-008 | research/source-materials/01-当前业务侧的业务场景分类.md | 节点编码 | 1 | 1 | ...2 个人账户管理费 1.1.2.3 开户规定 1.1.2.4 销户规定 1.1.2.5 开户行变更 1.1.2.6 支取方式管理 1.1.2.7 账户分类管理 1.1.2.8 交易代码 1.1.3 储蓄业务 1.1.3.... | 节点编码 |
+| EVID-12-009 | research/source-materials/01-当前业务侧的业务场景分类.md | 层级合理性 | 1 | 1 | ... 一、零售基础业务 1.1 普通个人业务 1.1.1 业务短信发送模板 1.1.1.1 账务管理 1.1.1.2 特殊业务 1.1.1.3 转汇业务 1.1.1.4 储蓄业务 1.1.1.5 缴费业务 1.1.1.6 通... | 层级合理性 |
+| EVID-12-010 | research/source-materials/01-当前业务侧的业务场景分类.md | 版本管理 | 1 | 1 | ...8.3 境外用卡小知识 1.1.9 缴费业务 1.1.9.1 近期关注(持续更新) 1.1.9.2 统一生活缴费 1.1.9.3 全行缴费项目 1.1.9.4 ETC业务 1.1.9.5 常见问题应对话术 1.1.10 ... | 版本管理 |
+

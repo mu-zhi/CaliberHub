@@ -30,74 +30,62 @@ public class ScenePO {
     @Column(name = "domain", length = 100)
     private String domain;
 
+    @Column(name = "scene_type", length = 32)
+    private String sceneType;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private SceneStatus status;
 
-    @Lob
-    @Column(name = "scene_description")
+    @Column(name = "scene_description", columnDefinition = "LONGTEXT")
     private String sceneDescription;
 
-    @Lob
-    @Column(name = "caliber_definition")
+    @Column(name = "caliber_definition", columnDefinition = "LONGTEXT")
     private String caliberDefinition;
 
-    @Lob
-    @Column(name = "applicability")
+    @Column(name = "applicability", columnDefinition = "LONGTEXT")
     private String applicability;
 
-    @Lob
-    @Column(name = "boundaries")
+    @Column(name = "boundaries", columnDefinition = "LONGTEXT")
     private String boundaries;
 
-    @Lob
-    @Column(name = "inputs_json")
+    @Column(name = "inputs_json", columnDefinition = "LONGTEXT")
     private String inputsJson;
 
-    @Lob
-    @Column(name = "outputs_json")
+    @Column(name = "outputs_json", columnDefinition = "LONGTEXT")
     private String outputsJson;
 
-    @Lob
-    @Column(name = "sql_variants_json")
+    @Column(name = "sql_variants_json", columnDefinition = "LONGTEXT")
     private String sqlVariantsJson;
 
-    @Lob
-    @Column(name = "code_mappings_json")
+    @Column(name = "code_mappings_json", columnDefinition = "LONGTEXT")
     private String codeMappingsJson;
 
     @Column(name = "contributors", length = 500)
     private String contributors;
 
-    @Lob
-    @Column(name = "sql_blocks_json")
+    @Column(name = "sql_blocks_json", columnDefinition = "LONGTEXT")
     private String sqlBlocksJson;
 
-    @Lob
-    @Column(name = "source_tables_json")
+    @Column(name = "source_tables_json", columnDefinition = "LONGTEXT")
     private String sourceTablesJson;
 
-    @Lob
-    @Column(name = "caveats_json")
+    @Column(name = "caveats_json", columnDefinition = "LONGTEXT")
     private String caveatsJson;
 
-    @Lob
-    @Column(name = "unmapped_text")
+    @Column(name = "unmapped_text", columnDefinition = "LONGTEXT")
     private String unmappedText;
 
-    @Lob
-    @Column(name = "quality_json")
+    @Column(name = "quality_json", columnDefinition = "LONGTEXT")
     private String qualityJson;
 
-    @Lob
-    @Column(name = "raw_input")
+    @Column(name = "raw_input", columnDefinition = "LONGTEXT")
     private String rawInput;
 
     @Column(name = "verified_at")
     private OffsetDateTime verifiedAt;
 
-    @Lob
-    @Column(name = "change_summary")
+    @Column(name = "change_summary", columnDefinition = "LONGTEXT")
     private String changeSummary;
 
     @Column(name = "created_by", nullable = false, length = 64)
@@ -157,6 +145,14 @@ public class ScenePO {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public String getSceneType() {
+        return sceneType;
+    }
+
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
     }
 
     public SceneStatus getStatus() {

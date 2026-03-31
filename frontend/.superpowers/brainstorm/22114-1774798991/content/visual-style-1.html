@@ -1,0 +1,133 @@
+<h2>先选整体 UI 方向</h2>
+<p class="subtitle">你刚才选的是整体重做。我先不讨论细节组件，先收敛整体气质、框架密度和视觉秩序。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f4f7fb;border:1px solid #d6dee8;border-radius:18px;padding:16px;min-height:250px;display:flex;flex-direction:column;gap:14px;">
+        <div style="height:18px;width:42%;background:#1c2b39;border-radius:6px;"></div>
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:14px;flex:1;">
+          <div style="background:#e8eef5;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+            <div style="height:10px;background:#a9b9cb;border-radius:999px;"></div>
+            <div style="height:10px;background:#c2ceda;border-radius:999px;width:82%;"></div>
+            <div style="height:10px;background:#c2ceda;border-radius:999px;width:70%;"></div>
+            <div style="height:10px;background:#c2ceda;border-radius:999px;width:76%;"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;">
+              <div style="background:#ffffff;border:1px solid #d7e0ea;border-radius:14px;padding:12px;">
+                <div style="font-size:11px;color:#75879b;margin-bottom:8px;">发布状态</div>
+                <div style="height:20px;width:58%;background:#17324d;border-radius:7px;"></div>
+              </div>
+              <div style="background:#ffffff;border:1px solid #d7e0ea;border-radius:14px;"></div>
+              <div style="background:#ffffff;border:1px solid #d7e0ea;border-radius:14px;"></div>
+            </div>
+            <div style="background:#ffffff;border:1px solid #d7e0ea;border-radius:16px;flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;">
+              <div style="height:12px;width:35%;background:#24394f;border-radius:7px;"></div>
+              <div style="height:1px;background:#e4eaf1;"></div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex:1;">
+                <div style="background:#f6f8fb;border-radius:12px;"></div>
+                <div style="background:#f6f8fb;border-radius:12px;"></div>
+                <div style="background:#f6f8fb;border-radius:12px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 冷静运营台</h3>
+      <p>浅色、克制、偏 Linear 式业务后台。重点是信息层级、密度和判断效率，不靠装饰感。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:linear-gradient(180deg,#eff7fb 0%,#dbeaf4 100%);border:1px solid #c7dce9;border-radius:18px;padding:16px;min-height:250px;display:flex;flex-direction:column;gap:12px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="height:18px;width:34%;background:#0d5375;border-radius:6px;"></div>
+          <div style="display:flex;gap:8px;">
+            <div style="width:44px;height:14px;border-radius:999px;background:#89c2cf;"></div>
+            <div style="width:44px;height:14px;border-radius:999px;background:#c5dde7;"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.2fr 0.9fr;gap:12px;flex:1;">
+          <div style="background:rgba(255,255,255,0.72);border:1px solid rgba(255,255,255,0.8);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:12px;backdrop-filter:blur(8px);">
+            <div style="height:12px;width:42%;background:#124d67;border-radius:7px;"></div>
+            <div style="flex:1;border-radius:14px;background:
+              radial-gradient(circle at 20% 35%, rgba(19,120,168,0.85) 0 10px, transparent 11px),
+              radial-gradient(circle at 52% 48%, rgba(15,141,148,0.82) 0 12px, transparent 13px),
+              radial-gradient(circle at 77% 30%, rgba(211,156,35,0.8) 0 9px, transparent 10px),
+              linear-gradient(135deg,#edf7fb,#dcebf3);position:relative;">
+              <div style="position:absolute;left:24%;top:36%;width:28%;height:2px;background:#5aa4ba;transform:rotate(12deg);"></div>
+              <div style="position:absolute;left:51%;top:37%;width:23%;height:2px;background:#6cb7a2;transform:rotate(-18deg);"></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="background:rgba(255,255,255,0.78);border:1px solid rgba(255,255,255,0.86);border-radius:16px;height:76px;"></div>
+            <div style="background:rgba(255,255,255,0.78);border:1px solid rgba(255,255,255,0.86);border-radius:16px;height:76px;"></div>
+            <div style="background:rgba(255,255,255,0.78);border:1px solid rgba(255,255,255,0.86);border-radius:16px;flex:1;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 图谱指挥台</h3>
+      <p>保留蓝绿品牌资产，强化数据网络、流转和控制感。更有“平台感”，但要控制视觉噪音。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f7f1e7;border:1px solid #dccfbc;border-radius:18px;padding:16px;min-height:250px;display:flex;flex-direction:column;gap:12px;">
+        <div style="height:20px;width:38%;background:#3f352f;border-radius:4px;"></div>
+        <div style="height:1px;background:#cdbca6;"></div>
+        <div style="display:grid;grid-template-columns:1fr 0.9fr;gap:14px;flex:1;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="height:64px;background:#fbf8f2;border:1px solid #dfd2c0;border-radius:14px;"></div>
+            <div style="height:64px;background:#fbf8f2;border:1px solid #dfd2c0;border-radius:14px;"></div>
+            <div style="flex:1;background:#fbf8f2;border:1px solid #dfd2c0;border-radius:14px;"></div>
+          </div>
+          <div style="background:#fbf8f2;border:1px solid #dfd2c0;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+            <div style="height:14px;width:52%;background:#564840;border-radius:4px;"></div>
+            <div style="height:8px;width:90%;background:#cdbba5;border-radius:999px;"></div>
+            <div style="height:8px;width:84%;background:#d7c6b1;border-radius:999px;"></div>
+            <div style="height:8px;width:76%;background:#d7c6b1;border-radius:999px;"></div>
+            <div style="margin-top:auto;height:92px;border-radius:12px;background:linear-gradient(180deg,#efe4d2,#e4d3bb);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 决策纸面台</h3>
+      <p>更像高层驾驶舱和政策台账，强调文档感、秩序感和汇报质感，弱化科技氛围。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="subtitle">请告诉我：</p>
+  <div class="options">
+    <div class="option" data-choice="prefer-a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>优先 A</h3>
+        <p>先把整个产品做成更专业、更克制的业务后台。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="prefer-b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>优先 B</h3>
+        <p>我希望保留“数据直通车”的品牌识别和平台科技感。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="prefer-c" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>优先 C</h3>
+        <p>我更想要稳重、汇报型、像正式系统而不是互联网工具。</p>
+      </div>
+    </div>
+  </div>
+</div>

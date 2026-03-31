@@ -88,6 +88,7 @@ public class ImportTaskQueryAppService {
         String status = po.getStatus() == null ? null : po.getStatus().toUpperCase(Locale.ROOT);
         return new ImportTaskDTO(
                 po.getTaskId(),
+                po.getMaterialId(),
                 status,
                 po.getCurrentStep(),
                 po.getSourceType(),

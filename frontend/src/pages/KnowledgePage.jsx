@@ -1,16 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiRequest, apiSseRequest, parseJsonText } from "../api/client";
+import { API_CONTRACTS, buildApiPath } from "../api/contracts";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, Circle } from "lucide-react";
 import { AccordionStepCard } from "../components/AccordionStepCard";
 import { AutoGrowTextarea } from "../components/AutoGrowTextarea";
+import { ImportLiveGraphCanvas } from "../components/knowledge/ImportLiveGraphCanvas";
+import {
+  applyImportLiveGraphPatch,
+  createImportLiveGraphState,
+  restoreImportLiveGraphSnapshot,
+  selectImportLiveGraphNode,
+} from "../components/knowledge/importLiveGraphState";
 import { UiTextarea } from "../components/ui";
 import { format as formatSql } from "sql-formatter";
 import {
   buildStep1Summary,
   buildStep2Summary,
   buildStep3Summary,
+  mergeCandidateGraphPatch,
   resolveAccordionStepState,
   toConfidenceLevelZh,
 } from "./knowledge-import-utils";
@@ -595,6 +604,7 @@ const EMPTY_FORM = {
 };
 
 const IMPORT_TASK_STORAGE_KEY = "dd.import.activeTaskId";
+const SAMPLE_MATERIAL_URL = "/samples/ingest/代发明细查询-上传样例材料.txt";
 
 function clampStep(step) {
   const value = Number(step || 1);
@@ -631,7 +641,7 @@ function resolveStepByTask(task) {
   return directStep;
 }
 
-export function KnowledgePage({ preset = "import" }) {
+export function KnowledgePage({ preset = "import", entry = "ingest" }) {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const username = useAuthStore((state) => state.username);
@@ -660,6 +670,7 @@ export function KnowledgePage({ preset = "import" }) {
   const [importElapsedMs, setImportElapsedMs] = useState(0);
   const [importBatchId, setImportBatchId] = useState("");
   const [importTaskStatus, setImportTaskStatus] = useState("");
+  const [importLiveGraphState, setImportLiveGraphState] = useState(() => createImportLiveGraphState());
   const [recentImportTasks, setRecentImportTasks] = useState([]);
   const [taskListLoading, setTaskListLoading] = useState(false);
   const [sceneQueueKeyword, setSceneQueueKeyword] = useState("");
@@ -707,7 +718,7 @@ export function KnowledgePage({ preset = "import" }) {
     setDomainLoadError("");
     try {
       // 场景绑定业务领域仅使用全量业务领域主数据
-      const result = await apiRequest("/domains", { token });
+      const result = await apiRequest(API_CONTRACTS.domains, { token });
       const nextDomains = Array.isArray(result) ? result.map((item) => normalizeDomainOption(item)).filter(Boolean) : [];
       setDomains(nextDomains);
       if (nextDomains.length === 0) {
@@ -729,7 +740,7 @@ export function KnowledgePage({ preset = "import" }) {
     }
     setTaskListLoading(true);
     try {
-      const tasks = await apiRequest("/import/tasks", {
+      const tasks = await apiRequest(API_CONTRACTS.importTasks, {
         token,
         query: {
           limit: 12,
@@ -754,7 +765,7 @@ export function KnowledgePage({ preset = "import" }) {
     }
     setMinimumUnitLoading(true);
     try {
-      const result = await apiRequest(`/scenes/${id}/minimum-unit-check`, { token });
+      const result = await apiRequest(buildApiPath("minimumUnitCheck", { id }), { token });
       setMinimumUnitCheck(result || null);
       return result;
     } catch (_) {
@@ -883,7 +894,7 @@ export function KnowledgePage({ preset = "import" }) {
         sortOrder: 9999,
         operator: "",
       };
-      const created = await apiRequest("/domains", {
+      const created = await apiRequest(API_CONTRACTS.domains, {
         method: "POST",
         token,
         body: payload,
@@ -1094,6 +1105,10 @@ export function KnowledgePage({ preset = "import" }) {
     setSelectedSceneIndex(0);
     setForm(nextSceneForms[0] || EMPTY_FORM);
     setBatchUnmappedText(parsed.batchUnmappedText || "");
+    setImportLiveGraphState((prev) => restoreImportLiveGraphSnapshot(prev, response?.candidateGraph, {
+      stageKey: "finalize",
+      stageName: "导入完成",
+    }));
 
     const qualityConfidence = Number(parsed.confidenceScore ?? parsed.quality?.confidence ?? 0);
     setPreprocessWarnings(parsed.warnings);
@@ -1168,7 +1183,7 @@ export function KnowledgePage({ preset = "import" }) {
       return;
     }
     try {
-      const task = await apiRequest(`/import/tasks/${encodeURIComponent(normalizedTaskId)}`, { token });
+      const task = await apiRequest(buildApiPath("importTaskById", { taskId: normalizedTaskId }), { token });
       persistTaskId(task?.taskId || normalizedTaskId);
       setImportTaskStatus(`${task?.status || ""}`.toUpperCase());
       if (`${task?.sourceType || ""}`.trim()) {
@@ -1517,9 +1532,11 @@ export function KnowledgePage({ preset = "import" }) {
     setPreprocessScenes([]);
     setSceneDrafts([]);
     setSceneForms({});
+    setImportLiveGraphState(createImportLiveGraphState());
     setBatchUnmappedText("");
     setSelectedSceneIndex(0);
     setForm(EMPTY_FORM);
+    setCandidateGraphLoading(true);
     const start = Date.now();
     try {
       const requestBody = {
@@ -1531,7 +1548,7 @@ export function KnowledgePage({ preset = "import" }) {
         operator: "",
       };
       setPreprocessMeta("导入启动 · 正在执行抽取与草稿生成…");
-      const response = await apiSseRequest("/import/preprocess-stream", {
+      const response = await apiSseRequest(API_CONTRACTS.importPreprocessStream, {
         token,
         body: requestBody,
         onEvent: (event) => {
@@ -1573,6 +1590,19 @@ export function KnowledgePage({ preset = "import" }) {
               return [...prev, nextItem];
             });
           }
+          if (event.event === "graph_patch") {
+            const detail = event.data || {};
+            setCandidateGraph((current) => mergeCandidateGraphPatch(current, detail));
+            setCandidateGraphError("");
+            setCandidateGraphLoading(false);
+            const focusNodeId = Array.isArray(detail.focusNodeIds)
+              ? detail.focusNodeIds.map((item) => `${item || ""}`.trim()).find(Boolean)
+              : "";
+            if (focusNodeId) {
+              setSelectedCandidateNodeId((current) => current || focusNodeId);
+              setCandidateGraphMergeTarget((current) => current || focusNodeId);
+            }
+          }
           if (event.event === "draft") {
             const detail = event.data || {};
             const sceneIndex = Number(detail.sceneIndex || 0);
@@ -1585,6 +1615,11 @@ export function KnowledgePage({ preset = "import" }) {
               lowConfidence: Boolean(detail.lowConfidence),
               warnings: Array.isArray(detail.warnings) ? detail.warnings : [],
             });
+            return;
+          }
+          if (event.event === "graph_patch") {
+            const detail = event.data || {};
+            setImportLiveGraphState((prev) => applyImportLiveGraphPatch(prev, detail));
           }
         },
       });
@@ -1612,7 +1647,7 @@ export function KnowledgePage({ preset = "import" }) {
     }
     try {
       if (importBatchId) {
-        const task = await apiRequest(`/import/tasks/${encodeURIComponent(importBatchId)}/quality-confirm`, {
+        const task = await apiRequest(buildApiPath("importTaskQualityConfirm", { taskId: importBatchId }), {
           method: "POST",
           token,
         });
@@ -1636,7 +1671,7 @@ export function KnowledgePage({ preset = "import" }) {
     }
     try {
       if (importBatchId) {
-        const task = await apiRequest(`/import/tasks/${encodeURIComponent(importBatchId)}/compare-confirm`, {
+        const task = await apiRequest(buildApiPath("importTaskCompareConfirm", { taskId: importBatchId }), {
           method: "POST",
           token,
         });
@@ -1656,7 +1691,7 @@ export function KnowledgePage({ preset = "import" }) {
       return;
     }
     try {
-      const task = await apiRequest(`/import/tasks/${encodeURIComponent(importBatchId)}/complete`, {
+      const task = await apiRequest(buildApiPath("importTaskComplete", { taskId: importBatchId }), {
         method: "POST",
         token,
       });
@@ -1678,7 +1713,7 @@ export function KnowledgePage({ preset = "import" }) {
     setSaving(true);
     setError("");
     try {
-      const response = await apiRequest("/scenes", {
+      const response = await apiRequest(API_CONTRACTS.scenes, {
         method: "POST",
         token,
         body: {
@@ -1707,7 +1742,7 @@ export function KnowledgePage({ preset = "import" }) {
     const { payload, normalizedForm, notices } = normalizeScenePayload();
     setForm(normalizedForm);
     setSceneForms((prev) => ({ ...prev, [selectedSceneIndex]: normalizedForm }));
-    const response = await apiRequest(`/scenes/${currentSceneId}`, {
+    const response = await apiRequest(buildApiPath("sceneById", { id: currentSceneId }), {
       method: "PUT",
       token,
       body: payload,
@@ -1778,7 +1813,7 @@ export function KnowledgePage({ preset = "import" }) {
           : [];
         throw new Error(`最小单元校验未通过：${failed.join("、") || "请补全必填结构后再发布"}`);
       }
-      const response = await apiRequest(`/scenes/${currentSceneId}/publish`, {
+      const response = await apiRequest(buildApiPath("scenePublish", { id: currentSceneId }), {
         method: "POST",
         token,
         body: {
@@ -1831,7 +1866,7 @@ export function KnowledgePage({ preset = "import" }) {
     setSaving(true);
     setError("");
     try {
-      const response = await apiRequest(`/scenes/${currentSceneId}/discard`, {
+      const response = await apiRequest(buildApiPath("sceneDiscard", { id: currentSceneId }), {
         method: "POST",
         token,
       });
@@ -1998,7 +2033,7 @@ export function KnowledgePage({ preset = "import" }) {
       }
       if (importBatchId) {
         try {
-          await apiRequest(`/import/tasks/${encodeURIComponent(importBatchId)}/rewind/1`, {
+          await apiRequest(buildApiPath("importTaskRewind", { taskId: importBatchId, step: 1 }), {
             method: "POST",
             token,
           });
@@ -2119,6 +2154,11 @@ export function KnowledgePage({ preset = "import" }) {
     }
   }
 
+  const pageTitle = entry === "modeling" ? "资产建模与发布" : "材料接入与解析";
+  const pageSummary = entry === "modeling"
+    ? "从导入任务恢复当前批次，逐个完成结构化对照、最小单元校验与发布。"
+    : "默认空态启动，先上传或粘贴材料，再进入抽取识别、图谱构建和草稿生成。";
+
   return (
     <div className="layout">
       {showImportDone ? (
@@ -2127,7 +2167,7 @@ export function KnowledgePage({ preset = "import" }) {
             <h3 id="importDoneTitle">本批次场景已处理完成</h3>
             <p>已完成发布/弃用处理。下一步可进入数据地图继续查看和复用场景。</p>
             <div className="actions">
-              <button className="btn btn-primary" type="button" onClick={() => navigate("/assets/scenes")}>
+              <button className="btn btn-primary" type="button" onClick={() => navigate("/map/scenes")}>
                 去数据地图查看
               </button>
               <button className="btn btn-ghost" type="button" onClick={() => setShowImportDone(false)}>
@@ -2137,6 +2177,27 @@ export function KnowledgePage({ preset = "import" }) {
           </div>
         </div>
       ) : null}
+
+      <section className="panel production-workbench-head">
+        <div className="panel-head">
+          <div>
+            <h2>{pageTitle}</h2>
+            <p>{pageSummary}</p>
+          </div>
+          <div className="knowledge-package-page-actions">
+            <a className="btn btn-ghost" href={SAMPLE_MATERIAL_URL} download>
+              下载样例材料
+            </a>
+            <button className="btn btn-ghost" type="button" onClick={() => navigate("/map")} disabled={!showImportDone && !sceneDrafts.length}>
+              去数据地图
+            </button>
+            <button className="btn btn-ghost" type="button" onClick={() => navigate("/runtime")}>
+              去运行决策台
+            </button>
+          </div>
+        </div>
+        <p className="subtle-note">当前正式工作台已接入真实导入链路。未上传材料前保持空态；样例只在你主动载入或下载后参与流程。</p>
+      </section>
 
       <AccordionStepCard
         ref={bindStepCardRef(1)}
@@ -2286,6 +2347,9 @@ export function KnowledgePage({ preset = "import" }) {
               <button className="btn btn-ghost" type="button" onClick={fillBestPracticeSample} disabled={loading}>
                 填入最佳实践样例
               </button>
+              <a className="btn btn-ghost" href={SAMPLE_MATERIAL_URL} download>
+                下载样例材料
+              </a>
               <button
                 className="btn btn-ghost"
                 type="button"
@@ -2298,6 +2362,7 @@ export function KnowledgePage({ preset = "import" }) {
                   setImportTaskStatus("");
                   setQualityConfirmed(false);
                   setCompareConfirmed(false);
+                  setImportLiveGraphState(createImportLiveGraphState());
                   setPreprocessMeta(sourceTypeConfig.modeHint);
                   setHasUnsavedChanges(true);
                   setBatchUnmappedText("");
@@ -2337,6 +2402,14 @@ export function KnowledgePage({ preset = "import" }) {
                 </ul>
               ) : null}
             </div>
+            <ImportLiveGraphCanvas
+              graphState={importLiveGraphState}
+              importPercent={importPercent}
+              importStageText={importStageText}
+              onSelectNode={(nodeId) => {
+                setImportLiveGraphState((prev) => selectImportLiveGraphNode(prev, nodeId));
+              }}
+            />
             {isImportPreset ? (
               <div className="import-task-board">
                 <div className="import-task-board-head">

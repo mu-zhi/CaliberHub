@@ -1,0 +1,97 @@
+<h2>业务视图：中央主区卡片 / 图谱混排规则</h2>
+<p class="subtitle">左侧导航树已经固定为“仅保留业务领域”。下面只比较选中某个领域后，中央主区第一眼应该先展示什么。</p>
+
+<div class="cards">
+  <div class="card" data-choice="c1" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">C1. 场景卡片优先，图谱下钻出现</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:180px 1fr;gap:10px;">
+            <div class="placeholder" style="height:280px;text-align:left;padding:10px;">
+              零售业务域
+              <br><span style="color:#94a3b8;">公司业务域</span>
+              <br><span style="color:#94a3b8;">风险管理域</span>
+            </div>
+            <div>
+              <div class="placeholder" style="height:52px;margin-bottom:8px;">领域摘要：场景数 / 方案数 / 覆盖率 / 风险提示</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                <div class="placeholder" style="height:92px;">场景卡片 A</div>
+                <div class="placeholder" style="height:92px;">场景卡片 B</div>
+                <div class="placeholder" style="height:92px;">场景卡片 C</div>
+                <div class="placeholder" style="height:92px;">场景卡片 D</div>
+              </div>
+              <div class="placeholder" style="height:72px;">选中某个场景后，这里再展开局部关系图或进入双栏</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C1. 场景卡片优先，图谱下钻出现</h3>
+      <p>业务视图先帮助用户理解“这个领域里有哪些场景”，图谱只在选中场景后再出现。最稳，但地图感会弱一些。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c2" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">C2. 场景卡片与局部图并置</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:180px 1fr;gap:10px;">
+            <div class="placeholder" style="height:280px;text-align:left;padding:10px;">
+              零售业务域
+              <br><span style="color:#94a3b8;">公司业务域</span>
+              <br><span style="color:#94a3b8;">风险管理域</span>
+            </div>
+            <div>
+              <div class="placeholder" style="height:52px;margin-bottom:8px;">领域摘要：场景数 / 方案数 / 覆盖率 / 风险提示</div>
+              <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:8px;">
+                <div>
+                  <div class="placeholder" style="height:78px;margin-bottom:8px;">重点场景卡片 A</div>
+                  <div class="placeholder" style="height:78px;margin-bottom:8px;">重点场景卡片 B</div>
+                  <div class="placeholder" style="height:78px;">重点场景卡片 C</div>
+                </div>
+                <div class="placeholder" style="height:242px;">领域局部关系图预览</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C2. 场景卡片与局部图并置</h3>
+      <p>左边先分发场景，右边同时保留当前领域的地图感。兼顾业务理解和关系感知，是最平衡的一种。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c3" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">C3. 局部关系图优先，场景作为筛选带</div>
+        <div class="mockup-body">
+          <div style="display:grid;grid-template-columns:180px 1fr;gap:10px;">
+            <div class="placeholder" style="height:280px;text-align:left;padding:10px;">
+              零售业务域
+              <br><span style="color:#94a3b8;">公司业务域</span>
+              <br><span style="color:#94a3b8;">风险管理域</span>
+            </div>
+            <div>
+              <div class="placeholder" style="height:44px;margin-bottom:8px;">场景筛选带：客户查询 | 信息变更 | 代发明细 | 财富交易</div>
+              <div class="placeholder" style="height:178px;margin-bottom:8px;">领域局部关系图（主区最大）</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                <div class="placeholder" style="height:56px;">场景摘要 A</div>
+                <div class="placeholder" style="height:56px;">场景摘要 B</div>
+                <div class="placeholder" style="height:56px;">场景摘要 C</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C3. 局部关系图优先，场景作为筛选带</h3>
+      <p>仍然保留业务视图名称，但阅读方式更接近图谱产品。地图感最强，不过第一次进入会更偏技术。</p>
+    </div>
+  </div>
+</div>

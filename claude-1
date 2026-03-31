@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CLAUDE_ONE_BIN="${CLAUDE_ONE_BIN:-$HOME/.npm-global/bin/claude}"
+
+if [[ ! -x "$CLAUDE_ONE_BIN" ]]; then
+  echo "Claude 1 binary not found at: $CLAUDE_ONE_BIN" >&2
+  echo "Set CLAUDE_ONE_BIN to the correct path and retry." >&2
+  exit 1
+fi
+
+# Claude 1 inherits your existing shell-level ANTHROPIC_* settings.
+exec "$CLAUDE_ONE_BIN" "$@"

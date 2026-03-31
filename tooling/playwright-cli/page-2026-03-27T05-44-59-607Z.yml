@@ -1,0 +1,267 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - link "跳转到主内容" [ref=e2] [cursor=pointer]:
+      - /url: "#mainContent"
+    - banner [ref=e3]:
+      - heading "数据 直通车 让用户没有难取的数据" [level=1] [ref=e5]:
+        - img [ref=e6]
+        - generic [ref=e13]:
+          - generic [ref=e14]: 数据
+          - generic [ref=e15]: 直通车
+        - generic [ref=e16]: 让用户没有难取的数据
+      - navigation "一级模块导航" [ref=e17]:
+        - link "首页总览" [ref=e18] [cursor=pointer]:
+          - /url: "#/overview"
+        - link "数据地图" [ref=e19] [cursor=pointer]:
+          - /url: "#/map"
+        - link "知识生产台" [ref=e20] [cursor=pointer]:
+          - /url: "#/production"
+        - link "发布中心" [ref=e21] [cursor=pointer]:
+          - /url: "#/publish"
+        - link "运行决策台" [ref=e22] [cursor=pointer]:
+          - /url: "#/runtime"
+        - link "审批与导出" [ref=e23] [cursor=pointer]:
+          - /url: "#/approval"
+        - link "监控与审计" [ref=e24] [cursor=pointer]:
+          - /url: "#/monitoring"
+      - generic [ref=e25]:
+        - generic "全局工具区" [ref=e26]:
+          - link "个人协作" [ref=e27] [cursor=pointer]:
+            - /url: "#/workspace/todo"
+          - link "系统设置" [ref=e28] [cursor=pointer]:
+            - /url: "#/system/guide"
+        - generic [ref=e29]:
+          - generic [ref=e30]: 当前角色
+          - combobox "当前角色" [ref=e31]:
+            - option "系统管理员"
+            - option "数据支持" [selected]
+            - option "数据专家"
+            - option "治理专员"
+            - option "一线用户"
+            - option "合规审计"
+    - main [ref=e33]:
+      - generic [ref=e565]:
+        - generic [ref=e566]:
+          - generic [ref=e567]:
+            - heading "发布中心" [level=2] [ref=e568]
+            - paragraph [ref=e569]: 这里直接读取真实发布门禁、版本快照和图谱投影，不再使用静态演示数据。
+          - generic [ref=e570]:
+            - generic [ref=e571]: MVP 最小闭环
+            - button "刷新状态" [ref=e572] [cursor=pointer]:
+              - img [ref=e574]
+              - generic [ref=e579]: 刷新状态
+        - generic [ref=e580]:
+          - generic [ref=e581]:
+            - generic [ref=e582]: 草稿场景
+            - strong [ref=e583]: "2"
+            - generic [ref=e584]: 待补充与待发布
+          - generic [ref=e585]:
+            - generic [ref=e586]: 已发布
+            - strong [ref=e587]: "1"
+            - generic [ref=e588]: 可进入运行决策台
+          - generic [ref=e589]:
+            - generic [ref=e590]: 已弃用
+            - strong [ref=e591]: "0"
+            - generic [ref=e592]: 默认不进入检索
+          - generic [ref=e593]:
+            - generic [ref=e594]: 当前门禁
+            - strong [ref=e595]: 通过
+            - generic [ref=e596]: 实时读取发布检查项
+        - generic [ref=e597]:
+          - generic [ref=e598]:
+            - generic [ref=e600]:
+              - heading "场景清单" [level=3] [ref=e601]
+              - paragraph [ref=e602]: 优先处理草稿，再复核已发布场景的快照与投影。
+            - generic [ref=e603]:
+              - button "Step 1：查询 2014 年至今主表明细 代发样板域 · FACT_DETAIL PUBLISHED 2026-03-27 13:44" [ref=e810] [cursor=pointer]:
+                - generic [ref=e605]:
+                  - strong [ref=e606]: Step 1：查询 2014 年至今主表明细
+                  - paragraph [ref=e607]: 代发样板域 · FACT_DETAIL
+                - generic [ref=e608]:
+                  - generic [ref=e609]: PUBLISHED
+                  - generic [ref=e610]: 2026-03-27 13:44
+              - button "Step 2：按需补查历史明细表 未绑定业务领域 · FACT_DETAIL DRAFT 2026-03-27 13:39" [ref=e611] [cursor=pointer]:
+                - generic [ref=e612]:
+                  - strong [ref=e613]: Step 2：按需补查历史明细表
+                  - paragraph [ref=e614]: 未绑定业务领域 · FACT_DETAIL
+                - generic [ref=e615]:
+                  - generic [ref=e616]: DRAFT
+                  - generic [ref=e617]: 2026-03-27 13:39
+              - button "Step 1：根据公司户口号查询代发协议号 未绑定业务领域 · FACT_DETAIL DRAFT 2026-03-27 13:39" [ref=e618] [cursor=pointer]:
+                - generic [ref=e619]:
+                  - strong [ref=e620]: Step 1：根据公司户口号查询代发协议号
+                  - paragraph [ref=e621]: 未绑定业务领域 · FACT_DETAIL
+                - generic [ref=e622]:
+                  - generic [ref=e623]: DRAFT
+                  - generic [ref=e624]: 2026-03-27 13:39
+          - generic [ref=e625]:
+            - generic [ref=e626]:
+              - generic [ref=e627]:
+                - generic [ref=e628]:
+                  - heading "当前场景" [level=3] [ref=e629]
+                  - paragraph [ref=e630]: 发布门禁、快照和投影状态放在一屏里看完。
+                - generic [ref=e631]: PUBLISHED
+              - generic [ref=e632]:
+                - generic [ref=e633]:
+                  - term [ref=e634]: 场景名称
+                  - definition [ref=e635]: Step 1：查询 2014 年至今主表明细
+                - generic [ref=e636]:
+                  - term [ref=e637]: 业务领域
+                  - definition [ref=e638]: 代发样板域
+                - generic [ref=e639]:
+                  - term [ref=e640]: 场景类型
+                  - definition [ref=e641]: FACT_DETAIL
+                - generic [ref=e642]:
+                  - term [ref=e643]: 最近更新时间
+                  - definition [ref=e644]: 2026-03-27 13:44
+                - generic [ref=e645]:
+                  - term [ref=e646]: 最新快照
+                  - definition [ref=e647]: SCN-99C05195BCD8-V001
+                - generic [ref=e648]:
+                  - term [ref=e649]: 图谱投影
+                  - definition [ref=e650]: SKIPPED
+              - generic [ref=e651]:
+                - link "回知识生产台继续编辑" [ref=e652] [cursor=pointer]:
+                  - /url: "#/production/modeling"
+                  - generic [ref=e653]: 回知识生产台继续编辑
+                - link "去数据地图查看图谱" [ref=e654] [cursor=pointer]:
+                  - /url: "#/map"
+                  - generic [ref=e655]: 去数据地图查看图谱
+                - link "去运行决策台验证" [ref=e656] [cursor=pointer]:
+                  - /url: "#/runtime"
+                  - generic [ref=e657]: 去运行决策台验证
+                - button "重建图谱投影" [ref=e658] [cursor=pointer]:
+                  - generic [ref=e659]: 重建图谱投影
+            - generic [ref=e660]:
+              - generic [ref=e661]:
+                - generic [ref=e662]:
+                  - heading "发布检查" [level=3] [ref=e663]
+                  - paragraph [ref=e664]: 门禁项直接读取后端计算结果，缺什么一眼能看见。
+                - img [ref=e665]
+              - generic [ref=e668]:
+                - article [ref=e669]:
+                  - generic [ref=e670]:
+                    - strong [ref=e671]: 场景类型
+                    - paragraph [ref=e672]: 已满足
+                  - generic [ref=e674]: 通过
+                - article [ref=e675]:
+                  - generic [ref=e676]:
+                    - strong [ref=e677]: 输出契约
+                    - paragraph [ref=e678]: 已满足
+                  - generic [ref=e680]: 通过
+                - article [ref=e681]:
+                  - generic [ref=e682]:
+                    - strong [ref=e683]: 输入槽位
+                    - paragraph [ref=e684]: 已满足
+                  - generic [ref=e686]: 通过
+                - article [ref=e687]:
+                  - generic [ref=e688]:
+                    - strong [ref=e689]: 来源接入契约
+                    - paragraph [ref=e690]: 已满足
+                  - generic [ref=e692]: 通过
+                - article [ref=e693]:
+                  - generic [ref=e694]:
+                    - strong [ref=e695]: 方案资产
+                    - paragraph [ref=e696]: 已满足
+                  - generic [ref=e698]: 通过
+                - article [ref=e699]:
+                  - generic [ref=e700]:
+                    - strong [ref=e701]: 覆盖声明
+                    - paragraph [ref=e702]: 已满足
+                  - generic [ref=e704]: 通过
+                - article [ref=e705]:
+                  - generic [ref=e706]:
+                    - strong [ref=e707]: 策略对象
+                    - paragraph [ref=e708]: 已满足
+                  - generic [ref=e710]: 通过
+                - article [ref=e711]:
+                  - generic [ref=e712]:
+                    - strong [ref=e713]: 证据片段
+                    - paragraph [ref=e714]: 已满足
+                  - generic [ref=e716]: 通过
+                - article [ref=e717]:
+                  - generic [ref=e718]:
+                    - strong [ref=e719]: 模式链接
+                    - paragraph [ref=e720]: 已满足
+                  - generic [ref=e722]: 通过
+                - article [ref=e723]:
+                  - generic [ref=e724]:
+                    - strong [ref=e725]: 默认时间语义
+                    - paragraph [ref=e726]: 已满足
+                  - generic [ref=e728]: 通过
+                - article [ref=e729]:
+                  - generic [ref=e730]:
+                    - strong [ref=e731]: 契约视图
+                    - paragraph [ref=e732]: 已满足
+                  - generic [ref=e734]: 通过
+                - article [ref=e735]:
+                  - generic [ref=e736]:
+                    - strong [ref=e737]: 来源契约
+                    - paragraph [ref=e738]: 已满足
+                  - generic [ref=e740]: 通过
+                - article [ref=e741]:
+                  - generic [ref=e742]:
+                    - strong [ref=e743]: 版本快照
+                    - paragraph [ref=e744]: 已满足
+                  - generic [ref=e746]: 通过
+              - generic [ref=e747]:
+                - generic [ref=e748]:
+                  - textbox [ref=e750]: 2026-03-27T13:44
+                  - paragraph [ref=e751]: 复核时间会随发布请求一起写入版本快照。
+                - generic [ref=e752]:
+                  - textbox "请输入本次发布摘要" [ref=e754]: MVP 样板场景发布
+                  - paragraph [ref=e755]: 建议写明样板范围、变更原因或风险说明。
+                - button "当前已发布" [disabled]:
+                  - generic: 当前已发布
+            - generic [ref=e758]:
+              - generic [ref=e759]:
+                - generic [ref=e760]:
+                  - heading "资产计数" [level=3] [ref=e761]
+                  - paragraph [ref=e762]: 这组计数能快速判断当前场景是否具备最小可发布结构。
+                - img [ref=e763]
+              - generic [ref=e767]:
+                - generic [ref=e768]:
+                  - generic [ref=e769]: 方案资产
+                  - strong [ref=e770]: "1"
+                - generic [ref=e771]:
+                  - generic [ref=e772]: 覆盖声明
+                  - strong [ref=e773]: "1"
+                - generic [ref=e774]:
+                  - generic [ref=e775]: 策略对象
+                  - strong [ref=e776]: "1"
+                - generic [ref=e777]:
+                  - generic [ref=e778]: 契约视图
+                  - strong [ref=e779]: "1"
+                - generic [ref=e780]:
+                  - generic [ref=e781]: 来源契约
+                  - strong [ref=e782]: "1"
+                - generic [ref=e783]:
+                  - generic [ref=e784]: 输出契约
+                  - strong [ref=e785]: "1"
+                - generic [ref=e786]:
+                  - generic [ref=e787]: 输入槽位
+                  - strong [ref=e788]: "2"
+                - generic [ref=e789]:
+                  - generic [ref=e790]: 版本快照
+                  - strong [ref=e791]: "1"
+            - generic [ref=e792]:
+              - generic [ref=e793]:
+                - generic [ref=e794]:
+                  - heading "版本与图谱投影" [level=3] [ref=e795]
+                  - paragraph [ref=e796]: 发布后这里会看到最新快照与投影状态，便于确认图谱已同步。
+                - img [ref=e797]
+              - generic [ref=e801]:
+                - article [ref=e802]:
+                  - generic [ref=e803]:
+                    - strong [ref=e804]: 图谱投影状态
+                    - paragraph [ref=e805]: 图投影已关闭，当前使用关系库检索运行时
+                  - generic [ref=e806]:
+                    - generic [ref=e807]: SKIPPED
+                    - generic [ref=e808]: 2026-03-27 13:44
+                - article [ref=e811]:
+                  - generic [ref=e812]:
+                    - strong [ref=e813]: SCN-99C05195BCD8-V001
+                    - paragraph [ref=e814]: MVP 样板场景发布
+                  - generic [ref=e815]:
+                    - generic [ref=e816]: PUBLISHED
+                    - generic [ref=e817]: 2026-03-27 13:44

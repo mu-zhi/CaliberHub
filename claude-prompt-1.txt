@@ -1,0 +1,16 @@
+请执行 `code-reviewing`（代码检视技能，请参考 `ai/skills/code-reviewing/SKILL.md`）。
+
+请对我们最近在后端（Backend）完成的“代发 / 薪资域真实库端到端闭环首批实现”进行只读全量梳理与评审。
+具体请评审以下两个强相关的修改：
+1. `backend/src/main/java/com/cmbchina/datadirect/caliber/application/service/command/ImportTaskCommandAppService.java`
+2. `backend/src/main/java/com/cmbchina/datadirect/caliber/adapter/web/ImportController.java`
+
+请重点确保不偏离以下五个维度：
+1. **规格符合性**：JSON 数据提取以及实体关联字段，是否存在未按照文档映射的字段情况。
+2. **契约漂移和异常处理**：Confirm API 与响应 Payload 结构是否符合规范抛出的业务验证结果。
+3. **回归风险**：确保新的 candidate-确认逻辑没有对基础对象结构做破坏。
+4. **缺失的单元测试补充需求**
+5. **缺失的文档维护要求**
+
+如果有 Findings（发现项的改进空间），请全部列出让我修复；如果没有，回复通过（Passed）即可。
+随后 Codex 将根据评审意见进行修正，完成后放行测试验收。

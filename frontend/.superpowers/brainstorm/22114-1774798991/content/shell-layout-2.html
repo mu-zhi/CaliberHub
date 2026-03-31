@@ -1,0 +1,136 @@
+<h2>再选一件事：整体框架怎么收</h2>
+<p class="subtitle">同样是冷静运营台，外壳结构会直接决定“粗糙感”是否消失。请选择更接近的一种。</p>
+
+<div class="cards">
+  <div class="card" data-choice="shell-a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f7fa;border:1px solid #dbe2ea;border-radius:18px;padding:14px;min-height:252px;">
+        <div style="height:42px;border-radius:12px;background:#ffffff;border:1px solid #dbe2ea;display:flex;align-items:center;justify-content:space-between;padding:0 14px;margin-bottom:12px;">
+          <div style="height:14px;width:22%;background:#203445;border-radius:5px;"></div>
+          <div style="display:flex;gap:10px;width:44%;">
+            <div style="height:12px;flex:1;background:#d6dee8;border-radius:999px;"></div>
+            <div style="height:12px;flex:1;background:#e3e9f0;border-radius:999px;"></div>
+            <div style="height:12px;flex:1;background:#e3e9f0;border-radius:999px;"></div>
+          </div>
+          <div style="width:56px;height:14px;background:#c7d1dd;border-radius:999px;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:96px 1fr;gap:12px;height:180px;">
+          <div style="background:#eef2f6;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:10px;">
+            <div style="height:10px;background:#8ea2b8;border-radius:999px;"></div>
+            <div style="height:10px;background:#c2ccd8;border-radius:999px;width:82%;"></div>
+            <div style="height:10px;background:#c2ccd8;border-radius:999px;width:72%;"></div>
+            <div style="height:10px;background:#c2ccd8;border-radius:999px;width:76%;"></div>
+          </div>
+          <div style="background:#ffffff;border:1px solid #dbe2ea;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+            <div style="height:14px;width:32%;background:#1f3344;border-radius:5px;"></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <div style="height:56px;background:#f6f8fb;border-radius:12px;"></div>
+              <div style="height:56px;background:#f6f8fb;border-radius:12px;"></div>
+              <div style="height:56px;background:#f6f8fb;border-radius:12px;"></div>
+            </div>
+            <div style="flex:1;background:#f7f9fc;border-radius:12px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 顶栏 + 细侧栏</h3>
+      <p>保留顶部一级导航，再把左侧做窄、做静。迁移成本最低，也最接近成熟后台。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="shell-b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f7fa;border:1px solid #dbe2ea;border-radius:18px;padding:14px;min-height:252px;">
+        <div style="display:grid;grid-template-columns:210px 1fr;gap:12px;height:224px;">
+          <div style="background:#f0f3f7;border:1px solid #dbe2ea;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px;">
+            <div style="height:16px;width:56%;background:#203445;border-radius:5px;"></div>
+            <div style="height:1px;background:#dbe2ea;"></div>
+            <div style="height:10px;background:#97aabd;border-radius:999px;"></div>
+            <div style="height:10px;background:#c4ced9;border-radius:999px;width:84%;"></div>
+            <div style="height:10px;background:#c4ced9;border-radius:999px;width:76%;"></div>
+            <div style="height:10px;background:#c4ced9;border-radius:999px;width:88%;"></div>
+            <div style="margin-top:auto;height:34px;background:#dde5ee;border-radius:10px;"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="height:42px;border-radius:12px;background:#ffffff;border:1px solid #dbe2ea;display:flex;align-items:center;justify-content:flex-end;padding:0 14px;">
+              <div style="width:160px;height:12px;background:#d8e0e8;border-radius:999px;"></div>
+            </div>
+            <div style="background:#ffffff;border:1px solid #dbe2ea;border-radius:16px;flex:1;padding:12px;display:flex;flex-direction:column;gap:10px;">
+              <div style="height:14px;width:26%;background:#1f3344;border-radius:5px;"></div>
+              <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:10px;flex:1;">
+                <div style="background:#f6f8fb;border-radius:12px;"></div>
+                <div style="display:grid;grid-template-rows:repeat(2,1fr);gap:10px;">
+                  <div style="background:#f6f8fb;border-radius:12px;"></div>
+                  <div style="background:#f6f8fb;border-radius:12px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 单左栏主导航</h3>
+      <p>把导航主权完全交给左侧，顶部只保留搜索、角色和全局动作。整体会更稳、更像专业产品。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="shell-c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#f5f7fa;border:1px solid #dbe2ea;border-radius:18px;padding:14px;min-height:252px;">
+        <div style="height:42px;border-radius:12px;background:#ffffff;border:1px solid #dbe2ea;display:flex;align-items:center;padding:0 14px;gap:10px;margin-bottom:12px;">
+          <div style="height:14px;width:18%;background:#203445;border-radius:5px;"></div>
+          <div style="display:flex;gap:8px;flex:1;">
+            <div style="height:12px;width:68px;background:#c7d1dc;border-radius:999px;"></div>
+            <div style="height:12px;width:68px;background:#e0e7ee;border-radius:999px;"></div>
+            <div style="height:12px;width:68px;background:#e0e7ee;border-radius:999px;"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 280px;gap:12px;height:180px;">
+          <div style="background:#ffffff;border:1px solid #dbe2ea;border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+            <div style="height:14px;width:34%;background:#1f3344;border-radius:5px;"></div>
+            <div style="height:34px;background:#eef2f6;border-radius:10px;"></div>
+            <div style="flex:1;background:#f7f9fc;border-radius:12px;"></div>
+          </div>
+          <div style="background:#f0f3f7;border:1px solid #dbe2ea;border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+            <div style="height:12px;width:40%;background:#516576;border-radius:5px;"></div>
+            <div style="height:56px;background:#ffffff;border-radius:12px;"></div>
+            <div style="height:56px;background:#ffffff;border-radius:12px;"></div>
+            <div style="flex:1;background:#ffffff;border-radius:12px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 顶部模块切换 + 右侧上下文</h3>
+      <p>更偏“工作区”产品。主内容最大，但交互复杂度更高，适合重度操作台，不适合全部页面统一。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="options">
+    <div class="option" data-choice="prefer-shell-a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>保守重构</h3>
+        <p>延续现有结构，但把比例、间距、层级全部做对。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="prefer-shell-b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>中度重构</h3>
+        <p>换成更成熟的一体式后台壳层，我更接受结构调整。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="prefer-shell-c" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>激进重构</h3>
+        <p>可以为了体验大改整体框架，只要结果更专业。</p>
+      </div>
+    </div>
+  </div>
+</div>

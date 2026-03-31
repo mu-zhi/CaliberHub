@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -31,8 +30,7 @@ public class ExecutionFeedbackPO {
     @Column(name = "success", nullable = false)
     private Boolean success;
 
-    @Lob
-    @Column(name = "reason")
+    @Column(name = "reason", columnDefinition = "LONGTEXT")
     private String reason;
 
     @Column(name = "selected_plan", length = 128)

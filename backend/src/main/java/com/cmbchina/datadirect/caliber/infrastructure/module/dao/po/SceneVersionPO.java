@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -29,13 +28,26 @@ public class SceneVersionPO {
     @Column(name = "version_no", nullable = false)
     private Integer versionNo;
 
-    @Lob
-    @Column(name = "snapshot_json", nullable = false)
+    @Column(name = "snapshot_json", nullable = false, columnDefinition = "LONGTEXT")
     private String snapshotJson;
 
-    @Lob
-    @Column(name = "change_summary")
+    @Column(name = "change_summary", columnDefinition = "LONGTEXT")
     private String changeSummary;
+
+    @Column(name = "version_tag", length = 64)
+    private String versionTag;
+
+    @Column(name = "publish_status", length = 20)
+    private String publishStatus;
+
+    @Column(name = "published_by", length = 64)
+    private String publishedBy;
+
+    @Column(name = "published_at")
+    private OffsetDateTime publishedAt;
+
+    @Column(name = "snapshot_summary_json", columnDefinition = "LONGTEXT")
+    private String snapshotSummaryJson;
 
     @Column(name = "created_by", nullable = false, length = 64)
     private String createdBy;
@@ -83,6 +95,46 @@ public class SceneVersionPO {
         this.changeSummary = changeSummary;
     }
 
+    public String getVersionTag() {
+        return versionTag;
+    }
+
+    public void setVersionTag(String versionTag) {
+        this.versionTag = versionTag;
+    }
+
+    public String getPublishStatus() {
+        return publishStatus;
+    }
+
+    public void setPublishStatus(String publishStatus) {
+        this.publishStatus = publishStatus;
+    }
+
+    public String getPublishedBy() {
+        return publishedBy;
+    }
+
+    public void setPublishedBy(String publishedBy) {
+        this.publishedBy = publishedBy;
+    }
+
+    public OffsetDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(OffsetDateTime publishedAt) {
+        this.publishedAt = publishedAt;
+    }
+
+    public String getSnapshotSummaryJson() {
+        return snapshotSummaryJson;
+    }
+
+    public void setSnapshotSummaryJson(String snapshotSummaryJson) {
+        this.snapshotSummaryJson = snapshotSummaryJson;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }
@@ -99,4 +151,3 @@ public class SceneVersionPO {
         this.createdAt = createdAt;
     }
 }
-

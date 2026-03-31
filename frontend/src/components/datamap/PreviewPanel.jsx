@@ -41,7 +41,7 @@ export function PreviewPanel({
   width,
   onWidthChange,
   onRetry,
-  onSwitchToLineage,
+  onSwitchToGraph,
 }) {
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
@@ -101,8 +101,8 @@ export function PreviewPanel({
           <p>可追溯预览：SQL、来源表、输出字段</p>
         </div>
         <div className="datamap-preview-actions">
-          <UiButton type="button" variant="secondary" size="sm" onClick={onSwitchToLineage} icon={<Workflow size={14} />}>
-            切换为血缘视图
+          <UiButton type="button" variant="secondary" size="sm" onClick={onSwitchToGraph} icon={<Workflow size={14} />}>
+            切换为资产图谱
           </UiButton>
         </div>
       </header>

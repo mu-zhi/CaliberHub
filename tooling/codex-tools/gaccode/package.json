@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@anthropic-ai/claude-code": "https://gaccode.com/claudecode/install"
+  }
+}

@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -33,15 +32,16 @@ public class ImportTaskPO {
     @Column(name = "source_name", length = 255)
     private String sourceName;
 
+    @Column(name = "material_id", length = 64)
+    private String materialId;
+
     @Column(name = "operator", length = 64)
     private String operator;
 
-    @Lob
-    @Column(name = "raw_text")
+    @Column(name = "raw_text", columnDefinition = "LONGTEXT")
     private String rawText;
 
-    @Lob
-    @Column(name = "preprocess_result_json")
+    @Column(name = "preprocess_result_json", columnDefinition = "LONGTEXT")
     private String preprocessResultJson;
 
     @Column(name = "quality_confirmed", nullable = false)
@@ -50,8 +50,7 @@ public class ImportTaskPO {
     @Column(name = "compare_confirmed", nullable = false)
     private Boolean compareConfirmed;
 
-    @Lob
-    @Column(name = "error_message")
+    @Column(name = "error_message", columnDefinition = "LONGTEXT")
     private String errorMessage;
 
     @Column(name = "created_at", nullable = false)
@@ -101,6 +100,14 @@ public class ImportTaskPO {
 
     public void setSourceName(String sourceName) {
         this.sourceName = sourceName;
+    }
+
+    public String getMaterialId() {
+        return materialId;
+    }
+
+    public void setMaterialId(String materialId) {
+        this.materialId = materialId;
     }
 
     public String getOperator() {

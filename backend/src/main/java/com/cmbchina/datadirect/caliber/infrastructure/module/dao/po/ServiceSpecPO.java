@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -32,8 +31,7 @@ public class ServiceSpecPO {
     @Column(name = "spec_version", nullable = false)
     private Integer specVersion;
 
-    @Lob
-    @Column(name = "spec_json", nullable = false)
+    @Column(name = "spec_json", nullable = false, columnDefinition = "LONGTEXT")
     private String specJson;
 
     @Column(name = "exported_by", nullable = false, length = 64)

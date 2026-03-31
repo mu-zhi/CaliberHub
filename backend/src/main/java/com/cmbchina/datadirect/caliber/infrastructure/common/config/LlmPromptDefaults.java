@@ -14,8 +14,8 @@ public final class LlmPromptDefaults {
 
             [抽取策略]
             A. 场景与 SQL 关联提取（Scene & SQL Binding）：
-            - 按业务意图或标题切换拆分 scene_candidates。
-            - 当文档出现 Step（如 Step 1/2/3）或明确时间分段（如 2009-2012、2014-至今）时，必须拆分为多个 scene_candidates，不得收敛为单场景。
+            - 按业务意图或标题切换拆分 scene_candidates，但必须优先识别“同一业务问题下的多种取数方案”。
+            - 当文档出现 Step（如 Step 1/2/3）、方法1/方法2、明确时间分段（如 2009-2012、2014-至今）或历史表切换时，若它们仍服务于同一个业务场景，必须保留为同一个 scene_candidate，并把差异下沉到多个 sql_segment_ids / plan variants；不得仅因取数路径不同就拆成多个 scene_candidates。
             - scene_title 绝对禁止直接使用表名或纯英文拼接。必须优先使用 SQL 上下文邻近的中文业务注释（如“方法1：根据公司户口号查询代发协议号”）。
             - 仅当确实没有可用中文注释时，才允许使用“查询 [表名]”作为兜底标题。
             - 给每一个抽取出的 SQL 片段分配独立 segment_id（如 SQL_001）。

@@ -3,19 +3,21 @@ package com.cmbchina.datadirect.caliber.application.service.command;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.CreateSceneCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.PublishSceneCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.UpdateSceneCmd;
-import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneMinimumUnitCheckDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneVersionDTO;
 import com.cmbchina.datadirect.caliber.application.assembler.SceneAssembler;
 import com.cmbchina.datadirect.caliber.application.exception.BusinessConflictException;
 import com.cmbchina.datadirect.caliber.application.exception.ResourceNotFoundException;
-import com.cmbchina.datadirect.caliber.application.service.support.SceneMinimumUnitSupport;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.GraphProjectionAppService;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.CanonicalSnapshotBindingService;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.SceneGraphAssetSyncService;
+import com.cmbchina.datadirect.caliber.application.service.query.graphrag.ScenePublishGateAppService;
 import com.cmbchina.datadirect.caliber.domain.model.CaliberDomain;
 import com.cmbchina.datadirect.caliber.domain.model.Scene;
 import com.cmbchina.datadirect.caliber.domain.model.SceneDraftUpdate;
 import com.cmbchina.datadirect.caliber.domain.model.SceneStatus;
 import com.cmbchina.datadirect.caliber.domain.support.CaliberDomainSupport;
 import com.cmbchina.datadirect.caliber.domain.support.SceneDomainSupport;
-import com.cmbchina.datadirect.caliber.domain.exception.DomainValidationException;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneAuditLogMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.SceneAuditLogPO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,6 +51,11 @@ public class SceneCommandAppService {
     private final SceneAssembler sceneAssembler;
     private final CaliberDictSyncService caliberDictSyncService;
     private final AlignmentReportAppService alignmentReportAppService;
+    private final SceneGraphAssetSyncService sceneGraphAssetSyncService;
+    private final ScenePublishGateAppService scenePublishGateAppService;
+    private final SceneVersionAppService sceneVersionAppService;
+    private final CanonicalSnapshotBindingService canonicalSnapshotBindingService;
+    private final GraphProjectionAppService graphProjectionAppService;
     private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper;
     private final SceneAuditLogMapper sceneAuditLogMapper;
@@ -58,6 +65,11 @@ public class SceneCommandAppService {
                                   SceneAssembler sceneAssembler,
                                   CaliberDictSyncService caliberDictSyncService,
                                   AlignmentReportAppService alignmentReportAppService,
+                                  SceneGraphAssetSyncService sceneGraphAssetSyncService,
+                                  ScenePublishGateAppService scenePublishGateAppService,
+                                  SceneVersionAppService sceneVersionAppService,
+                                  CanonicalSnapshotBindingService canonicalSnapshotBindingService,
+                                  GraphProjectionAppService graphProjectionAppService,
                                   MeterRegistry meterRegistry,
                                   ObjectMapper objectMapper,
                                   SceneAuditLogMapper sceneAuditLogMapper) {
@@ -66,6 +78,11 @@ public class SceneCommandAppService {
         this.sceneAssembler = sceneAssembler;
         this.caliberDictSyncService = caliberDictSyncService;
         this.alignmentReportAppService = alignmentReportAppService;
+        this.sceneGraphAssetSyncService = sceneGraphAssetSyncService;
+        this.scenePublishGateAppService = scenePublishGateAppService;
+        this.sceneVersionAppService = sceneVersionAppService;
+        this.canonicalSnapshotBindingService = canonicalSnapshotBindingService;
+        this.graphProjectionAppService = graphProjectionAppService;
         this.meterRegistry = meterRegistry;
         this.objectMapper = objectMapper;
         this.sceneAuditLogMapper = sceneAuditLogMapper;
@@ -76,7 +93,9 @@ public class SceneCommandAppService {
     public SceneDTO create(CreateSceneCmd cmd) {
         String domainName = resolveDomainName(cmd.domainId(), cmd.domain());
         Scene scene = Scene.createDraft(cmd.sceneTitle(), cmd.domainId(), domainName, cmd.rawInput(), cmd.operator());
+        scene.setSceneType(normalizeSceneType(cmd.sceneType()));
         Scene saved = saveWithConflictGuard(scene);
+        sceneGraphAssetSyncService.ensureGovernanceAssets(saved.getId(), cmd.operator());
         writeSceneAudit(saved.getId(), "CREATE_DRAFT", cmd.operator(), Map.of("status", saved.getStatus().name()));
         return sceneAssembler.toDTO(saved);
     }
@@ -92,6 +111,7 @@ public class SceneCommandAppService {
                 cmd.sceneTitle(),
                 cmd.domainId(),
                 domainName,
+                normalizeSceneType(cmd.sceneType()),
                 sanitizeSceneDescription(cmd.sceneDescription()),
                 cmd.caliberDefinition(),
                 cmd.applicability(),
@@ -111,6 +131,7 @@ public class SceneCommandAppService {
 
         assertExpectedVersion(scene, cmd.expectedVersion());
         Scene saved = saveWithConflictGuard(scene);
+        sceneGraphAssetSyncService.syncSceneAssetsFromLegacy(saved.getId(), cmd.operator());
         caliberDictSyncService.syncFromScene(saved.getId(), saved.getDomainId(), saved.getCodeMappingsJson());
         writeSceneAudit(saved.getId(), "UPDATE_DRAFT", cmd.operator(), Map.of("status", saved.getStatus().name()));
         return sceneAssembler.toDTO(saved);
@@ -124,16 +145,22 @@ public class SceneCommandAppService {
         try {
             Scene scene = sceneDomainSupport.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("scene not found: " + id));
-            assertPublishableMinimumUnit(scene);
+            sceneGraphAssetSyncService.ensureGovernanceAssets(scene.getId(), cmd.operator());
+            scenePublishGateAppService.assertPublishable(scene);
             alignmentReportAppService.assertPublishAllowed(scene.getId());
             List<String> softGateWarnings = collectPublishSoftGateWarnings(scene);
 
             scene.publish(cmd.verifiedAt(), cmd.changeSummary(), cmd.operator());
             Scene saved = saveWithConflictGuard(scene);
+            sceneGraphAssetSyncService.syncAssetStatuses(saved.getId(), saved.getStatus().name(), cmd.operator());
+            SceneVersionDTO snapshot = sceneVersionAppService.createPublishedSnapshot(saved.getId(), cmd.changeSummary(), cmd.operator());
+            canonicalSnapshotBindingService.bindSceneSnapshot(saved.getId(), snapshot.id(), cmd.operator());
+            graphProjectionAppService.refreshProjection(saved.getId(), saved.getSceneCode(), cmd.operator());
             Map<String, Object> detail = new LinkedHashMap<>();
             detail.put("status", saved.getStatus().name());
             detail.put("verifiedAt", saved.getVerifiedAt());
             detail.put("publishedAt", saved.getPublishedAt());
+            detail.put("snapshotId", snapshot.id());
             if (!softGateWarnings.isEmpty()) {
                 detail.put("softGateWarnings", softGateWarnings);
                 Counter.builder("caliber.scene.publish.soft_gate.total")
@@ -143,7 +170,7 @@ public class SceneCommandAppService {
             }
             writeSceneAudit(saved.getId(), "PUBLISH", cmd.operator(), detail);
             success = true;
-            return sceneAssembler.toDTO(saved);
+            return withSnapshotId(sceneAssembler.toDTO(saved), snapshot.id());
         } finally {
             Counter.builder("caliber.scene.publish.total")
                     .tag("success", String.valueOf(success))
@@ -175,6 +202,8 @@ public class SceneCommandAppService {
                 .orElseThrow(() -> new ResourceNotFoundException("scene not found: " + id));
         scene.discard(operator);
         Scene saved = saveWithConflictGuard(scene);
+        sceneGraphAssetSyncService.syncAssetStatuses(saved.getId(), saved.getStatus().name(), operator);
+        graphProjectionAppService.refreshProjection(saved.getId(), saved.getSceneCode(), operator);
         writeSceneAudit(saved.getId(), "DISCARD", operator, Map.of("status", saved.getStatus().name()));
         return sceneAssembler.toDTO(saved);
     }
@@ -233,19 +262,6 @@ public class SceneCommandAppService {
         CaliberDomain domain = caliberDomainSupport.findById(domainId)
                 .orElseThrow(() -> new ResourceNotFoundException("domain not found: " + domainId));
         return domain.getDomainName();
-    }
-
-    private void assertPublishableMinimumUnit(Scene scene) {
-        SceneMinimumUnitCheckDTO check = SceneMinimumUnitSupport.check(scene, objectMapper);
-        if (Boolean.TRUE.equals(check.publishReady())) {
-            return;
-        }
-        String message = check.items().stream()
-                .filter(item -> !Boolean.TRUE.equals(item.passed()))
-                .map(item -> item.name() + "：" + item.message())
-                .reduce((a, b) -> a + "；" + b)
-                .orElse("最小单元校验未通过");
-        throw new DomainValidationException("发布失败，最小单元不完整：" + message);
     }
 
     private List<String> collectPublishSoftGateWarnings(Scene scene) {
@@ -309,5 +325,49 @@ public class SceneCommandAppService {
             return normalized;
         }
         return text.trim();
+    }
+
+    private SceneDTO withSnapshotId(SceneDTO dto, Long snapshotId) {
+        return new SceneDTO(
+                dto.id(),
+                dto.sceneCode(),
+                dto.sceneTitle(),
+                dto.domainId(),
+                dto.domain(),
+                dto.domainName(),
+                dto.sceneType(),
+                dto.status(),
+                dto.sceneDescription(),
+                dto.caliberDefinition(),
+                dto.applicability(),
+                dto.boundaries(),
+                dto.inputsJson(),
+                dto.outputsJson(),
+                dto.sqlVariantsJson(),
+                dto.codeMappingsJson(),
+                dto.contributors(),
+                dto.sqlBlocksJson(),
+                dto.sourceTablesJson(),
+                dto.caveatsJson(),
+                dto.unmappedText(),
+                dto.qualityJson(),
+                dto.rawInput(),
+                dto.verifiedAt(),
+                dto.changeSummary(),
+                dto.createdBy(),
+                dto.createdAt(),
+                dto.updatedAt(),
+                dto.publishedBy(),
+                dto.publishedAt(),
+                dto.rowVersion(),
+                snapshotId
+        );
+    }
+
+    private String normalizeSceneType(String sceneType) {
+        if (sceneType == null || sceneType.isBlank()) {
+            return "FACT_DETAIL";
+        }
+        return sceneType.trim().toUpperCase();
     }
 }

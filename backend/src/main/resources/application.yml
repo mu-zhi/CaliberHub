@@ -2,10 +2,10 @@ spring:
   application:
     name: caliber-mvp-backend
   datasource:
-    url: jdbc:h2:mem:caliber;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${CALIBER_DB_URL:jdbc:mysql://127.0.0.1:3306/caliber?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
+    driver-class-name: ${CALIBER_DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${CALIBER_DB_USERNAME:caliber}
+    password: ${CALIBER_DB_PASSWORD:caliber}
   jpa:
     open-in-view: false
     hibernate:
@@ -27,7 +27,7 @@ spring:
       timeout: 2s
 
 server:
-  port: 8080
+  port: 8082
 
 info:
   app:
@@ -93,8 +93,8 @@ caliber:
   llm:
     preprocess:
       enabled: true
-      endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
-      api-key: "${CALIBER_LLM_API_KEY:sk-df67655474664ebfa40406bb770fa216}"
+      endpoint: "${CALIBER_LLM_ENDPOINT:https://coding.dashscope.aliyuncs.com/v1/chat/completions}"
+      api-key: "${CALIBER_LLM_API_KEY:}"
       model: "qwen3-max"
       timeout-seconds: 35
       temperature: 0.0
@@ -105,3 +105,15 @@ caliber:
       circuit-breaker-failure-threshold: 5
       circuit-breaker-open-seconds: 60
       secret-key: ${CALIBER_LLM_SECRET_KEY:caliber-local-llm-secret}
+  graph-runtime:
+    projection-enabled: ${CALIBER_GRAPH_PROJECTION_ENABLED:false}
+    read-enabled: ${CALIBER_GRAPH_READ_ENABLED:false}
+    vector-enabled: ${CALIBER_GRAPH_VECTOR_ENABLED:false}
+    rebuild-enabled: ${CALIBER_GRAPH_REBUILD_ENABLED:true}
+    neo4j-uri: ${CALIBER_NEO4J_URI:bolt://127.0.0.1:7687}
+    neo4j-username: ${CALIBER_NEO4J_USERNAME:neo4j}
+    neo4j-password: ${CALIBER_NEO4J_PASSWORD:neo4j}
+    neo4j-database: ${CALIBER_NEO4J_DATABASE:neo4j}
+    embedding-provider: ${CALIBER_GRAPH_EMBEDDING_PROVIDER:HASH}
+    embedding-model: ${CALIBER_GRAPH_EMBEDDING_MODEL:hash-bow-v1}
+    embedding-dimension: ${CALIBER_GRAPH_EMBEDDING_DIMENSION:32}

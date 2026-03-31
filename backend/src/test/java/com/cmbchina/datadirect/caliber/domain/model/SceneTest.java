@@ -59,6 +59,7 @@ class SceneTest {
                 "零售客户信息查询-更新",
                 null,
                 "零售金融",
+                "FACT_DETAIL",
                 "desc",
                 "definition",
                 "",

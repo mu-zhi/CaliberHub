@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 
 public record ImportTaskDTO(
         String taskId,
+        String materialId,
         String status,
         Integer currentStep,
         String sourceType,

@@ -1,0 +1,195 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - link "跳转到主内容" [ref=e2] [cursor=pointer]:
+      - /url: "#mainContent"
+    - banner [ref=e3]:
+      - heading "数据 直通车 让用户没有难取的数据" [level=1] [ref=e5]:
+        - img [ref=e6]
+        - generic [ref=e13]:
+          - generic [ref=e14]: 数据
+          - generic [ref=e15]: 直通车
+        - generic [ref=e16]: 让用户没有难取的数据
+      - navigation "一级模块导航" [ref=e17]:
+        - link "首页总览" [ref=e18] [cursor=pointer]:
+          - /url: "#/overview"
+        - link "数据地图" [ref=e19] [cursor=pointer]:
+          - /url: "#/map"
+        - link "知识生产台" [ref=e20] [cursor=pointer]:
+          - /url: "#/production"
+        - link "发布中心" [ref=e21] [cursor=pointer]:
+          - /url: "#/publish"
+        - link "运行决策台" [ref=e22] [cursor=pointer]:
+          - /url: "#/runtime"
+        - link "审批与导出" [ref=e23] [cursor=pointer]:
+          - /url: "#/approval"
+        - link "监控与审计" [ref=e24] [cursor=pointer]:
+          - /url: "#/monitoring"
+      - generic [ref=e25]:
+        - generic "全局工具区" [ref=e26]:
+          - link "个人协作" [ref=e27] [cursor=pointer]:
+            - /url: "#/workspace/todo"
+          - link "系统设置" [ref=e28] [cursor=pointer]:
+            - /url: "#/system/guide"
+        - generic [ref=e29]:
+          - generic [ref=e30]: 当前角色
+          - combobox "当前角色" [ref=e31]:
+            - option "系统管理员"
+            - option "数据支持" [selected]
+            - option "数据专家"
+            - option "治理专员"
+            - option "一线用户"
+            - option "合规审计"
+    - main [ref=e33]:
+      - generic [ref=e1116]:
+        - generic [ref=e1117]:
+          - generic [ref=e1118]:
+            - heading "运行决策台" [level=2] [ref=e1119]
+            - paragraph [ref=e1120]: 这里直接串起场景召回、方案选择和 Knowledge Package（知识包）返回，用于验证检索链路是否闭环。
+          - generic [ref=e1121]:
+            - generic [ref=e1122]: MVP 检索验证
+            - button "刷新场景" [ref=e1123] [cursor=pointer]:
+              - generic [ref=e1124]: 刷新场景
+        - generic [ref=e1125]:
+          - generic [ref=e1126]:
+            - generic [ref=e1127]: 已发布样板
+            - strong [ref=e1128]: "1"
+            - generic [ref=e1129]: 当前只展示可运行场景
+          - generic [ref=e1130]:
+            - generic [ref=e1131]: 已声明方案
+            - strong [ref=e1132]: "1"
+            - generic [ref=e1133]: 来自真实方案资产
+          - generic [ref=e1134]:
+            - generic [ref=e1135]: 覆盖分段
+            - strong [ref=e1136]: "1"
+            - generic [ref=e1137]: 用于时段命中判断
+          - generic [ref=e1138]:
+            - generic [ref=e1139]: 图谱投影
+            - strong [ref=e1140]: SKIPPED
+            - generic [ref=e1141]: 2026-03-27 13:45
+        - generic [ref=e1142]:
+          - generic [ref=e1143]:
+            - generic [ref=e1144]:
+              - generic [ref=e1145]:
+                - generic [ref=e1146]:
+                  - heading "当前样板" [level=3] [ref=e1147]
+                  - paragraph [ref=e1148]: 运行决策台默认只读取已发布的代发明细场景。
+                - generic [ref=e1149]: SKIPPED
+              - generic [ref=e1150]:
+                - generic [ref=e1151]: 选择场景
+                - combobox "选择场景" [ref=e1152]:
+                  - option "Step 1：查询 2014 年至今主表明细" [selected]
+              - generic [ref=e1153]:
+                - generic [ref=e1154]:
+                  - term [ref=e1155]: 场景编码
+                  - definition [ref=e1156]: SCN-99C05195BCD8
+                - generic [ref=e1157]:
+                  - term [ref=e1158]: 场景类型
+                  - definition [ref=e1159]: FACT_DETAIL
+                - generic [ref=e1160]:
+                  - term [ref=e1161]: 最新快照
+                  - definition [ref=e1162]: SCN-99C05195BCD8-V001
+                - generic [ref=e1163]:
+                  - term [ref=e1164]: 发布时间
+                  - definition [ref=e1165]: 2026-03-27 13:44
+            - generic [ref=e1166]:
+              - generic [ref=e1167]:
+                - generic [ref=e1168]:
+                  - heading "已发布资产摘要" [level=3] [ref=e1169]
+                  - paragraph [ref=e1170]: 先确认契约、策略和覆盖都已到位，再执行知识包验证。
+                - img [ref=e1171]
+              - generic [ref=e1175]:
+                - article [ref=e1176]:
+                  - generic [ref=e1177]:
+                    - strong [ref=e1178]: 方案资产
+                    - paragraph [ref=e1179]: 取数方案1
+                  - generic [ref=e1180]: "1"
+                - article [ref=e1181]:
+                  - generic [ref=e1182]:
+                    - strong [ref=e1183]: 输入槽位
+                    - paragraph [ref=e1184]: CORP_CARD_NBR、PROTOCOL_NBR
+                  - generic [ref=e1185]: "2"
+                - article [ref=e1186]:
+                  - generic [ref=e1187]:
+                    - strong [ref=e1188]: 输出契约
+                    - paragraph [ref=e1189]: 协议号、交易日期、金额
+                  - generic [ref=e1190]: "1"
+            - generic [ref=e1191]:
+              - generic [ref=e1192]:
+                - generic [ref=e1193]:
+                  - heading "覆盖与门禁" [level=3] [ref=e1194]
+                  - paragraph [ref=e1195]: 运行前先确认覆盖段和发布门禁都能成立。
+                - img [ref=e1196]
+              - article [ref=e1200]:
+                - generic [ref=e1201]:
+                  - strong [ref=e1202]: 取数方案1覆盖声明
+                  - paragraph [ref=e1203]: 覆盖时段：未显式声明时段；主要来源：PDM_VHIS.T05_AGN_DTL
+                - generic [ref=e1204]: FULL
+              - generic [ref=e1205]:
+                - article [ref=e1206]:
+                  - generic [ref=e1207]:
+                    - strong [ref=e1208]: 场景类型
+                    - paragraph [ref=e1209]: 已满足
+                  - generic [ref=e1210]: 通过
+                - article [ref=e1211]:
+                  - generic [ref=e1212]:
+                    - strong [ref=e1213]: 输出契约
+                    - paragraph [ref=e1214]: 已满足
+                  - generic [ref=e1215]: 通过
+                - article [ref=e1216]:
+                  - generic [ref=e1217]:
+                    - strong [ref=e1218]: 输入槽位
+                    - paragraph [ref=e1219]: 已满足
+                  - generic [ref=e1220]: 通过
+                - article [ref=e1221]:
+                  - generic [ref=e1222]:
+                    - strong [ref=e1223]: 来源接入契约
+                    - paragraph [ref=e1224]: 已满足
+                  - generic [ref=e1225]: 通过
+                - article [ref=e1226]:
+                  - generic [ref=e1227]:
+                    - strong [ref=e1228]: 方案资产
+                    - paragraph [ref=e1229]: 已满足
+                  - generic [ref=e1230]: 通过
+          - generic [ref=e1231]:
+            - generic [ref=e1232]:
+              - generic [ref=e1233]:
+                - generic [ref=e1234]:
+                  - heading "结构化查询" [level=3] [ref=e1235]
+                  - paragraph [ref=e1236]: 先输入标识、时间范围和请求字段，再并行查看召回过程和知识包结果。
+                - generic [ref=e1237]: 操作人：support
+              - generic [ref=e1238]:
+                - generic [ref=e1239]:
+                  - generic [ref=e1240]: 标识类型
+                  - combobox "标识类型" [ref=e1241]:
+                    - option "CORP_CARD_NBR" [selected]
+                    - option "PROTOCOL_NBR"
+                    - option "CORP_CARD_NBR"
+                - generic [ref=e1242]:
+                  - generic [ref=e1243]: 标识值
+                  - textbox "标识值" [ref=e1246]:
+                    - /placeholder: 请输入协议号或客户号
+                - generic [ref=e1247]:
+                  - generic [ref=e1248]:
+                    - generic [ref=e1249]: 开始日期
+                    - textbox "开始日期" [ref=e1252]: 2021-01-01
+                  - generic [ref=e1253]:
+                    - generic [ref=e1254]: 结束日期
+                    - textbox "结束日期" [ref=e1257]: 2021-12-31
+                - generic [ref=e1258]:
+                  - generic [ref=e1259]: 请求字段
+                  - generic [ref=e1260]:
+                    - textbox "请求字段 当前 MVP 依赖契约视图做字段裁剪，命中受限字段会返回 need_approval。" [ref=e1262]:
+                      - /placeholder: 多个字段请用逗号或换行分隔
+                      - text: 协议号, 交易日期, 金额
+                    - paragraph [ref=e1263]: 当前 MVP 依赖契约视图做字段裁剪，命中受限字段会返回 need_approval。
+                - generic [ref=e1264]:
+                  - generic [ref=e1265]: 用途说明
+                  - textbox "用途说明" [ref=e1268]:
+                    - /placeholder: 请输入本次验证用途
+                    - text: 代发明细 MVP 运行验证
+                - button "生成知识包" [ref=e1270] [cursor=pointer]:
+                  - generic [ref=e1271]: 生成知识包
+            - generic [ref=e1272]:
+              - img [ref=e1274]
+              - heading "尚未生成知识包" [level=3] [ref=e1279]
+              - paragraph [ref=e1280]: 当前已选择 Step 1：查询 2014 年至今主表明细，请输入标识值并提交一次检索验证。当前请求字段数：3。

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, WifiOff } from "lucide-react";
 import { apiRequest, apiRequestWithMeta } from "../api/client";
+import { API_CONTRACTS } from "../api/contracts";
 import { UiButton, UiEmptyState } from "../components/ui";
 import { useAuthStore } from "../store/authStore";
 
@@ -522,7 +523,7 @@ export function SystemPage({ view = "llm" }) {
 
   async function loadConfig() {
     try {
-      const data = await apiRequest("/system/llm-preprocess-config");
+      const data = await apiRequest(API_CONTRACTS.llmConfig);
       setConfig({
         enabled: data.enabled !== false,
         endpoint: data.endpoint || "",
@@ -563,7 +564,7 @@ export function SystemPage({ view = "llm" }) {
         apiKey: config.apiKey || "",
         clearApiKey: !!config.clearApiKey,
       };
-      const data = await apiRequest("/system/llm-preprocess-config", {
+      const data = await apiRequest(API_CONTRACTS.llmConfig, {
         method: "PUT",
         body: payload,
       });
@@ -584,7 +585,7 @@ export function SystemPage({ view = "llm" }) {
 
   async function testConfig() {
     try {
-      const { data, meta } = await apiRequestWithMeta("/system/llm-preprocess-config/test", {
+      const { data, meta } = await apiRequestWithMeta(API_CONTRACTS.llmConfigTest, {
         method: "POST",
         body: {
           rawText: testDraft.rawText,
@@ -637,7 +638,7 @@ export function SystemPage({ view = "llm" }) {
 
   async function fetchModels() {
     try {
-      const result = await apiRequest("/system/llm-preprocess-config/models", {
+      const result = await apiRequest(API_CONTRACTS.llmConfigModels, {
         method: "POST",
         body: {
           endpoint: config.endpoint,
@@ -657,7 +658,7 @@ export function SystemPage({ view = "llm" }) {
 
   async function loadPrompts() {
     try {
-      const data = await apiRequest("/system/llm-preprocess-config/prompts");
+      const data = await apiRequest(API_CONTRACTS.llmPromptConfig);
       const defaults = defaultPrompts();
       setPrompt({
         preprocessSystemPrompt: data.preprocessSystemPrompt || defaults.preprocessSystemPrompt,
@@ -684,7 +685,7 @@ export function SystemPage({ view = "llm" }) {
 
   async function savePrompt() {
     try {
-      const data = await apiRequest("/system/llm-preprocess-config/prompts", {
+      const data = await apiRequest(API_CONTRACTS.llmPromptConfig, {
         method: "PUT",
         body: {
           preprocessSystemPrompt: prompt.preprocessSystemPrompt,
@@ -712,7 +713,7 @@ export function SystemPage({ view = "llm" }) {
 
   async function resetPrompt() {
     try {
-      const data = await apiRequest("/system/llm-preprocess-config/prompts/reset", {
+      const data = await apiRequest(API_CONTRACTS.llmPromptReset, {
         method: "POST",
         body: {},
       });
@@ -740,7 +741,7 @@ export function SystemPage({ view = "llm" }) {
 
   async function previewPromptDraft() {
     try {
-      const { data, meta } = await apiRequestWithMeta("/system/llm-preprocess-config/prompts/preview", {
+      const { data, meta } = await apiRequestWithMeta(API_CONTRACTS.llmPromptPreview, {
         method: "POST",
         body: {
           rawText: promptPreviewDraft.rawText,
@@ -767,10 +768,10 @@ export function SystemPage({ view = "llm" }) {
         </div>
         <div className="panel-block">
           <h3>系统定位</h3>
-          <p className="subtle-note">当前阶段以口径治理和数据地图为核心能力。</p>
+          <p className="subtle-note">当前阶段以知识生产台和数据地图为核心能力。</p>
           <ul className="plain-list">
-            <li>业务场景是最小治理单元，支持多取数方案表达历史与口径差异。</li>
-            <li>口径治理主流程为导入、修订、发布，强调“信息不丢失”。</li>
+            <li>业务场景是正式语义组织单元，方案资产用于表达同一场景下的历史与口径差异。</li>
+            <li>知识生产主流程为导入、质检、对照、编辑发布，强调“信息不丢失”。</li>
             <li>数据地图用于消费与理解治理成果，支持关系浏览与路径分析。</li>
           </ul>
         </div>

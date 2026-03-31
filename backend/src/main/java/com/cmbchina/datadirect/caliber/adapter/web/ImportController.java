@@ -69,7 +69,8 @@ public class ImportController {
                         payload,
                         taskId,
                         stage -> sendEventUnchecked(emitter, "stage", stage),
-                        draft -> sendEventUnchecked(emitter, "draft", draft)
+                        draft -> sendEventUnchecked(emitter, "draft", draft),
+                        graphPatch -> sendEventUnchecked(emitter, "graph_patch", graphPatch)
                 );
                 sendEvent(emitter, "done", result);
                 emitter.complete();

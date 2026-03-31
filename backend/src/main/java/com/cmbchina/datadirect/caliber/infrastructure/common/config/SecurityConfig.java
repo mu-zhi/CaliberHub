@@ -61,6 +61,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(requests -> {
                     requests.requestMatchers("/", "/index.html", "/favicon.svg", "/assets/**", "/business_categories.json").permitAll();
+                    requests.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
                     requests.requestMatchers("/actuator/health", "/actuator/info").permitAll();
                     requests.requestMatchers("/api/system/auth/token").permitAll();
                     requests.requestMatchers("/actuator/**").hasRole("ADMIN");

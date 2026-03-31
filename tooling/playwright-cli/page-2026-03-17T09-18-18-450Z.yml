@@ -1,0 +1,570 @@
+- generic [ref=e1]:
+  - generic [ref=e9]:
+    - img [ref=e11]:
+      - generic [ref=e302]:
+        - generic [ref=e307]:
+          - text: 第 3 章三层架构与核心节点图
+          - text: 用“代发明细查询”这个真实案例，把三层架构、12 类核心业务节点和 18 类总节点讲成一条能听懂的主线。
+        - generic [ref=e312]:
+          - text: 图例
+          - text: 蓝色：场景治理层 / 问题入口
+          - text: 绿色：语义知识层
+          - text: 黄色：元数据层
+          - text: 红色：治理对象
+          - text: 灰色：18 类对照与讲解顺序
+          - text: 橙色：批注
+          - text: 实线：定义 / 使用 / 组成
+          - text: 虚线：映射 / 版本 / 证据
+        - generic [ref=e319]: 先看一个真实问题
+        - generic [ref=e324]: 先把“用户到底要查什么”讲清楚，再回看为什么要有三层。
+        - generic [ref=e329]:
+          - text: 一个真实问题
+          - text: 查某客户在给定时间范围内的代发明细
+          - text: 关注：交易日期 / 代发协议号 / 代发批次号 / 户口号 / 户口名称 / 交易金额 / 代发状态
+        - generic [ref=e334]:
+          - text: 业务领域
+          - text: 公司业务
+        - generic [ref=e339]:
+          - text: 业务场景
+          - text: 代发明细查询
+          - text: 主对象：代发明细记录
+          - text: 默认时间：TRX_DT（交易日期）
+        - generic [ref=e344]:
+          - text: 场景边界
+          - text: 适用：通过代发协议号查询客户代发明细
+          - text: 不适用：2004 年前柜面历史代发 / 代发批次汇总口径
+          - text: 说明：公司户口号、公司客户号只是入口，不默认拆新场景
+        - generic [ref=e349]:
+          - text: 标准输出字段
+          - text: 交易日期 / 代发协议号 / 代发批次号
+          - text: 户口号 / 户口名称 / 交易金额
+          - text: 代发状态 / 客户号 / 交易摘要
+        - generic [ref=e355]:
+          - text: 批注
+          - text: 这张图不再从 18 类名词开始背，而是先跟着一个真实场景走一遍，再回看 18 类总表。
+        - generic [ref=e361]: 问题收敛到场景
+        - generic [ref=e367]: 包含
+        - generic [ref=e373]: 定义边界
+        - generic [ref=e379]: 交付字段
+        - generic [ref=e386]: 语义知识层：把“业务怎么说”和“数据怎么落”连接起来
+        - generic [ref=e391]: 这里不只是放抽象名词，而是用当前案例中的真实对象来解释每一类节点为什么存在。
+        - generic [ref=e396]: 入口与边界解释
+        - generic [ref=e401]:
+          - text: 规范词元
+          - text: 代发明细记录
+        - generic [ref=e406]:
+          - text: 业务术语
+          - text: 代发明细
+          - text: 代发流水
+          - text: 代发交易明细
+        - generic [ref=e411]:
+          - text: 领域概念
+          - text: 代发
+        - generic [ref=e416]:
+          - text: 派生规则
+          - text: 公司户口号 / 公司客户号 -> 代发协议号
+          - text: 作用：把不同入口收敛到同一业务场景
+        - generic [ref=e422]:
+          - text: 批注
+          - text: 派生规则解决“从什么入口进”，不解决“表和表怎么连”；它和表间关联关系对象不是一回事。
+        - generic [ref=e427]: 对象与口径定义
+        - generic [ref=e432]:
+          - text: 业务口径
+          - text: 先查代发协议号，再查代发明细
+          - text: 默认时间：交易日期
+          - text: 批次汇总金额不是当前默认结果
+        - generic [ref=e437]:
+          - text: 组合概念
+          - text: 代发明细记录
+        - generic [ref=e442]:
+          - text: 字段概念
+          - text: 交易日期 / 代发协议号 / 代发批次号 / 户口号
+          - text: 户口名称 / 交易金额 / 代发状态 / 客户号 / 交易摘要
+        - generic [ref=e447]:
+          - text: 这里回答两个问题
+          - text: 1. 这个场景到底在交付什么对象
+          - text: 2. 这个对象默认要返回哪些字段
+        - generic [ref=e452]: 白盒路径与执行解释
+        - generic [ref=e457]:
+          - text: 表间关联关系对象
+          - text: 协议出款户口_合作方协议关联
+          - text: 左表 = NLJ54_AGF_PROTOCOL_PAY_CARD_T
+          - text: 右表 = T03_SF_COOP_AGR_INF_S
+          - text: 关联键 = PROTOCOL_NBR / AGR_ID
+        - generic [ref=e462]:
+          - text: 表间关联关系对象
+          - text: 合作方协议_代发明细关联
+          - text: 左表 = T03_SF_COOP_AGR_INF_S
+          - text: 右表 = T05_AGN_DTL
+          - text: 关联键 = AGR_ID / AUTO_PAY_ARG_ID
+        - generic [ref=e467]:
+          - text: 字典
+          - text: 代发状态代码 AGN_STS_CD（待补码值说明）
+          - text: 户口类型代码 EAC_TYP_CD（待补码值说明）
+          - text: 当前材料未给出稳定码表原文
+        - generic [ref=e472]:
+          - text: SQL 代码段
+          - text: 先查协议号，再查 PDM_VHIS.T05_AGN_DTL
+          - text: FROM NDS_VHIS.NLJ54_AGF_PROTOCOL_PAY_CARD_T
+          - text: JOIN PDM_VHIS.T03_SF_COOP_AGR_INF_S
+          - text: JOIN PDM_VHIS.T05_AGN_DTL
+        - generic [ref=e478]:
+          - text: 批注
+          - text: 表间关联关系对象负责白盒关联；字典只在拿到稳定码表证据后再落图；SQL 代码段负责可执行查询路径。
+        - generic [ref=e484]: 归一到
+        - generic [ref=e490]: 使用业务口径
+        - generic [ref=e496]: 绑定主对象
+        - generic [ref=e502]: 由…组成
+        - generic [ref=e508]: 统一入口
+        - generic [ref=e514]: 使用关联关系
+        - generic [ref=e520]: 使用关联关系
+        - generic [ref=e526]: 使用字典
+        - generic [ref=e532]: 使用 SQL 代码段
+        - generic [ref=e538]: 限定对象边界
+        - generic [ref=e545]: 元数据层：按“数据库 -> 模式 -> 表 -> 字段”展开
+        - generic [ref=e550]: 主链路、批次链路和历史分表链分开画，避免把真实物理落点压成一个集合框。
+        - generic [ref=e555]:
+          - text: 数据库
+          - text: 高斯数据库（GaussDB）
+        - generic [ref=e560]:
+          - text: 模式
+          - text: NDS_VHIS
+        - generic [ref=e565]:
+          - text: 来源表
+          - text: NLJ54_AGF_PROTOCOL_PAY_CARD_T
+        - generic [ref=e570]:
+          - text: 来源表
+          - text: T03_SF_COOP_AGR_INF_S
+        - generic [ref=e575]:
+          - text: 来源表
+          - text: T05_AGN_DTL
+        - generic [ref=e580]:
+          - text: 字段清单｜NLJ54_AGF_PROTOCOL_PAY_CARD_T
+          - text: PROTOCOL_NBR / CARD_TYPE / CARD_INTERNAL_NBR / CARD_NBR
+          - text: PAY_ACCT / PAY_NAME / PAY_FULL_NAME / CLIENT_NBR
+        - generic [ref=e585]:
+          - text: 字段概念映射主清单
+          - text: 代发协议号 -> PROTOCOL_NBR / AGR_ID
+          - text: 代发批次号 -> AGN_BCH_SEQ
+          - text: 交易日期 -> TRX_DT
+          - text: 交易金额 -> TRX_AMT
+          - text: 客户号 -> CLIENT_NBR / CUST_ID
+          - text: 交易摘要 -> TRX_TXT_CD / CUST_SMR
+        - generic [ref=e591]: 包含
+        - generic [ref=e597]: 包含
+        - generic [ref=e603]: 包含
+        - generic [ref=e609]: 包含
+        - generic [ref=e615]: 映射到
+        - generic [ref=e621]: 左表
+        - generic [ref=e627]: 右表
+        - generic [ref=e633]: 右表
+        - generic [ref=e640]: 治理对象：三层之外，但横切三层
+        - generic [ref=e645]: 任何层的对象都可以挂证据、版本和门禁结果，所以治理对象必须单独存在。
+        - generic [ref=e650]:
+          - text: 证据片段
+          - text: SQL 片段 / 口径文档片段 / 人工确认
+          - text: 决定代发协议号与代发明细关系是否可追溯
+        - generic [ref=e655]:
+          - text: 版本快照
+          - text: 代发明细查询@v20260317
+          - text: 草稿 / 已发布 / 已废弃
+        - generic [ref=e660]:
+          - text: 运行时约束
+          - text: 先过 置信度分值（置信度分值） / 合法性 / 边界门禁
+          - text: 再看 可靠性得分（可靠性得分）
+        - generic [ref=e666]:
+          - text: 批注
+          - text: 治理对象不解释业务含义，但它决定对象能不能发布、能不能追溯、能不能回放。
+        - generic [ref=e672]: 证据来自
+        - generic [ref=e678]: 挂载版本
+        - generic [ref=e684]: 进入运行门禁
+        - generic [ref=e691]: 18 类图元如何落到这个案例
+        - generic [ref=e696]: 右侧不是附录，而是把抽象类别重新落回真实对象，帮助讲解时随时对照。
+        - generic [ref=e701]:
+          - text: 18 类图元对照（类型 | 本案例示例 | 说明）
+          - text: 1 业务领域 | 公司业务 | 场景所属父域
+          - text: 2 业务场景 | 代发明细查询 | 运行时主中心
+          - text: 3 规范词元 | 代发明细记录 | 标准化入口
+          - text: 4 业务术语 | 代发明细 / 代发流水 / 代发交易明细 | 业务说法
+          - text: 5 业务口径 | 先查协议号，再查代发明细 | 边界定义
+          - text: 6 字段概念 | 交易日期 / 代发协议号 / 代发批次号 / 户口号 / 户口名称 / 交易金额 / 代发状态 / 客户号 / 交易摘要 | 标准输出字段基线
+          - text: 7 组合概念 | 代发明细记录 | 交付对象
+          - text: 8 领域概念 | 代发 | 域边界
+          - text: 9 派生规则 | 公司户口号 / 公司客户号 -> 代发协议号 | 入口收敛规则
+          - text: 10 表间关联关系对象 | 协议出款户口_合作方协议关联 / 合作方协议_代发明细关联 | 白盒关联
+          - text: 11 SQL 代码段 | 协议号查询 + 代发明细查询片段 | 可执行写法
+          - text: 12 字典 | 代发状态代码 / 户口类型代码（待补证据） | 码值解释待补
+          - text: 13 数据库 | 高斯数据库（GaussDB） | 物理载体
+          - text: 14 模式 | NDS_VHIS / PDM_VHIS / 历史分表链 | 物理分组
+          - text: 15 来源表 | NLJ54_AGF_PROTOCOL_PAY_CARD_T / T03_SF_COOP_AGR_INF_S / T05_AGN_DTL / T05_AGN_BCH_EVT | 物理落点
+          - text: 16 字段 | PROTOCOL_NBR / AGR_ID / AUTO_PAY_ARG_ID / AGN_BCH_SEQ / TRX_DT / TRX_AMT / TRX_TXT_CD 等 | 字段落点
+          - text: 17 证据片段 | SQL 片段 / 文档片段 / 人工确认 | 治理对象
+          - text: 18 版本快照 | 业务场景版本快照 | 治理对象
+        - generic [ref=e706]:
+          - text: 讲解顺序
+          - text: 1. 先问用户到底要查什么
+          - text: 2. 再看业务场景如何定边界
+          - text: 3. 再看语义层如何把协议号、批次号、明细和入口规则讲明白
+          - text: 4. 最后看元数据层把这些解释落到真实表字段
+          - text: 5. 讲完再回看 18 类总节点，自然就能听懂
+        - generic [ref=e711]:
+          - text: 关键约束
+          - text: 1. 业务场景是运行时主中心，不能被主题节点或语义视图反向替代
+          - text: 2. 元数据层不可自由合并，否则失去真实落点
+          - text: 3. 语义层允许冗余，但要缓慢收口
+          - text: 4. 派生规则、表间关联关系对象、字典、SQL 代码段各自回答不同问题
+        - generic [ref=e717]: 挂载输出字段
+        - generic [ref=e723]: 关键对象可追溯
+        - generic [ref=e729]: 讲解主线
+        - generic [ref=e734]:
+          - text: 模式
+          - text: PDM_VHIS
+        - generic [ref=e739]:
+          - text: 模式
+          - text: 历史分表链
+          - text: LGC_EAM / LGC_EDW / OAGN_VHIS
+        - generic [ref=e744]:
+          - text: 来源表
+          - text: T05_AGN_BCH_EVT
+        - generic [ref=e749]:
+          - text: 历史表
+          - text: CORINFO_PKTRSLOGP_YEAR
+        - generic [ref=e754]:
+          - text: 历史表
+          - text: ODS_C3A3_A2DPADTLP_YEAR / OAGN_AGN_DTL_EVT
+        - generic [ref=e759]:
+          - text: 字段清单｜T03_SF_COOP_AGR_INF_S
+          - text: AGR_ID / AGR_MDF / CUST_ID / ORG_ID
+          - text: OPN_DT / EFT_DT / MTU_DT / AGR_STS_CD
+        - generic [ref=e764]:
+          - text: 字段清单｜T05_AGN_DTL
+          - text: EVT_ID / AUTO_PAY_ARG_ID / AGN_BCH_SEQ / DTL_SEQ_NBR
+          - text: EAC_NBR / EAC_NM / EAC_TYP_CD / CUST_ID / ACT_ID / ACT_CD
+          - text: TRX_AMT / TRX_SEQ / TRX_SET / TRX_TXT_CD / CUST_SMR
+          - text: TRX_DT / TRX_TM / AGN_STS_CD
+        - generic [ref=e769]:
+          - text: 字段清单｜T05_AGN_BCH_EVT
+          - text: AUTO_PAY_ARG_ID / AGN_BCH_SEQ / ESTB_DT / ESTB_TM
+          - text: TOT_CNT / TOT_AMT / SUC_CNT / SUC_AMT
+          - text: TRX_TXT_CD / AGN_STS_CD
+        - generic [ref=e774]:
+          - text: 历史字段清单
+          - text: EPXCNVNBR / EPXBTHNBR / EPXEACNBR / EPXTRXAMT / EPXTRXDAT
+          - text: DTLBTHNBR / DTLEACNBR / DTLTRSAMT / DTLTRSDAT
+          - text: BCH_SEQ / EAC_NBR / TRX_AMT / TRX_DT
+        - generic [ref=e780]:
+          - text: 批注
+          - text: 这次元数据层不再用“模式集合 + 表示意 + 字段示意”糊过去，而是把主链路、批次链路和历史分表链都拆开，评审时能一眼看见真实落点。
+        - generic [ref=e786]: 包含
+        - generic [ref=e792]: 包含
+        - generic [ref=e798]: 包含
+        - generic [ref=e804]: 包含
+        - generic [ref=e810]: 包含
+        - generic [ref=e816]: 包含字段
+        - generic [ref=e822]: 包含字段
+        - generic [ref=e828]: 包含字段
+        - generic [ref=e834]: 包含字段
+        - generic [ref=e840]: 包含字段
+        - generic [ref=e846]: 包含字段
+        - generic [ref=e852]: 左表
+        - generic [ref=e2405]:
+          - text: 第 5 章知识生产链路图
+          - text: 统一采用“代发明细查询”作为完整展开链：真实输入 -> 文本知识流 -> 元数据实证流 -> 汇合对象 -> 门禁与发布建议。
+        - generic [ref=e2410]:
+          - text: 图例
+          - text: 蓝色：场景 / 输入 / 输出
+          - text: 绿色：语义对象与语义召回
+          - text: 黄色：元数据与确定性定位
+          - text: 紫色：门禁 / 状态 / 评分
+          - text: 红色：风险 / 人工复核
+          - text: 橙色：批注
+          - text: 实线：主链路
+          - text: 虚线：映射 / 校验 / 引用
+        - generic [ref=e2417]: 真实输入材料
+        - generic [ref=e2422]: 先回答“原始材料是什么”，再回答如何抽取和校验。
+        - generic [ref=e2427]:
+          - text: 口径段落
+          - text: 内容：代发明细定义、适用范围、不适用范围
+          - text: 作用：说明当前场景不覆盖 2004 年前柜面历史代发
+        - generic [ref=e2432]:
+          - text: 历史 SQL
+          - text: 内容：主链路 SQL、批次 SQL、历史回查 SQL
+          - text: 作用：提供表、字段、关联和过滤条件
+        - generic [ref=e2437]:
+          - text: 问题样例
+          - text: 内容：按客户号 / 户口号 / 协议号 / 批次号查询
+          - text: 作用：定义入口参数和预期输出
+        - generic [ref=e2442]:
+          - text: 字段解释
+          - text: 内容：交易日期、代发状态、交易摘要等
+          - text: 作用：支撑字段概念和字典映射
+        - generic [ref=e2449]: 文本知识流：语义召回侧
+        - generic [ref=e2454]: 负责把“用户怎么说”和“业务怎么讲”组织成场景、规则、概念和输出契约。
+        - generic [ref=e2459]:
+          - text: 文本分类
+          - text: 输入：口径段落 / SQL / 问题样例 / 字段解释
+          - text: 处理：按材料类型分流
+          - text: 产物：材料标签
+          - text: 去向：决定抽取规则
+        - generic [ref=e2464]:
+          - text: 三元组生成
+          - text: 输入：代发表述、历史边界、输出期望
+          - text: 处理：生成候选事实
+          - text: 产物：初级三元组
+          - text: 去向：进入合法性校验与推理
+        - generic [ref=e2469]:
+          - text: 推理
+          - text: 输入：客户号、户口号、代发协议号
+          - text: 处理：推导入口收敛关系
+          - text: 产物：派生规则
+          - text: 去向：收敛到统一场景入口
+        - generic [ref=e2474]:
+          - text: 语义注入
+          - text: 输入：交易日期、代发批次号、代发状态
+          - text: 处理：绑定字段概念、默认时间、边界说明
+          - text: 产物：字段概念、默认时间语义、适用范围
+          - text: 去向：进入场景生成
+        - generic [ref=e2479]:
+          - text: 场景生成
+          - text: 输入：已注入语义的候选事实
+          - text: 处理：组织场景结构
+          - text: 产物：业务场景、主组合概念、标准输出字段清单
+          - text: 去向：与元数据实证流汇合
+        - generic [ref=e2485]:
+          - text: 语义召回原则
+          - text: 业务场景、业务口径、字段概念、组合概念、派生规则、表间关联关系对象、字典都先通过语义召回与关键词命中做候选收敛。
+        - generic [ref=e2491]: 输入
+        - generic [ref=e2497]: 输入
+        - generic [ref=e2502]: 下一步
+        - generic [ref=e2507]: 下一步
+        - generic [ref=e2512]: 下一步
+        - generic [ref=e2517]: 下一步
+        - generic [ref=e2524]: 元数据实证流：确定性定位侧
+        - generic [ref=e2529]: 负责把数据库、模式、表、字段、表间关联关系和 SQL 可执行性全部落到真实物理结构。
+        - generic [ref=e2534]:
+          - text: 数据库
+          - text: 高斯数据库（GaussDB）
+          - text: 作用：物理载体
+        - generic [ref=e2539]:
+          - text: 模式
+          - text: NDS_VHIS
+        - generic [ref=e2544]:
+          - text: 模式
+          - text: PDM_VHIS
+        - generic [ref=e2549]:
+          - text: 模式
+          - text: 历史分表链
+          - text: LGC_EAM / LGC_EDW / OAGN_VHIS
+        - generic [ref=e2555]: 包含
+        - generic [ref=e2561]: 包含
+        - generic [ref=e2566]: 包含
+        - generic [ref=e2571]:
+          - text: 来源表
+          - text: NLJ54_AGF_PROTOCOL_PAY_CARD_T
+        - generic [ref=e2577]: 包含
+        - generic [ref=e2582]:
+          - text: 字段清单
+          - text: PROTOCOL_NBR / CARD_NBR / PAY_ACCT
+          - text: PAY_NAME / PAY_FULL_NAME / CLIENT_NBR
+        - generic [ref=e2590]:
+          - text: 来源表
+          - text: T03_SF_COOP_AGR_INF_S
+        - generic [ref=e2596]: 包含
+        - generic [ref=e2601]:
+          - text: 字段清单
+          - text: AGR_ID / CUST_ID / OPN_DT / EFT_DT
+          - text: MTU_DT / AGR_STS_CD
+        - generic [ref=e2609]:
+          - text: 来源表
+          - text: T05_AGN_DTL
+        - generic [ref=e2615]: 包含
+        - generic [ref=e2620]:
+          - text: 字段清单
+          - text: EVT_ID / AUTO_PAY_ARG_ID / AGN_BCH_SEQ / DTL_SEQ_NBR
+          - text: EAC_NBR / EAC_NM / CUST_ID / TRX_AMT
+          - text: TRX_TXT_CD / CUST_SMR / TRX_DT / AGN_STS_CD
+        - generic [ref=e2628]:
+          - text: 来源表
+          - text: T05_AGN_BCH_EVT
+        - generic [ref=e2634]: 包含
+        - generic [ref=e2639]:
+          - text: 字段清单
+          - text: AUTO_PAY_ARG_ID / AGN_BCH_SEQ / ESTB_DT / ESTB_TM
+          - text: TOT_CNT / TOT_AMT / SUC_CNT / SUC_AMT
+          - text: TRX_TXT_CD / AGN_STS_CD
+        - generic [ref=e2647]:
+          - text: 来源表
+          - text: 历史关键表
+        - generic [ref=e2653]: 包含
+        - generic [ref=e2658]:
+          - text: 字段清单
+          - text: CORINFO_PKTRSLOGP_YEAR / ODS_C3A3_A2DPADTLP_YEAR / OAGN_AGN_DTL_EVT
+          - text: 关键字段：EPXCNVNBR / EPXBTHNBR / EPXEACNBR / EPXTRXAMT / EPXTRXDAT
+          - text: DTLBTHNBR / DTLTRSAMT / BCH_SEQ / EAC_NBR / TRX_AMT / TRX_DT
+        - generic [ref=e2666]:
+          - text: 概念映射
+          - text: 代发协议号 -> PROTOCOL_NBR / AGR_ID
+          - text: 代发批次号 -> AGN_BCH_SEQ
+          - text: 交易日期 -> TRX_DT
+          - text: 交易金额 -> TRX_AMT
+          - text: 客户号 -> CLIENT_NBR / CUST_ID
+        - generic [ref=e2671]:
+          - text: 统计特征对比
+          - text: 校验 TRX_DT 时间分布、TRX_AMT 值域、AGN_BCH_SEQ 唯一性与批次稳定性
+        - generic [ref=e2676]:
+          - text: SQL 引擎验证器
+          - text: 校验主链路 SQL、批次 SQL、历史回查 SQL
+          - text: 固化两条表间关联关系对象
+          - text: 输出可执行性判断
+        - generic [ref=e2682]:
+          - text: 确定性定位原则
+          - text: 数据库、模式、来源表、字段不走向量合并
+          - text: 只允许精确匹配、结构化索引与有限模糊匹配
+        - generic [ref=e2689]: 汇合对象、治理对象与发布门禁
+        - generic [ref=e2694]: 两条流先在对象上对齐，再统一进入合法性与置信度门禁。
+        - generic [ref=e2699]:
+          - text: 主组合概念
+          - text: 代发明细记录
+        - generic [ref=e2704]:
+          - text: 默认时间语义
+          - text: TRX_DT（交易日期）
+        - generic [ref=e2709]:
+          - text: 表间关联关系对象
+          - text: 协议出款户口_合作方协议关联
+          - text: 合作方协议_代发明细关联
+        - generic [ref=e2714]:
+          - text: 标准输出字段清单
+          - text: 代发协议号 / 代发批次号 / 交易日期
+          - text: 户口号 / 户口名称 / 交易金额
+          - text: 代发状态 / 客户号 / 交易摘要
+        - generic [ref=e2719]:
+          - text: 治理对象
+          - text: 证据片段：SQL 片段 / 文档片段 / 人工确认
+          - text: 版本快照：只追加版本，不直接覆盖既有已发布对象
+        - generic [ref=e2724]:
+          - text: 对象级门禁
+          - text: 先过 conf_score
+          - text: 低于 0.90 -> 需人工复核
+        - generic [ref=e2729]:
+          - text: 合法性与边界门禁
+          - text: 检查关系合法性、场景边界、标准输出字段契约
+        - generic [ref=e2734]:
+          - text: 发布建议
+          - text: allow / need_approval / deny
+          - text: 只有通过门禁的结果才能进入主图
+        - generic [ref=e2740]:
+          - text: 批注
+          - text: 知识生产不是“抽完就发”。文本知识流负责生成候选业务语义，元数据实证流负责把数据库 -> 模式 -> 表 -> 字段的真实落点讲清楚，只有四个汇合对象都对齐后，才有资格进入发布门禁。
+        - generic [ref=e2746]: 语义产物
+        - generic [ref=e2752]: 物理映射
+        - generic [ref=e2758]: 默认时间实证
+        - generic [ref=e2764]: 固化关联
+        - generic [ref=e2770]: 场景输出契约
+        - generic [ref=e2776]: 进入门禁
+        - generic [ref=e2781]: 置信度通过
+        - generic [ref=e2786]: 合法性通过
+        - generic [ref=e2792]: 提供证据 / 版本
+    - textbox [active]
+  - generic [ref=e168]:
+    - generic "插入页面" [ref=e1024]
+    - generic "页面" [ref=e1026]
+    - generic "三层架构与核心节点 (DsfcN9To4RMZfU35aS87) [1]" [ref=e1029]:
+      - generic [ref=e1030]: 三层架构与核心节点
+    - link "jgraph/drawio" [ref=e1032] [cursor=pointer]:
+      - /url: https://github.com/jgraph/drawio
+      - img "jgraph/drawio" [ref=e1033]
+    - textbox "缩放 (Alt+Mousewheel)" [ref=e179]: 40%
+  - generic "未命名绘图" [ref=e180]:
+    - generic [ref=e181]:
+      - generic "绘图" [ref=e182] [cursor=pointer]
+      - generic "形状" [ref=e183] [cursor=pointer]
+      - generic "格式 (⌘+⇧+P)" [ref=e184] [cursor=pointer]: 格式
+    - generic [ref=e185]:
+      - generic "插入" [ref=e186] [cursor=pointer]
+      - generic "删除" [ref=e187] [cursor=pointer]
+    - generic [ref=e188]:
+      - generic "撤销 (⌘+Z)" [ref=e189] [cursor=pointer]
+      - generic "重做 (⌘+⇧+Z)" [ref=e190]
+    - generic [ref=e191]:
+      - generic "适应大小 (⌘+H)" [ref=e192] [cursor=pointer]
+      - generic "放大 (⌘ +)" [ref=e193] [cursor=pointer]
+      - generic "缩小 (⌘ -)" [ref=e194] [cursor=pointer]
+    - generic "修改未保存。点击此处保存。" [ref=e2872] [cursor=pointer]
+  - table [ref=e2874]:
+    - rowgroup [ref=e2875]:
+      - row "设置" [ref=e2876] [cursor=pointer]:
+        - cell
+        - cell "设置" [ref=e2877]
+        - cell [ref=e2878]
+      - row [ref=e2880]:
+        - cell
+        - cell [ref=e2881]:
+          - separator [ref=e2882]
+      - row "文件" [ref=e2883] [cursor=pointer]:
+        - cell
+        - cell "文件" [ref=e2884]
+        - cell [ref=e2885]
+      - row [ref=e2887]:
+        - cell
+        - cell [ref=e2888]:
+          - separator [ref=e2889]
+      - row "形状 ⌘+⇧+K" [ref=e2890] [cursor=pointer]:
+        - cell
+        - cell "形状" [ref=e2891]
+        - cell "⌘+⇧+K" [ref=e2892]
+      - row "格式 ⌘+⇧+P" [ref=e2893] [cursor=pointer]:
+        - cell
+        - cell "格式" [ref=e2894]
+        - cell "⌘+⇧+P" [ref=e2895]
+      - row "图层 ⌘+⇧+L" [ref=e2896] [cursor=pointer]:
+        - cell
+        - cell "图层" [ref=e2897]
+        - cell "⌘+⇧+L" [ref=e2898]
+      - row "标签 ⌘+K" [ref=e2899] [cursor=pointer]:
+        - cell
+        - cell "标签" [ref=e2900]
+        - cell "⌘+K" [ref=e2901]
+      - row [ref=e2902]:
+        - cell
+        - cell [ref=e2903]:
+          - separator [ref=e2904]
+      - row "查找/替换 ⌘+F" [ref=e2905] [cursor=pointer]:
+        - cell
+        - cell "查找/替换" [ref=e2906]
+        - cell "⌘+F" [ref=e2907]
+      - row [ref=e2908]:
+        - cell
+        - cell [ref=e2909]:
+          - separator [ref=e2910]
+      - row "导出为" [ref=e2911] [cursor=pointer]:
+        - cell
+        - cell "导出为" [ref=e2912]
+        - cell [ref=e2913]
+      - row "导入自" [ref=e2915] [cursor=pointer]:
+        - cell
+        - cell "导入自" [ref=e2916]
+        - cell [ref=e2917]
+      - row [ref=e2919]:
+        - cell
+        - cell [ref=e2920]:
+          - separator [ref=e2921]
+      - row "打印... ⌘+P" [ref=e2922] [cursor=pointer]:
+        - cell
+        - cell "打印..." [ref=e2923]
+        - cell "⌘+P" [ref=e2924]
+      - row [ref=e2925]:
+        - cell
+        - cell [ref=e2926]:
+          - separator [ref=e2927]
+      - row "帮助" [ref=e2928] [cursor=pointer]:
+        - cell
+        - cell "帮助" [ref=e2929]
+        - cell [ref=e2930]
+      - row [ref=e2932]:
+        - cell
+        - cell [ref=e2933]:
+          - separator [ref=e2934]
+      - row "关闭" [ref=e2935] [cursor=pointer]:
+        - cell
+        - cell "关闭" [ref=e2936]
+        - cell [ref=e2937]

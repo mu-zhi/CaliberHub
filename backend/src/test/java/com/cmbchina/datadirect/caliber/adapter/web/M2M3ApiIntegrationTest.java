@@ -1,5 +1,20 @@
 package com.cmbchina.datadirect.caliber.adapter.web;
 
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ContractViewMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.InputSlotSchemaMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.OutputContractMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanSchemaLinkMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceContractMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceIntakeContractMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.AbstractSnapshotGraphAuditablePO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.ContractViewPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.InputSlotSchemaPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.OutputContractPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanSchemaLinkPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.SourceContractPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.SourceIntakeContractPO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -10,6 +25,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,12 +48,34 @@ class M2M3ApiIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private PlanMapper planMapper;
+
+    @Autowired
+    private OutputContractMapper outputContractMapper;
+
+    @Autowired
+    private InputSlotSchemaMapper inputSlotSchemaMapper;
+
+    @Autowired
+    private PlanSchemaLinkMapper planSchemaLinkMapper;
+
+    @Autowired
+    private SourceIntakeContractMapper sourceIntakeContractMapper;
+
+    @Autowired
+    private ContractViewMapper contractViewMapper;
+
+    @Autowired
+    private SourceContractMapper sourceContractMapper;
+
     @Test
     void shouldCompleteM2M3CoreFlow() throws Exception {
         String token = loginAndGetToken("support", "support123");
         long domainId = createDomain(token);
         long sceneId = createScene(token, "M2M3-场景初始");
         updateSceneForPublish(token, sceneId, domainId, "M2M3-场景初始", "M2M3 初始描述");
+        prepareMinimumPublishAssets(sceneId);
 
         long semanticViewId = createSemanticView(token, domainId);
         mockMvc.perform(post("/api/scenes/{id}/references", sceneId)
@@ -65,6 +106,7 @@ class M2M3ApiIntegrationTest {
                 .andExpect(jsonPath("$.versionNo").value(1));
 
         updateSceneForPublish(token, sceneId, domainId, "M2M3-场景修订", "M2M3 二次描述");
+        prepareMinimumPublishAssets(sceneId);
         mockMvc.perform(post("/api/scenes/{id}/versions", sceneId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -228,18 +270,51 @@ class M2M3ApiIntegrationTest {
                 .andExpect(jsonPath("$.serviceSpecCount").value(1));
     }
 
+    @Test
+    void shouldCreatePublishedSnapshotBeforeGraphProjection() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        long domainId = createDomain(token);
+        long sceneId = createScene(token, "代发明细查询");
+        updateSceneForPublish(token, sceneId, domainId, "代发明细查询", "按协议号查询代发明细");
+        prepareMinimumPublishAssets(sceneId);
+
+        MvcResult publishResult = mockMvc.perform(post("/api/scenes/{id}/publish", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "verifiedAt": "2026-03-29T10:00:00+08:00",
+                                  "changeSummary": "发布代发明细样板",
+                                  "operator": "support"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.snapshotId").isNumber())
+                .andReturn();
+
+        long snapshotId = objectMapper.readTree(publishResult.getResponse().getContentAsString()).path("snapshotId").asLong();
+        assertThat(snapshotId).isPositive();
+
+        mockMvc.perform(get("/api/graphrag/projection/{sceneId}", sceneId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sceneId").value(sceneId))
+                .andExpect(jsonPath("$.snapshotId").value(snapshotId));
+    }
+
     private long createDomain(String token) throws Exception {
+        String suffix = String.valueOf(System.nanoTime());
         MvcResult result = mockMvc.perform(post("/api/domains")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "domainCode": "M2M3_DOMAIN",
-                                  "domainName": "M2M3 测试域",
+                                  "domainCode": "M2M3_DOMAIN_%s",
+                                  "domainName": "M2M3 测试域 %s",
                                   "domainOverview": "用于 M2/M3 集成测试",
                                   "operator": "support"
                                 }
-                                """))
+                                """.formatted(suffix, suffix)))
                 .andExpect(status().isCreated())
                 .andReturn();
         return objectMapper.readTree(result.getResponse().getContentAsString()).path("id").asLong();
@@ -310,5 +385,109 @@ class M2M3ApiIntegrationTest {
                 .andReturn();
         JsonNode tokenNode = objectMapper.readTree(result.getResponse().getContentAsString());
         return tokenNode.path("accessToken").asText();
+    }
+
+    private void prepareMinimumPublishAssets(long sceneId) {
+        OffsetDateTime now = OffsetDateTime.now();
+        List<PlanPO> plans = planMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId);
+        assertThat(plans).isNotEmpty();
+
+        for (PlanPO plan : plans) {
+            if (plan.getDefaultTimeSemantic() == null || plan.getDefaultTimeSemantic().isBlank()) {
+                plan.setDefaultTimeSemantic("交易日期");
+                plan.setUpdatedBy("support");
+                plan.setUpdatedAt(now);
+                planMapper.save(plan);
+            }
+        }
+
+        OutputContractPO outputContract = outputContractMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).stream()
+                .findFirst()
+                .orElseThrow();
+        SourceIntakeContractPO intakeContract = sourceIntakeContractMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).stream()
+                .findFirst()
+                .orElseThrow();
+        PlanPO primaryPlan = plans.get(0);
+
+        if (inputSlotSchemaMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            InputSlotSchemaPO slot = new InputSlotSchemaPO();
+            slot.setSceneId(sceneId);
+            slot.setSlotCode("SLOT-" + sceneId + "-CUST");
+            slot.setSlotName("cust_id");
+            slot.setSlotType("STRING");
+            slot.setRequiredFlag(true);
+            slot.setIdentifierCandidatesJson("[\"CUST_ID\"]");
+            slot.setNormalizationRule("trim");
+            slot.setClarificationHint("请输入客户号");
+            stamp(slot, now);
+            inputSlotSchemaMapper.save(slot);
+        }
+
+        if (contractViewMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            ContractViewPO view = new ContractViewPO();
+            view.setSceneId(sceneId);
+            view.setPlanId(primaryPlan.getId());
+            view.setOutputContractId(outputContract.getId());
+            view.setViewCode("CV-" + sceneId + "-DEFAULT");
+            view.setViewName("默认普通角色视图");
+            view.setRoleScope("SUPPORT");
+            view.setVisibleFieldsJson("[\"cust_id\"]");
+            view.setMaskedFieldsJson("[]");
+            view.setRestrictedFieldsJson("[]");
+            view.setForbiddenFieldsJson("[]");
+            view.setApprovalTemplate("");
+            stamp(view, now);
+            contractViewMapper.save(view);
+        }
+
+        if (sourceContractMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            SourceContractPO sourceContract = new SourceContractPO();
+            sourceContract.setSceneId(sceneId);
+            sourceContract.setPlanId(primaryPlan.getId());
+            sourceContract.setIntakeContractId(intakeContract.getId());
+            sourceContract.setSourceContractCode("SRC-" + sceneId + "-MAIN");
+            sourceContract.setSourceName("M2M3 主来源");
+            sourceContract.setPhysicalTable("DM_CUSTOMER_INFO");
+            sourceContract.setSourceRole("DETAIL_MAIN");
+            sourceContract.setIdentifierType("CUST_ID");
+            sourceContract.setOutputIdentifierType("CUST_ID");
+            sourceContract.setSourceSystem("M2M3 测试域");
+            sourceContract.setTimeSemantic("交易日期");
+            sourceContract.setCompletenessLevel("FULL");
+            sourceContract.setSensitivityLevel("S1");
+            sourceContract.setStartDate(LocalDate.of(2014, 1, 1));
+            sourceContract.setMaterialSourceNote("M2M3 集成测试补齐最小发布门禁");
+            sourceContract.setNotes("用于验证发布门禁与快照");
+            stamp(sourceContract, now);
+            sourceContractMapper.save(sourceContract);
+        }
+
+        for (PlanPO plan : plans) {
+            boolean hasSchemaLink = !planSchemaLinkMapper.findByPlanIdAndStatus(plan.getId(), "DRAFT").isEmpty()
+                    || !planSchemaLinkMapper.findByPlanIdAndStatus(plan.getId(), "PUBLISHED").isEmpty();
+            if (!hasSchemaLink) {
+                PlanSchemaLinkPO schemaLink = new PlanSchemaLinkPO();
+                schemaLink.setPlanId(plan.getId());
+                schemaLink.setTableName("DM_CUSTOMER_INFO");
+                schemaLink.setColumnName("CUST_ID");
+                schemaLink.setLinkRole("OUTPUT");
+                schemaLink.setEvidenceId(null);
+                schemaLink.setConfidenceScore(0.9d);
+                schemaLink.setStatus("DRAFT");
+                schemaLink.setCreatedBy("support");
+                schemaLink.setCreatedAt(now);
+                schemaLink.setUpdatedBy("support");
+                schemaLink.setUpdatedAt(now);
+                planSchemaLinkMapper.save(schemaLink);
+            }
+        }
+    }
+
+    private void stamp(AbstractSnapshotGraphAuditablePO po, OffsetDateTime now) {
+        po.setStatus("DRAFT");
+        po.setCreatedBy("support");
+        po.setCreatedAt(now);
+        po.setUpdatedBy("support");
+        po.setUpdatedAt(now);
     }
 }

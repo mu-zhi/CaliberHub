@@ -114,6 +114,7 @@ public class SceneQueryAppService {
                 scene.domainId(),
                 scene.domain(),
                 domainName,
+                scene.sceneType(),
                 scene.status(),
                 scene.sceneDescription(),
                 scene.caliberDefinition(),
@@ -137,7 +138,8 @@ public class SceneQueryAppService {
                 scene.updatedAt(),
                 scene.publishedBy(),
                 scene.publishedAt(),
-                scene.rowVersion()
+                scene.rowVersion(),
+                scene.snapshotId()
         );
     }
 }

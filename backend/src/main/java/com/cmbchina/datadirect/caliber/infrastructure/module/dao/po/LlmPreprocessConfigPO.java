@@ -3,7 +3,6 @@ package com.cmbchina.datadirect.caliber.infrastructure.module.dao.po;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
@@ -22,8 +21,7 @@ public class LlmPreprocessConfigPO {
     @Column(name = "endpoint", length = 500)
     private String endpoint;
 
-    @Lob
-    @Column(name = "api_key_ciphertext")
+    @Column(name = "api_key_ciphertext", columnDefinition = "LONGTEXT")
     private String apiKeyCiphertext;
 
     @Column(name = "model", length = 100)
@@ -44,16 +42,13 @@ public class LlmPreprocessConfigPO {
     @Column(name = "fallback_to_rule", nullable = false)
     private Boolean fallbackToRule;
 
-    @Lob
-    @Column(name = "preprocess_system_prompt")
+    @Column(name = "preprocess_system_prompt", columnDefinition = "LONGTEXT")
     private String preprocessSystemPrompt;
 
-    @Lob
-    @Column(name = "preprocess_user_prompt_template")
+    @Column(name = "preprocess_user_prompt_template", columnDefinition = "LONGTEXT")
     private String preprocessUserPromptTemplate;
 
-    @Lob
-    @Column(name = "prep_schema_json")
+    @Column(name = "prep_schema_json", columnDefinition = "LONGTEXT")
     private String prepSchemaJson;
 
     @Column(name = "prompt_version")

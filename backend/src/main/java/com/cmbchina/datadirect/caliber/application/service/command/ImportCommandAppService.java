@@ -1,8 +1,13 @@
 package com.cmbchina.datadirect.caliber.application.service.command;
 
+import com.cmbchina.datadirect.caliber.application.api.dto.response.CandidateGraphDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportGraphPatchDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.CreateSceneCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.PreprocessImportCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.UpdateSceneCmd;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportCandidateGraphDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportCandidateGraphEdgeDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportCandidateGraphNodeDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.PreprocessResultDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.PreprocessSceneDraftDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
@@ -20,8 +25,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletionService;
@@ -56,18 +64,19 @@ public class ImportCommandAppService {
     private final MeterRegistry meterRegistry;
     private final SceneCommandAppService sceneCommandAppService;
     private final ImportTaskCommandAppService importTaskCommandAppService;
+    private final ImportCandidateGraphAssembler importCandidateGraphAssembler;
 
     public ImportCommandAppService(LlmPreprocessSupport llmPreprocessSupport,
                                    ObjectMapper objectMapper,
                                    MeterRegistry meterRegistry) {
-        this(llmPreprocessSupport, objectMapper, meterRegistry, null, null);
+        this(llmPreprocessSupport, objectMapper, meterRegistry, null, null, new ImportCandidateGraphAssembler());
     }
 
     public ImportCommandAppService(LlmPreprocessSupport llmPreprocessSupport,
                                    ObjectMapper objectMapper,
                                    MeterRegistry meterRegistry,
                                    SceneCommandAppService sceneCommandAppService) {
-        this(llmPreprocessSupport, objectMapper, meterRegistry, sceneCommandAppService, null);
+        this(llmPreprocessSupport, objectMapper, meterRegistry, sceneCommandAppService, null, new ImportCandidateGraphAssembler());
     }
 
     @Autowired
@@ -75,12 +84,14 @@ public class ImportCommandAppService {
                                    ObjectMapper objectMapper,
                                    MeterRegistry meterRegistry,
                                    SceneCommandAppService sceneCommandAppService,
-                                   ImportTaskCommandAppService importTaskCommandAppService) {
+                                   ImportTaskCommandAppService importTaskCommandAppService,
+                                   ImportCandidateGraphAssembler importCandidateGraphAssembler) {
         this.llmPreprocessSupport = llmPreprocessSupport;
         this.objectMapper = objectMapper;
         this.meterRegistry = meterRegistry;
         this.sceneCommandAppService = sceneCommandAppService;
         this.importTaskCommandAppService = importTaskCommandAppService;
+        this.importCandidateGraphAssembler = importCandidateGraphAssembler;
     }
 
     public PreprocessResultDTO preprocess(PreprocessImportCmd cmd) {
@@ -91,6 +102,8 @@ public class ImportCommandAppService {
         return preprocessChunked(cmd, importBatchId, stage -> {
             // no-op for non-stream endpoint
         }, draft -> {
+            // no-op for non-stream endpoint
+        }, graphPatch -> {
             // no-op for non-stream endpoint
         });
     }
@@ -103,6 +116,7 @@ public class ImportCommandAppService {
         enforceInputLineLimit(cmd.rawText());
         long totalStart = now();
         String importBatchId = normalizeImportBatchId(importBatchIdInput);
+        String materialId = trackTaskStart(importBatchId, cmd);
         List<StageTimingDTO> stageTimings = new ArrayList<>();
         List<PreprocessSceneDraftDTO> sceneDrafts = new ArrayList<>();
         Consumer<StageTimingDTO> stageConsumer = stage -> {
@@ -111,7 +125,6 @@ public class ImportCommandAppService {
         Consumer<PreprocessSceneDraftDTO> draftConsumer = scene -> {
             // no-op
         };
-        trackTaskStart(importBatchId, cmd);
 
         try {
             long splitStart = now();
@@ -197,7 +210,7 @@ public class ImportCommandAppService {
             stageTimings.add(finalizeStage);
             stageConsumer.accept(finalizeStage);
 
-            PreprocessResultDTO result = decorateResult(base, stageTimings, sceneDrafts, importBatchId, elapsed(totalStart));
+            PreprocessResultDTO result = decorateResult(base, stageTimings, sceneDrafts, importBatchId, materialId, elapsed(totalStart));
             trackTaskReady(importBatchId, result);
             return result;
         } catch (RuntimeException ex) {
@@ -209,19 +222,33 @@ public class ImportCommandAppService {
     public PreprocessResultDTO preprocessChunked(PreprocessImportCmd cmd,
                                                  Consumer<StageTimingDTO> stageConsumer,
                                                  Consumer<PreprocessSceneDraftDTO> draftConsumer) {
-        return preprocessChunked(cmd, null, stageConsumer, draftConsumer);
+        return preprocessChunked(cmd, null, stageConsumer, draftConsumer, graphPatch -> {
+            // no-op
+        });
     }
 
     public PreprocessResultDTO preprocessChunked(PreprocessImportCmd cmd,
                                                  String importBatchIdInput,
                                                  Consumer<StageTimingDTO> stageConsumer,
                                                  Consumer<PreprocessSceneDraftDTO> draftConsumer) {
+        return preprocessChunked(cmd, importBatchIdInput, stageConsumer, draftConsumer, graphPatch -> {
+            // no-op
+        });
+    }
+
+    public PreprocessResultDTO preprocessChunked(PreprocessImportCmd cmd,
+                                                 String importBatchIdInput,
+                                                 Consumer<StageTimingDTO> stageConsumer,
+                                                 Consumer<PreprocessSceneDraftDTO> draftConsumer,
+                                                 Consumer<ImportGraphPatchDTO> graphPatchConsumer) {
         enforceInputLineLimit(cmd.rawText());
         long totalStart = now();
         String importBatchId = normalizeImportBatchId(importBatchIdInput);
+        String materialId = trackTaskStart(importBatchId, cmd);
         List<StageTimingDTO> stageTimings = new ArrayList<>();
         List<PreprocessSceneDraftDTO> sceneDrafts = new ArrayList<>();
-        trackTaskStart(importBatchId, cmd);
+        int graphPatchSeq = 0;
+        ImportCandidateGraphDTO previousGraph = null;
         try {
 
             long splitStart = now();
@@ -323,6 +350,18 @@ public class ImportCommandAppService {
                 );
                 stageTimings.add(mergeStage);
                 stageConsumer.accept(mergeStage);
+                previousGraph = emitGraphPatchIfEnabled(
+                        graphPatchConsumer,
+                        importBatchId,
+                        materialId,
+                        base,
+                        previousGraph,
+                        STAGE_MERGE,
+                        ++graphPatchSeq,
+                        chunks.size(),
+                        chunkResults.size(),
+                        "merge阶段已输出候选实体图谱增量"
+                );
             }
 
             if (chunks.size() == 1) {
@@ -353,6 +392,11 @@ public class ImportCommandAppService {
             stageTimings.add(normalizeStage);
             stageConsumer.accept(normalizeStage);
 
+            CandidateGraphDTO liveGraph = importCandidateGraphAssembler.buildSnapshotFromResult(importBatchId, materialId, base);
+            if (!liveGraph.nodes().isEmpty() || !liveGraph.edges().isEmpty()) {
+                graphPatchConsumer.accept(buildGraphPatch(liveGraph, 1, normalizeStage, "候选实体图谱已更新"));
+            }
+
             long draftStart = now();
             if (Boolean.TRUE.equals(cmd.autoCreateDrafts())) {
                 sceneDrafts.addAll(persistSceneDrafts(base, cmd, draftConsumer));
@@ -381,13 +425,175 @@ public class ImportCommandAppService {
             stageTimings.add(finalizeStage);
             stageConsumer.accept(finalizeStage);
 
-            PreprocessResultDTO result = decorateResult(base, stageTimings, sceneDrafts, importBatchId, elapsed(totalStart));
+            PreprocessResultDTO result = decorateResult(base, stageTimings, sceneDrafts, importBatchId, materialId, elapsed(totalStart));
             trackTaskReady(importBatchId, result);
+            previousGraph = emitGraphPatchIfEnabled(
+                    graphPatchConsumer,
+                    importBatchId,
+                    materialId,
+                    result,
+                    previousGraph,
+                    STAGE_FINALIZE,
+                    ++graphPatchSeq,
+                    1,
+                    1,
+                    "导入完成时输出候选实体图谱快照"
+            );
             return result;
         } catch (RuntimeException ex) {
             trackTaskFailed(importBatchId, ex.getMessage());
             throw ex;
         }
+    }
+
+    private ImportCandidateGraphDTO emitGraphPatchIfEnabled(Consumer<JsonNode> graphPatchConsumer,
+                                        String taskId,
+                                        String materialId,
+                                        PreprocessResultDTO base,
+                                        ImportCandidateGraphDTO previousGraph,
+                                        String stageKey,
+                                        int patchSeq,
+                                        int chunkIndex,
+                                        int chunkTotal,
+                                        String summary) {
+            if (graphPatchConsumer == null || base == null || importCandidateGraphBuildService == null) {
+                return null;
+            }
+            ImportCandidateGraphDTO currentGraph = buildCandidateGraph(taskId, materialId, base);
+            if (currentGraph == null) {
+                return previousGraph;
+            }
+            JsonNode patch = buildGraphPatchPayload(taskId, materialId, currentGraph, previousGraph, patchSeq, stageKey, chunkIndex, chunkTotal, summary);
+            graphPatchConsumer.accept(patch);
+            return currentGraph;
+        }
+
+    private JsonNode buildGraphPatchPayload(String taskId,
+                                           String materialId,
+                                           ImportCandidateGraphDTO currentGraph,
+                                           ImportCandidateGraphDTO previousGraph,
+                                           int patchSeq,
+                                           String stageKey,
+                                           int chunkIndex,
+                                           int chunkTotal,
+                                           String summary) {
+        ObjectNode patch = objectMapper.createObjectNode();
+        patch.put("patchSeq", patchSeq);
+        patch.put("stageKey", stageKey == null ? "" : stageKey);
+        patch.put("chunkIndex", chunkIndex);
+        patch.put("chunkTotal", Math.max(1, chunkTotal));
+        patch.put("summary", summary == null ? "" : summary);
+
+        ImportCandidateGraphDTO graph = currentGraph;
+        ArrayNode addedNodes = objectMapper.createArrayNode();
+        ArrayNode updatedNodes = objectMapper.createArrayNode();
+        ArrayNode addedEdges = objectMapper.createArrayNode();
+        ArrayNode updatedEdges = objectMapper.createArrayNode();
+        ArrayNode focusNodeIds = objectMapper.createArrayNode();
+
+        if (currentGraph != null) {
+            Map<String, JsonNode> previousNodes = mapNodesByCode(previousGraph == null ? Collections.emptyList() : previousGraph.nodes());
+            Map<String, JsonNode> previousEdges = mapEdgesByCode(previousGraph == null ? Collections.emptyList() : previousGraph.edges());
+            currentGraph.nodes().forEach(node -> {
+                String code = safeText(node.nodeCode(), "");
+                if (!code.isBlank()) {
+                    JsonNode currentNode = objectMapper.valueToTree(node);
+                    JsonNode previousNode = previousNodes.get(code);
+                    if (previousNode == null) {
+                        addedNodes.add(currentNode);
+                    } else if (!previousNode.equals(currentNode)) {
+                        updatedNodes.add(currentNode);
+                        focusNodeIds.add(code);
+                    }
+                }
+            });
+            currentGraph.edges().forEach(edge -> {
+                String code = safeText(edge.edgeCode(), "");
+                if (!code.isBlank()) {
+                    JsonNode currentEdge = objectMapper.valueToTree(edge);
+                    JsonNode previousEdge = previousEdges.get(code);
+                    if (previousEdge == null) {
+                        addedEdges.add(currentEdge);
+                        focusNodeIds.add(code);
+                    } else if (!previousEdge.equals(currentEdge)) {
+                        updatedEdges.add(currentEdge);
+                        focusNodeIds.add(code);
+                    }
+                }
+            });
+        }
+
+        patch.set("addedNodes", addedNodes);
+        patch.set("updatedNodes", updatedNodes);
+        patch.set("addedEdges", addedEdges);
+        patch.set("updatedEdges", updatedEdges);
+        patch.set("focusNodeIds", focusNodeIds);
+        return patch;
+    }
+
+    private Map<String, JsonNode> mapNodesByCode(List<ImportCandidateGraphNodeDTO> nodes) {
+        Map<String, JsonNode> map = new LinkedHashMap<>();
+        if (nodes == null) {
+            return map;
+        }
+        for (ImportCandidateGraphNodeDTO node : nodes) {
+            String code = safeText(node == null ? null : node.nodeCode(), "");
+            if (code.isBlank()) {
+                continue;
+            }
+            map.put(code, objectMapper.valueToTree(node));
+        }
+        return map;
+    }
+
+    private Map<String, JsonNode> mapEdgesByCode(List<ImportCandidateGraphEdgeDTO> edges) {
+        Map<String, JsonNode> map = new LinkedHashMap<>();
+        if (edges == null) {
+            return map;
+        }
+        for (ImportCandidateGraphEdgeDTO edge : edges) {
+            String code = safeText(edge == null ? null : edge.edgeCode(), "");
+            if (code.isBlank()) {
+                continue;
+            }
+            map.put(code, objectMapper.valueToTree(edge));
+        }
+        return map;
+    }
+
+    private ArrayNode mapNodesToArray(List<ImportCandidateGraphNodeDTO> items) {
+        ArrayNode array = objectMapper.createArrayNode();
+        if (items == null) {
+            return array;
+        }
+        for (ImportCandidateGraphNodeDTO item : items) {
+            if (item != null) {
+                array.add(objectMapper.valueToTree(item));
+            }
+        }
+        return array;
+    }
+
+    private ArrayNode mapEdgesToArray(List<ImportCandidateGraphEdgeDTO> items) {
+        ArrayNode array = objectMapper.createArrayNode();
+        if (items == null) {
+            return array;
+        }
+        for (ImportCandidateGraphEdgeDTO item : items) {
+            if (item != null) {
+                array.add(objectMapper.valueToTree(item));
+            }
+        }
+        return array;
+    }
+
+    private ImportCandidateGraphDTO buildCandidateGraph(String taskId,
+                                                      String materialId,
+                                                      PreprocessResultDTO base) {
+        if (importCandidateGraphBuildService == null) {
+            return null;
+        }
+        return importCandidateGraphBuildService.build(taskId, materialId, base);
     }
 
     private PreprocessResultDTO measured(String mode, Supplier<String> supplier) {
@@ -450,8 +656,10 @@ public class ImportCommandAppService {
                     confidenceLevel,
                     confidence < 0.70,
                     null,
+                    CandidateGraphDTO.empty(),
                     List.of(),
                     List.of(),
+                    null,
                     null
             );
         } catch (Exception ex) {
@@ -466,8 +674,10 @@ public class ImportCommandAppService {
                     "LOW",
                     true,
                     null,
+                    CandidateGraphDTO.empty(),
                     List.of(),
                     List.of(),
+                    null,
                     null
             );
         }
@@ -557,8 +767,10 @@ public class ImportCommandAppService {
                     "LOW",
                     true,
                     null,
+                    CandidateGraphDTO.empty(),
                     List.of(),
                     List.of(),
+                    null,
                     null
             );
         }
@@ -659,8 +871,10 @@ public class ImportCommandAppService {
                     "LOW",
                     true,
                     null,
+                    CandidateGraphDTO.empty(),
                     List.of(),
                     List.of(),
+                    null,
                     null
             );
         }
@@ -714,6 +928,7 @@ public class ImportCommandAppService {
                     sceneTitle,
                     null,
                     "",
+                    "FACT_DETAIL",
                     cmd.rawText(),
                     cmd.operator()
             ));
@@ -724,6 +939,7 @@ public class ImportCommandAppService {
                     sceneTitle,
                     null,
                     safeText(scene.path("domain_guess"), ""),
+                    safeText(scene.path("scene_type"), "FACT_DETAIL"),
                     safeText(scene.path("scene_description"), ""),
                     safeText(scene.path("caliber_definition"), ""),
                     safeText(scene.path("applicability"), ""),
@@ -767,7 +983,15 @@ public class ImportCommandAppService {
                                                List<StageTimingDTO> stageTimings,
                                                List<PreprocessSceneDraftDTO> sceneDrafts,
                                                String importBatchId,
+                                               String materialId,
                                                long totalElapsedMs) {
+        CandidateGraphDTO candidateGraph = base.candidateGraph();
+        if (candidateGraph == null
+                || candidateGraph.nodes() == null
+                || candidateGraph.edges() == null
+                || (candidateGraph.nodes().isEmpty() && candidateGraph.edges().isEmpty() && base.scenes() != null && !base.scenes().isEmpty())) {
+            candidateGraph = importCandidateGraphAssembler.buildSnapshotFromResult(importBatchId, materialId, base);
+        }
         return new PreprocessResultDTO(
                 base.caliberImportJson(),
                 base.mode(),
@@ -779,9 +1003,34 @@ public class ImportCommandAppService {
                 base.confidenceLevel(),
                 base.lowConfidence(),
                 totalElapsedMs,
+                candidateGraph,
                 stageTimings,
                 sceneDrafts,
-                importBatchId
+                importBatchId,
+                materialId == null ? base.materialId() : materialId
+        );
+    }
+
+    private ImportGraphPatchDTO buildGraphPatch(CandidateGraphDTO graph,
+                                                int patchSeq,
+                                                StageTimingDTO stage,
+                                                String message) {
+        List<String> focusNodeIds = new ArrayList<>();
+        for (int i = 0; i < graph.nodes().size() && i < 3; i++) {
+            focusNodeIds.add(graph.nodes().get(i).id());
+        }
+        return new ImportGraphPatchDTO(
+                patchSeq,
+                stage.stageKey(),
+                stage.stageName(),
+                graph.nodes(),
+                List.of(),
+                graph.edges(),
+                List.of(),
+                focusNodeIds,
+                graph.nodes().size(),
+                graph.edges().size(),
+                message
         );
     }
 
@@ -792,11 +1041,11 @@ public class ImportCommandAppService {
         return importBatchIdInput.trim();
     }
 
-    private void trackTaskStart(String importBatchId, PreprocessImportCmd cmd) {
+    private String trackTaskStart(String importBatchId, PreprocessImportCmd cmd) {
         if (importTaskCommandAppService == null) {
-            return;
+            return null;
         }
-        importTaskCommandAppService.start(importBatchId, cmd);
+        return importTaskCommandAppService.start(importBatchId, cmd).materialId();
     }
 
     private void trackTaskReady(String importBatchId, PreprocessResultDTO result) {
@@ -842,6 +1091,13 @@ public class ImportCommandAppService {
             return fallback;
         }
         String text = node.asText(fallback);
+        if (text == null || text.isBlank()) {
+            return fallback;
+        }
+        return text;
+    }
+
+    private String safeText(String text, String fallback) {
         if (text == null || text.isBlank()) {
             return fallback;
         }

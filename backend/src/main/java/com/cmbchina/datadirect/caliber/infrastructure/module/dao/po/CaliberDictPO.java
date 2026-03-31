@@ -34,8 +34,7 @@ public class CaliberDictPO {
     @Column(name = "value_name", length = 500)
     private String valueName;
 
-    @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "LONGTEXT")
     private String description;
 
     @Column(name = "last_scene_id")

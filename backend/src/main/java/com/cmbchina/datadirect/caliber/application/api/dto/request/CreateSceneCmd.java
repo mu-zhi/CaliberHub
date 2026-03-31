@@ -6,6 +6,7 @@ public record CreateSceneCmd(
         @NotBlank String sceneTitle,
         Long domainId,
         String domain,
+        String sceneType,
         String rawInput,
         String operator
 ) {

@@ -5,18 +5,18 @@ CREATE TABLE IF NOT EXISTS caliber_import_task (
     source_type VARCHAR(32),
     source_name VARCHAR(255),
     operator VARCHAR(64),
-    raw_text CLOB,
-    preprocess_result_json CLOB,
+    raw_text LONGTEXT,
+    preprocess_result_json LONGTEXT,
     quality_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
     compare_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
-    error_message CLOB,
+    error_message LONGTEXT,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     completed_at TIMESTAMP NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_import_task_status_updated
+CREATE INDEX idx_import_task_status_updated
     ON caliber_import_task (status, updated_at);
 
-CREATE INDEX IF NOT EXISTS idx_import_task_updated_at
+CREATE INDEX idx_import_task_updated_at
     ON caliber_import_task (updated_at);

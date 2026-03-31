@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiRequest } from "../api/client";
+import { API_CONTRACTS, buildApiPath } from "../api/contracts";
 import { useAuthStore } from "../store/authStore";
 
 const DATETIME_FORMATTER = new Intl.DateTimeFormat("zh-CN", {
@@ -91,7 +92,7 @@ export function DomainManagementPage() {
     setLoading(true);
     setError("");
     try {
-      const result = await apiRequest("/domains", { token });
+      const result = await apiRequest(API_CONTRACTS.domains, { token });
       const nextRows = Array.isArray(result) ? result : [];
       setRows(nextRows);
       if (nextRows.length === 0) {
@@ -156,8 +157,8 @@ export function DomainManagementPage() {
         operator: "",
       };
       const saved = form.id
-        ? await apiRequest(`/domains/${form.id}`, { method: "PUT", token, body: payload })
-        : await apiRequest("/domains", { method: "POST", token, body: payload });
+        ? await apiRequest(buildApiPath("domainById", { id: form.id }), { method: "PUT", token, body: payload })
+        : await apiRequest(API_CONTRACTS.domains, { method: "POST", token, body: payload });
       const savedId = saved?.id || null;
       setMeta(`${form.id ? "更新" : "创建"}成功：${saved?.domainName || saved?.domainCode || "-"}`);
       await loadDomains(savedId);

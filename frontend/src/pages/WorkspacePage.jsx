@@ -45,7 +45,7 @@ export function WorkspacePage({ view = "todo" }) {
     if (view === "notice") {
       return (
         <ul className="plain-list">
-          <li>系统公告：口径治理与数据地图已切换至 React 版。</li>
+          <li>系统公告：知识生产台与数据地图已切换至 React 版。</li>
           <li>发布提醒：建议发布前补充变更摘要与验证时间。</li>
         </ul>
       );
