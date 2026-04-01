@@ -25,15 +25,15 @@
 
 | 编号 | 场景 | 文档路径 |
 | --- | --- | --- |
-| 01 | 材料接入与来源接入契约登记 | `docs/architecture/features/iteration-01-knowledge-production/01-source-intake-registration.md` |
-| 02 | 解析抽取与证据确认 | `docs/architecture/features/iteration-01-knowledge-production/02-parsing-and-evidence-confirmation.md` |
-| 03 | 资产建模与治理对象编辑 | `docs/architecture/features/iteration-01-knowledge-production/03-asset-modeling-and-governance-editing.md` |
+| 01 | 材料接入与来源接入契约登记 | `docs/architecture/features/iteration-01-knowledge-production/01-材料接入与来源接入契约登记.md` |
+| 02 | 解析抽取与证据确认 | `docs/architecture/features/iteration-01-knowledge-production/02-解析抽取与证据确认.md` |
+| 03 | 资产建模与治理对象编辑 | `docs/architecture/features/iteration-01-knowledge-production/03-资产建模与治理对象编辑.md` |
 | 03a | 字典治理 | `docs/architecture/features/iteration-01-knowledge-production/03a-dictionary-governance.md` |
-| 04 | 推理校验与推理链复核 | `docs/architecture/features/iteration-01-knowledge-production/04-inference-validation-and-chain-review.md` |
+| 04 | 推理校验与推理链复核 | `docs/architecture/features/iteration-01-knowledge-production/04-推理校验与推理链复核.md` |
 | 04a | 推理资产详情与前台可见 | `docs/architecture/features/iteration-01-knowledge-production/04a-inference-asset-detail-and-visibility.md` |
-| 05 | 元数据对齐与来源契约固化 | `docs/architecture/features/iteration-01-knowledge-production/05-metadata-alignment-and-source-contract.md` |
+| 05 | 元数据对齐与来源契约固化 | `docs/architecture/features/iteration-01-knowledge-production/05-元数据对齐与来源契约固化.md` |
 | 05a | 表间关联关系治理 | `docs/architecture/features/iteration-01-knowledge-production/05a-join-relation-governance.md` |
-| 06 | 复核与缺口任务协同 | `docs/architecture/features/iteration-01-knowledge-production/06-review-and-gap-task-collaboration.md` |
+| 06 | 复核与缺口任务协同 | `docs/architecture/features/iteration-01-knowledge-production/06-复核与缺口任务协同.md` |
 
 ### 3.2 迭代二：运行与治理工作台
 
@@ -41,33 +41,33 @@
 
 | 编号 | 场景 | 文档路径 |
 | --- | --- | --- |
-| 12a | 首页总览与状态分发 | `docs/architecture/features/iteration-02-runtime-and-governance/12a-home-overview-and-state-dispatch.md` |
-| 07 | 发布检查、灰度发布与回滚 | `docs/architecture/features/iteration-02-runtime-and-governance/07-publish-check-gray-release-and-rollback.md` |
-| 08 | 运行决策与知识包生成 | `docs/architecture/features/iteration-02-runtime-and-governance/08-runtime-decision-and-knowledge-package.md` |
-| 09 | 审批与导出 | `docs/architecture/features/iteration-02-runtime-and-governance/09-approval-and-export.md` |
-| 10 | 数据地图浏览与覆盖追踪 | `docs/architecture/features/iteration-02-runtime-and-governance/10-data-map-browsing-and-coverage-tracing.md` |
-| 11 | 监控审计与影响分析 | `docs/architecture/features/iteration-02-runtime-and-governance/11-monitoring-audit-and-impact-analysis.md` |
-| 12 | 全局壳层、导航与跨工作台上下文跳转 | `docs/architecture/features/iteration-02-runtime-and-governance/12-global-shell-navigation-and-context-handoff.md` |
+| 12a | 首页总览与状态分发 | `docs/architecture/features/iteration-02-runtime-and-governance/12a-首页总览与状态分发.md` |
+| 07 | 发布检查、灰度发布与回滚 | `docs/architecture/features/iteration-02-runtime-and-governance/07-发布检查、灰度发布与回滚.md` |
+| 08 | 运行决策与知识包生成 | `docs/architecture/features/iteration-02-runtime-and-governance/08-运行决策与知识包生成.md` |
+| 09 | 审批与导出 | `docs/architecture/features/iteration-02-runtime-and-governance/09-审批与导出.md` |
+| 10 | 数据地图浏览与覆盖追踪 | `docs/architecture/features/iteration-02-runtime-and-governance/10-数据地图浏览与覆盖追踪.md` |
+| 11 | 监控审计与影响分析 | `docs/architecture/features/iteration-02-runtime-and-governance/11-监控审计与影响分析.md` |
+| 12 | 全局壳层、导航与跨工作台上下文跳转 | `docs/architecture/features/iteration-02-runtime-and-governance/12-全局壳层、导航与跨工作台上下文跳转.md` |
 | 12b | `OpenAPI` 契约与前端消费 | `docs/architecture/features/iteration-02-runtime-and-governance/12b-openapi-contract-and-frontend-consumption.md` |
 
 ### 3.3 迭代三：公司代发与财富样板域
 
 | 编号 | 场景 | 文档路径 |
 | --- | --- | --- |
-| 13 | 代发明细查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/13-payroll-detail-query.md` |
-| 14 | 代发批次结果查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/14-payroll-batch-result-query.md` |
-| 15 | 基金申购、赎回申请记录查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/15-fund-subscription-redemption-application.md` |
-| 16 | 基金资金交易与分红记录查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/16-fund-capital-dividend-record.md` |
-| 17 | SA 理财交易查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/17-sa-wealth-transaction-query.md` |
+| 13 | 代发明细查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/13-代发明细查询.md` |
+| 14 | 代发批次结果查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/14-代发批次结果查询.md` |
+| 15 | 基金申购、赎回申请记录查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/15-基金申购、赎回申请记录查询.md` |
+| 16 | 基金资金交易与分红记录查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/16-基金资金交易与分红记录查询.md` |
+| 17 | SA 理财交易查询 | `docs/architecture/features/iteration-03-payroll-and-wealth/17-SA理财交易查询.md` |
 
 ### 3.4 迭代四：零售画像与高风险样板域
 
 | 编号 | 场景 | 文档路径 |
 | --- | --- | --- |
-| 18 | 零售客户基础信息查询 | `docs/architecture/features/iteration-04-retail-and-high-risk/18-retail-customer-basic-profile.md` |
-| 19 | 零售户口开户机构变更查询 | `docs/architecture/features/iteration-04-retail-and-high-risk/19-retail-account-opening-org-change.md` |
-| 20 | 客户密码修改日志查询 | `docs/architecture/features/iteration-04-retail-and-high-risk/20-customer-password-change-audit-log.md` |
-| 21 | 断卡排查账户管控核验 | `docs/architecture/features/iteration-04-retail-and-high-risk/21-watchlist-control-verification.md` |
+| 18 | 零售客户基础信息查询 | `docs/architecture/features/iteration-04-retail-and-high-risk/18-零售客户基础信息查询.md` |
+| 19 | 零售户口开户机构变更查询 | `docs/architecture/features/iteration-04-retail-and-high-risk/19-零售户口开户机构变更查询.md` |
+| 20 | 客户密码修改日志查询 | `docs/architecture/features/iteration-04-retail-and-high-risk/20-客户密码修改日志查询.md` |
+| 21 | 断卡排查账户管控核验 | `docs/architecture/features/iteration-04-retail-and-high-risk/21-断卡排查账户管控核验.md` |
 
 ## 四、主方案覆盖矩阵
 

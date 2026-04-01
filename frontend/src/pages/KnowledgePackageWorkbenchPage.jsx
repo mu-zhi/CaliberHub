@@ -229,6 +229,7 @@ export function KnowledgePackageWorkbenchPage() {
   const role = useAuthStore((state) => state.role) || "admin";
   const token = useAuthStore((state) => state.token);
   const [loading, setLoading] = useState(true);
+  const [loadTimeout, setLoadTimeout] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [loadError, setLoadError] = useState("");
@@ -332,6 +333,17 @@ export function KnowledgePackageWorkbenchPage() {
   }, [token]);
 
   useEffect(() => {
+    if (!loading) {
+      setLoadTimeout(false);
+      return undefined;
+    }
+    const timerId = window.setTimeout(() => {
+      setLoadTimeout(true);
+    }, 8000);
+    return () => window.clearTimeout(timerId);
+  }, [loading]);
+
+  useEffect(() => {
     const requestedFields = runtimeContextState.requestedFields.join(", ");
     if (!runtimeContextState.sceneCode && !requestedFields && !runtimeContextState.purpose) {
       return;
@@ -375,6 +387,8 @@ export function KnowledgePackageWorkbenchPage() {
     setQueryError("");
     await refreshSceneBundle(nextSceneId);
   }
+
+  const latestVersion = sceneBundle.versions?.[0] || null;
 
   function handleClearResult() {
     setResult(null);
@@ -461,7 +475,6 @@ export function KnowledgePackageWorkbenchPage() {
     await submitQueryText(subQuestion);
   }
 
-  const latestVersion = sceneBundle.versions?.[0] || null;
   const requestedFieldCount = parseRequestedFields(form.requestedFields).length;
   const identifierOptions = useMemo(
     () => buildIdentifierOptions(sceneBundle.inputSlots, form.identifierType),
@@ -542,6 +555,13 @@ export function KnowledgePackageWorkbenchPage() {
             <p>正在加载已发布的代发明细场景与知识包样板资产…</p>
           </div>
         </div>
+        {loadTimeout ? (
+          <UiInlineError
+            message={loadError || "加载超时，请检查后端服务或稍后重试。"}
+            actionText="重新加载"
+            onAction={() => refreshScenes()}
+          />
+        ) : null}
       </section>
     );
   }
@@ -696,7 +716,7 @@ export function KnowledgePackageWorkbenchPage() {
             </div>
             <div className="knowledge-package-coverage-list">
               {sceneBundle.coverages.map((item) => {
-                const coverageStatus = describeCoverageStatus(item.coverageStatus);
+                const coverageStatus = describeCoverageStatus(item.coverageStatus || item.status);
                 return (
                   <article key={item.id || item.coverageCode} className="knowledge-package-coverage-item">
                     <div>
@@ -813,7 +833,7 @@ export function KnowledgePackageWorkbenchPage() {
                 <article className="runtime-process-item">
                   <strong>场景召回</strong>
                   <p>{pipeline.sceneSearch?.reasons?.join("；") || "未返回召回说明"}</p>
-                  <span>{pipeline.sceneSearch?.candidates?.length || 0} 个候选方案</span>
+                  <span>{pipeline.sceneSearch?.candidates?.length || 0} 个候选场景</span>
                 </article>
                 <article className="runtime-process-item">
                   <strong>方案选择</strong>

@@ -54,7 +54,10 @@ class LlmPreprocessConfigApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.endpoint").value("https://example.com/v1/chat/completions"))
                 .andExpect(jsonPath("$.enableThinking").value(true))
-                .andExpect(jsonPath("$.hasApiKey").value(true));
+                .andExpect(jsonPath("$.hasApiKey").value(true))
+                .andExpect(jsonPath("$.providerCode").value("COMPATIBLE"))
+                .andExpect(jsonPath("$.supportsResponsesApi").value(false))
+                .andExpect(jsonPath("$.supportsThinkingToggle").value(true));
 
         MvcResult queryResult = mockMvc.perform(get("/api/system/llm-preprocess-config")
                         .header("Authorization", "Bearer " + token))
@@ -69,6 +72,37 @@ class LlmPreprocessConfigApiIntegrationTest {
         assertThat(config.path("configSource").asText()).isEqualTo("PERSISTED");
         assertThat(config.path("endpointHost").asText()).isEqualTo("example.com");
         assertThat(config.path("fallbackStrategy").asText()).isEqualTo("LLM -> RULE");
+        assertThat(config.path("providerCode").asText()).isEqualTo("COMPATIBLE");
+        assertThat(config.path("providerLabel").asText()).isEqualTo("兼容模式");
+        assertThat(config.path("supportsResponsesApi").asBoolean()).isFalse();
+        assertThat(config.path("supportsStructuredOutputs").asBoolean()).isFalse();
+        assertThat(config.path("supportsThinkingToggle").asBoolean()).isTrue();
+    }
+
+    @Test
+    void shouldRejectIncompatibleThinkingToggleForOpenAiResponses() throws Exception {
+        String token = loginAndGetToken("admin", "admin123");
+        String updateRequest = """
+                {
+                  "enabled": true,
+                  "endpoint": "https://api.openai.com/v1/responses",
+                  "model": "gpt-5.4",
+                  "timeoutSeconds": 45,
+                  "temperature": 0.1,
+                  "maxTokens": 4096,
+                  "enableThinking": true,
+                  "fallbackToRule": true,
+                  "operator": "sys-admin"
+                }
+                """;
+
+        mockMvc.perform(put("/api/system/llm-preprocess-config")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateRequest))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("DOMAIN_VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("enableThinking")));
     }
 
     @Test
@@ -132,6 +166,8 @@ class LlmPreprocessConfigApiIntegrationTest {
                 .andExpect(jsonPath("$.schemaValidationMessage").isString())
                 .andExpect(jsonPath("$.templateHasRequiredTokens").isBoolean())
                 .andExpect(jsonPath("$.templateMissingTokens").isArray())
+                .andExpect(jsonPath("$.requiresManualReview").isBoolean())
+                .andExpect(jsonPath("$.manualReviewReasons").isArray())
                 .andReturn();
         JsonNode oldPromptPayload = objectMapper.readTree(getResult.getResponse().getContentAsString());
         String oldFingerprint = oldPromptPayload.path("promptFingerprint").asText();
@@ -155,6 +191,8 @@ class LlmPreprocessConfigApiIntegrationTest {
                 .andExpect(jsonPath("$.promptFingerprint").isString())
                 .andExpect(jsonPath("$.schemaValid").value(true))
                 .andExpect(jsonPath("$.templateHasRequiredTokens").value(true))
+                .andExpect(jsonPath("$.requiresManualReview").value(true))
+                .andExpect(jsonPath("$.manualReviewReasons[0]").isString())
                 .andReturn();
         JsonNode updatedPromptPayload = objectMapper.readTree(updateResult.getResponse().getContentAsString());
         String newFingerprint = updatedPromptPayload.path("promptFingerprint").asText();
@@ -177,9 +215,13 @@ class LlmPreprocessConfigApiIntegrationTest {
                 .andExpect(jsonPath("$.promptFingerprint").isString())
                 .andExpect(jsonPath("$.schemaValid").isBoolean())
                 .andExpect(jsonPath("$.templateHasRequiredTokens").isBoolean())
+                .andExpect(jsonPath("$.requiresManualReview").value(false))
+                .andExpect(jsonPath("$.manualReviewReasons").isArray())
                 .andReturn();
         JsonNode resetPayload = objectMapper.readTree(resetResult.getResponse().getContentAsString());
         assertThat(resetPayload.path("preprocessUserPromptTemplate").asText()).contains("{{DYNAMIC_JSON_SCHEMA}}");
+        assertThat(resetPayload.path("preprocessUserPromptTemplate").asText()).contains("<task>");
+        assertThat(resetPayload.path("preprocessSystemPrompt").asText()).contains("<output_contract>");
         assertThat(resetPayload.path("promptVersion").asLong()).isGreaterThan(newPromptVersion);
         assertThat(resetPayload.path("promptHash").asText()).isNotBlank();
     }

@@ -5268,6 +5268,10 @@ textarea:focus-visible {
     width: 100%;
   }
 
+  .task-mainline-grid {
+    grid-template-columns: 1fr;
+  }
+
   .home-scene-row {
     grid-template-columns: 1fr;
     gap: 6px;
@@ -5692,6 +5696,18 @@ textarea:focus-visible {
   position: relative;
 }
 
+.lineage-d3-container {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+}
+
+.lineage-d3-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .lineage-truncated-note {
   position: absolute;
   top: 10px;
@@ -5928,9 +5944,47 @@ textarea:focus-visible,
   gap: 10px;
 }
 
+.task-mainline-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 18px;
+}
+
+.task-mainline-card,
+.task-risk-card {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.secondary-results-zone {
+  display: grid;
+  gap: 14px;
+}
+
+.history-step-zone {
+  display: grid;
+  gap: 14px;
+}
+
+.history-step-zone-head h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.history-step-zone-head p {
+  margin: 6px 0 0;
+}
+
+.history-step-stack {
+  display: grid;
+  gap: 12px;
+}
+
 .knowledge-package-page-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -9321,6 +9375,11 @@ textarea:focus-visible,
   display: grid;
   gap: 12px;
   margin-top: 14px;
+}
+
+.approval-export-record-meta {
+  margin-top: 4px;
+  line-height: 1.5;
 }
 
 .workbench-timeline {

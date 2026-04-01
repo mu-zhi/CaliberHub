@@ -6,6 +6,7 @@ import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPromptDef
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPromptFingerprint;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPrepSchemaJsonGenerator;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPreprocessProperties;
+import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmProviderCapabilityRegistry;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmSecretCodec;
 import com.cmbchina.datadirect.caliber.domain.model.LlmPreprocessConfig;
 import com.cmbchina.datadirect.caliber.domain.support.LlmPreprocessConfigDomainSupport;
@@ -579,17 +580,12 @@ public class LlmPreprocessSupportImpl implements LlmPreprocessSupport {
             throw new IllegalStateException("llm model is empty");
         }
         PromptRenderResult promptRenderResult = renderPrompt(runtimeConfig, rawText, sourceType);
+        LlmProviderCapabilityRegistry.ProviderCapability capability =
+                LlmProviderCapabilityRegistry.resolve(endpoint, model);
 
-        Map<String, Object> requestPayload = new LinkedHashMap<>();
-        requestPayload.put("model", model);
-        requestPayload.put("temperature", runtimeConfig.temperature());
-        requestPayload.put("max_tokens", runtimeConfig.maxTokens());
-        requestPayload.put("enable_thinking", runtimeConfig.enableThinking());
-        requestPayload.put("response_format", Map.of("type", "json_object"));
-        requestPayload.put("messages", List.of(
-                buildMessage("system", promptRenderResult.systemPrompt()),
-                buildMessage("user", promptRenderResult.userPrompt())
-        ));
+        Map<String, Object> requestPayload = capability.supportsResponsesApi()
+                ? buildResponsesRequestPayload(model, runtimeConfig, promptRenderResult)
+                : buildChatCompletionsRequestPayload(model, runtimeConfig, promptRenderResult);
         String requestBody = writeJson(requestPayload);
 
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -662,6 +658,35 @@ public class LlmPreprocessSupportImpl implements LlmPreprocessSupport {
         message.put("role", role);
         message.put("content", content);
         return message;
+    }
+
+    private Map<String, Object> buildChatCompletionsRequestPayload(String model,
+                                                                   RuntimeConfig runtimeConfig,
+                                                                   PromptRenderResult promptRenderResult) {
+        Map<String, Object> requestPayload = new LinkedHashMap<>();
+        requestPayload.put("model", model);
+        requestPayload.put("temperature", runtimeConfig.temperature());
+        requestPayload.put("max_tokens", runtimeConfig.maxTokens());
+        requestPayload.put("enable_thinking", runtimeConfig.enableThinking());
+        requestPayload.put("response_format", Map.of("type", "json_object"));
+        requestPayload.put("messages", List.of(
+                buildMessage("system", promptRenderResult.systemPrompt()),
+                buildMessage("user", promptRenderResult.userPrompt())
+        ));
+        return requestPayload;
+    }
+
+    private Map<String, Object> buildResponsesRequestPayload(String model,
+                                                             RuntimeConfig runtimeConfig,
+                                                             PromptRenderResult promptRenderResult) {
+        Map<String, Object> requestPayload = new LinkedHashMap<>();
+        requestPayload.put("model", model);
+        requestPayload.put("instructions", promptRenderResult.systemPrompt());
+        requestPayload.put("input", promptRenderResult.userPrompt());
+        requestPayload.put("temperature", runtimeConfig.temperature());
+        requestPayload.put("max_output_tokens", runtimeConfig.maxTokens());
+        requestPayload.put("text", Map.of("format", Map.of("type", "json_object")));
+        return requestPayload;
     }
 
     private PromptRenderResult renderPrompt(RuntimeConfig runtimeConfig, String rawText, String sourceType) {

@@ -155,6 +155,7 @@ export function LineageGraphView({
   const simulationRef = useRef(null);
   const showEdgeLabelsRef = useRef(showEdgeLabels);
   showEdgeLabelsRef.current = showEdgeLabels;
+  const zoomBehaviorRef = useRef(null);
 
   const graphData = useMemo(() => {
     if (!lineageData?.nodes?.length) return null;
@@ -207,14 +208,14 @@ export function LineageGraphView({
 
     const g = svg.append("g");
 
-    svg.call(
-      d3.zoom()
-        .extent([[0, 0], [width, height]])
-        .scaleExtent([0.1, 4])
-        .on("zoom", (event) => {
-          g.attr("transform", event.transform);
-        }),
-    );
+    const zoomBehavior = d3.zoom()
+      .extent([[0, 0], [width, height]])
+      .scaleExtent([0.1, 4])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+    zoomBehaviorRef.current = zoomBehavior;
+    svg.call(zoomBehavior);
 
     svg.on("click", () => {
       onNodeSelectRef.current?.(null);
@@ -366,6 +367,37 @@ export function LineageGraphView({
       linkLabels.attr("fill", "#666");
     }
 
+    function fitGraphToViewport() {
+      if (!nodes.length || !zoomBehaviorRef.current) {
+        return;
+      }
+      const xs = nodes.map((item) => item.x).filter((value) => Number.isFinite(value));
+      const ys = nodes.map((item) => item.y).filter((value) => Number.isFinite(value));
+      if (!xs.length || !ys.length) {
+        return;
+      }
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+      const graphWidth = Math.max(1, maxX - minX);
+      const graphHeight = Math.max(1, maxY - minY);
+      const padding = 72;
+      const scale = Math.max(
+        0.35,
+        Math.min(
+          1.35,
+          Math.min((width - padding * 2) / graphWidth, (height - padding * 2) / graphHeight),
+        ),
+      );
+      const translateX = width / 2 - ((minX + maxX) / 2) * scale;
+      const translateY = height / 2 - ((minY + maxY) / 2) * scale;
+      svg.call(
+        zoomBehaviorRef.current.transform,
+        d3.zoomIdentity.translate(translateX, translateY).scale(scale),
+      );
+    }
+
     simulation.on("tick", () => {
       link.attr("d", (d) => getLinkPath(d));
 
@@ -387,6 +419,15 @@ export function LineageGraphView({
 
       node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
       nodeLabels.attr("x", (d) => d.x).attr("y", (d) => d.y);
+    });
+
+    simulation.on("end", () => {
+      fitGraphToViewport();
+    });
+
+    window.requestAnimationFrame(() => {
+      simulation.tick(80);
+      fitGraphToViewport();
     });
   }, [graphData]);
 

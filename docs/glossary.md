@@ -147,12 +147,16 @@
 | 中文术语 | 英文全称 | 缩写 | 说明 |
 |---------|---------|------|------|
 | 知识图谱 | Knowledge Graph | KG | 以实体、关系与语义组织知识的结构化网络 |
+| 实体 | Entity | - | 在知识图谱中可被独立识别、独立引用并可进入治理边界的对象 |
+| 关系 | Relation | - | 连接两个实体并表达明确业务语义的事实联系或结构连接 |
+| 属性 | Attribute | - | 附着在实体或关系上的描述性字段，用于表达状态、边界、来源和约束 |
 | 三元组 | Triple | - | 由主语、谓语、宾语构成的最小知识表达单元 |
 | 资源描述框架 | Resource Description Framework | RDF | 以三元组统一表达图谱事实的标准模型 |
 | 图查询语言 | SPARQL Protocol and RDF Query Language | SPARQL | 面向 RDF 图的查询语言 |
 | 本体语言 | Web Ontology Language | OWL | 用于描述概念层级、约束与推理规则的语义网语言 |
 | 模式 | Schema | - | 规定实体、关系、属性与约束的骨架 |
 | 本体 | Ontology | - | 对边界概念、关系与约束的形式化定义 |
+| 图推理 | Graph Reasoning | - | 基于已知实体、关系、约束和规则推出可解释结论的过程 |
 | 属性图 | Property Graph | - | 节点和边都可携带属性的图模型 |
 | 图数据库 | Graph Database | - | 面向图结构存储、检索与遍历的数据库 |
 | 标签属性图 | Labeled Property Graph | LPG | 以带标签的节点、边及其属性组织数据的属性图模型 |

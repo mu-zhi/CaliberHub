@@ -25,6 +25,7 @@ interface ContractPathParams {
   importTaskCandidateGraph: { taskId: PathParamValue };
   importTaskCandidateGraphReview: { taskId: PathParamValue };
   datamapNodeDetail: { id: PathParamValue };
+  serviceSpecExport: { sceneId: PathParamValue };
 }
 
 function toClientPath<TPath extends OpenApiPath>(path: TPath): ClientPath<TPath> {
@@ -42,6 +43,7 @@ const STATIC_OPENAPI_PATHS = {
   authToken: "/api/system/auth/token",
   domains: "/api/domains",
   scenes: "/api/scenes",
+  serviceSpecs: "/api/service-specs",
   plans: "/api/plans",
   coverageDeclarations: "/api/coverage-declarations",
   policies: "/api/policies",
@@ -88,6 +90,7 @@ const TEMPLATED_OPENAPI_PATHS = {
   importTaskCandidateGraph: "/api/import/tasks/{taskId}/candidate-graph",
   importTaskCandidateGraphReview: "/api/import/tasks/{taskId}/candidate-graph/review",
   datamapNodeDetail: "/api/datamap/node/{id}/detail",
+  serviceSpecExport: "/api/service-specs/export/{sceneId}",
 } as const satisfies Record<keyof ContractPathParams, OpenApiPath>;
 
 export const API_CONTRACTS = Object.freeze(

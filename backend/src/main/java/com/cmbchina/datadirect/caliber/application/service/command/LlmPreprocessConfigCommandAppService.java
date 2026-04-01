@@ -18,6 +18,7 @@ import com.cmbchina.datadirect.caliber.domain.support.LlmPreprocessConfigDomainS
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPromptDefaults;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPromptFingerprint;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPrepSchemaJsonGenerator;
+import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmProviderCapabilityRegistry;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPreprocessProperties;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmSecretCodec;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -341,6 +342,11 @@ public class LlmPreprocessConfigCommandAppService {
             }
             if (trimOrEmpty(cmd.model()).isEmpty()) {
                 throw new DomainValidationException("model is required when llm preprocess is enabled");
+            }
+            LlmProviderCapabilityRegistry.ProviderCapability capability =
+                    LlmProviderCapabilityRegistry.resolve(cmd.endpoint(), cmd.model());
+            if (!capability.supportsThinkingToggle() && Boolean.TRUE.equals(cmd.enableThinking())) {
+                throw new DomainValidationException("enableThinking is not supported for provider " + capability.providerCode());
             }
         }
         if (trimOrEmpty(cmd.operator()).isEmpty()) {

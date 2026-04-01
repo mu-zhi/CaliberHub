@@ -14,6 +14,8 @@ public record LlmPromptConfigDTO(
         String schemaValidationMessage,
         Boolean templateHasRequiredTokens,
         List<String> templateMissingTokens,
+        Boolean requiresManualReview,
+        List<String> manualReviewReasons,
         String updatedBy,
         OffsetDateTime updatedAt
 ) {

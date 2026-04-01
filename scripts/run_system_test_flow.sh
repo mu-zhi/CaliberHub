@@ -4,8 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FRONTEND_DIR="${ROOT_DIR}/frontend"
 BACKEND_DIR="${ROOT_DIR}/backend"
-BASE_URL="${BASE_URL:-http://127.0.0.1:8080}"
-FRONTEND_URL="${FRONTEND_URL:-http://127.0.0.1:5173}"
+BASE_URL="${BASE_URL:-http://127.0.0.1:8082}"
+FRONTEND_URL="${FRONTEND_URL:-http://127.0.0.1:5174}"
 CI_SKIP_BACKEND_TESTS="${CI_SKIP_BACKEND_TESTS:-false}"
 
 echo "[1/5] 前端 lint"
@@ -32,15 +32,15 @@ echo "[5/5] 轻量健康检查（如服务在线）"
 if curl -fsS -X POST "${BASE_URL%/}/api/system/auth/token" \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}' >/dev/null 2>&1; then
-  echo "  - backend 8080 可访问"
+  echo "  - backend 8082 可访问"
 else
-  echo "  - backend 8080 未在线（非阻断，按需先启动）"
+  echo "  - backend 8082 未在线（非阻断，按需先启动）"
 fi
 
 if curl -fsS -I "${FRONTEND_URL%/}" >/dev/null 2>&1; then
-  echo "  - frontend 5173 可访问"
+  echo "  - frontend 5174 可访问"
 else
-  echo "  - frontend 5173 未在线（非阻断，按需先启动）"
+  echo "  - frontend 5174 未在线（非阻断，按需先启动）"
 fi
 
 echo "系统化测试流程执行完成。"

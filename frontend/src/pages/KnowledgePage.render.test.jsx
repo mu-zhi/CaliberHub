@@ -32,8 +32,13 @@ afterEach(() => {
 describe("KnowledgePage render smoke", () => {
   it("renders import preset without runtime error", () => {
     const html = renderKnowledgePage("import");
-    expect(html).toContain("候选实体图谱");
-    expect(html).toContain("正在等待首批实体");
+    expect(html).toContain("当前导入任务");
+    expect(html).toContain("当前待办");
+    expect(html).toContain("历史步骤摘要");
+    expect(html).toContain("场景队列");
+    expect(html).toContain("导入明细");
+    expect(html).not.toContain("正在等待首批实体");
+    expect(html).not.toContain("导入内容类型");
   });
 
   it("renders manual preset without runtime error", () => {

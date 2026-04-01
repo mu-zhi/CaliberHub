@@ -24,6 +24,9 @@ export const AccordionStepCard = forwardRef(function AccordionStepCard(
     state,
     summaryText,
     showEdit,
+    actionLabel = "修改",
+    actionTestId,
+    keepContentMounted = true,
     onEdit,
     children,
   },
@@ -63,7 +66,7 @@ export const AccordionStepCard = forwardRef(function AccordionStepCard(
 
   const contentStyle = isExpanded
     ? { maxHeight: `${Math.max(1, contentMaxHeight)}px` }
-    : { maxHeight: "0px" };
+    : { maxHeight: "0px", pointerEvents: "none" };
 
   return (
     <section
@@ -88,19 +91,21 @@ export const AccordionStepCard = forwardRef(function AccordionStepCard(
           </div>
         </div>
         {showEdit ? (
-          <button className="btn btn-ghost" type="button" onClick={onEdit}>
-            修改
+          <button className="btn btn-ghost" type="button" onClick={onEdit} data-testid={actionTestId}>
+            {actionLabel}
           </button>
         ) : null}
       </div>
-      <div
-        className={`accordion-step-content ${isExpanded ? "is-open" : "is-closed"}`}
-        aria-hidden={!isExpanded}
-        style={contentStyle}
-        {...(isExpanded ? {} : { inert: "" })}
-      >
-        <div className="accordion-step-content-inner" ref={contentInnerRef}>{children}</div>
-      </div>
+      {isExpanded || keepContentMounted ? (
+        <div
+          className={`accordion-step-content ${isExpanded ? "is-open" : "is-closed"}`}
+          aria-hidden={!isExpanded}
+          style={contentStyle}
+          {...(isExpanded ? {} : { inert: "" })}
+        >
+          <div className="accordion-step-content-inner" ref={contentInnerRef}>{children}</div>
+        </div>
+      ) : null}
     </section>
   );
 });

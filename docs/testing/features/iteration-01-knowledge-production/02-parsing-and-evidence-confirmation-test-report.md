@@ -1,7 +1,7 @@
 # 解析抽取与证据确认测试文档
 
-> 对应特性文档：`docs/architecture/features/iteration-01-knowledge-production/02-parsing-and-evidence-confirmation.md`
-> 当前阶段：首轮实现已完成，等待补浏览器级联调与代码检视结论
+> 对应特性文档：`docs/architecture/features/iteration-01-knowledge-production/02-解析抽取与证据确认.md`
+> 当前阶段：首轮实现已完成，已补浏览器级回归，等待真实服务联调与代码检视结论
 
 ## 1. 测试目标
 
@@ -48,4 +48,43 @@
 ## 7. 剩余风险
 
 1. 当前 `graph_patch` 为“归一完成后发出首批图谱补丁”的首版实现，尚未细化为更高频的多批次增长动画。
-2. 仍缺少真实浏览器联调与交互级 `E2E（端到端，End-to-End）` 回归，当前以前后端契约测试与前端渲染/状态机测试为主。
+2. 已补基于 `Playwright（浏览器自动化框架）` 的浏览器级交互回归，并新增真实 `backend（后端）:8082` + `frontend（前端）:5174` 联调下的导入、恢复任务、运行决策台与审批页只读 smoke；但当前仍缺更完整的真实后端驱动交互级 `E2E（端到端，End-to-End）` 回归。
+
+## 8. 2026-04-01 缺陷收口（导入中活图谱首轮实现）
+
+### 8.1 红测复现
+
+1. 后端 `ImportCommandAppServiceTest` 失败：`graph_patch.patchSeq` 实际为 `[1, 1]`，未按阶段递增。
+2. 后端 `ImportTaskQueryAppServiceTest` 失败：`candidateGraph` 为 `nodes/edges` 空数组时未触发回填，节点数为 `0`。
+3. 前端 `KnowledgePage.test.jsx` 失败：流式结束后若响应缺少 `candidateGraph`，页面图谱节点从 `2` 退回到 `0`。
+
+### 8.2 最小修复
+
+1. `ImportCommandAppService`：`normalize` 阶段补丁改为沿用递增 `patchSeq`，避免与 `finalize` 重号。
+2. `ImportTaskQueryAppService`：`candidateGraph` 仅在“已有图内容”或“无场景可回填”时复用；空壳图 + 有场景时强制回填。
+3. `KnowledgePage`：`applyPreprocessPayload` 仅在响应携带非空图快照时覆盖活图谱状态；否则保留流式补丁已累计结果。
+
+### 8.3 复跑命令与结果
+
+1. `cd backend && mvn -q -Dtest=ImportCommandAppServiceTest,ImportTaskQueryAppServiceTest test`：通过。
+2. `cd frontend && npm run test -- src/pages/KnowledgePage.test.jsx`：通过。
+
+## 9. 2026-04-01 浏览器级回归补齐
+
+### 9.1 新增浏览器回归
+
+1. 新增 `frontend/e2e/import-live-graph.spec.jsx`，覆盖“导入中活图谱”在真实浏览器中的空态、流式补丁与完成态画布渲染。
+2. 新增 `frontend/e2e/runtime-knowledge-package.spec.jsx`，覆盖运行决策台的候选场景、覆盖状态与知识包展示口径。
+3. 新增 `frontend/e2e/real-service-smoke.spec.jsx`，覆盖真实服务下的导入中活图谱、恢复任务、运行决策台与审批页只读 smoke。
+4. 新增 `frontend/playwright.config.js` 与 `package.json` 的 `test:e2e` / `test:e2e:install` 脚本，统一浏览器回归入口。
+
+### 9.2 关键校正
+
+1. 前端路由采用 `HashRouter（哈希路由）`，浏览器回归入口需使用 `/#/production/ingest` 与 `/#/runtime`。
+2. 浏览器 Mock 仅拦截 `/api/**` 业务请求，避免误拦截 `/src/api/*` 模块脚本导致页面加载失败。
+
+### 9.3 复跑命令与结果
+
+1. `cd frontend && npx playwright install chromium`：通过。
+2. `cd frontend && npx playwright test e2e/import-live-graph.spec.jsx e2e/runtime-knowledge-package.spec.jsx`：通过。
+3. `cd frontend && npx playwright test e2e/real-service-smoke.spec.jsx`：通过。

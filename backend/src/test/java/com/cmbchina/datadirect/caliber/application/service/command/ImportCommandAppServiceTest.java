@@ -1,6 +1,7 @@
 package com.cmbchina.datadirect.caliber.application.service.command;
 
 import com.cmbchina.datadirect.caliber.application.api.dto.request.PreprocessImportCmd;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportGraphPatchDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.PreprocessResultDTO;
 import com.cmbchina.datadirect.caliber.application.support.LlmPreprocessSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -176,6 +178,66 @@ class ImportCommandAppServiceTest {
         assertThatThrownBy(() -> importCommandAppService.preprocess(cmd))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("分块预处理被中断");
+    }
+
+    @Test
+    void shouldEmitGraphPatchDtoWhenChunkedPreprocessCompletes() {
+        ImportCommandAppService importCommandAppService = newService();
+        PreprocessImportCmd cmd = new PreprocessImportCmd(
+                "### 场景标题：客户查询\nSELECT CUST_ID FROM T_CLIENT;",
+                "PASTE_MD",
+                "graph.sql",
+                null,
+                false,
+                "tester"
+        );
+        String responseJson = """
+                {
+                  "doc_type": "CALIBER_IMPORT_V2",
+                  "schema_version": "2.0.0",
+                  "source_type": "PASTE_MD",
+                  "global": {},
+                  "scenes": [
+                    {
+                      "scene_title": "客户查询",
+                      "quality": {"confidence": 0.91, "warnings": [], "errors": []},
+                      "sql_variants": [
+                        {
+                          "variant_name": "默认方案",
+                          "source_tables": ["T_CLIENT"]
+                        }
+                      ]
+                    }
+                  ],
+                  "quality": {"confidence": 0.91, "warnings": [], "errors": []},
+                  "parse_report": {"warnings": [], "errors": []},
+                  "_meta": {"mode": "llm_enhanced"}
+                }
+                """;
+        when(llmPreprocessSupport.preprocessToCaliberImportV2ByLlm(eq(cmd.rawText()), eq("PASTE_MD"), eq("graph.sql")))
+                .thenReturn(responseJson);
+        List<ImportGraphPatchDTO> graphPatches = new CopyOnWriteArrayList<>();
+
+        PreprocessResultDTO result = importCommandAppService.preprocessChunked(
+                cmd,
+                null,
+                stage -> {
+                },
+                draft -> {
+                },
+                graphPatches::add
+        );
+
+        assertThat(result.candidateGraph()).isNotNull();
+        assertThat(graphPatches).isNotEmpty();
+        assertThat(graphPatches).extracting(ImportGraphPatchDTO::stageKey)
+                .contains("normalize", "finalize");
+        assertThat(graphPatches).extracting(ImportGraphPatchDTO::patchSeq)
+                .containsExactly(1, 2);
+        ImportGraphPatchDTO finalPatch = graphPatches.get(graphPatches.size() - 1);
+        assertThat(finalPatch.stageKey()).isEqualTo("finalize");
+        assertThat(finalPatch.addedNodes()).isNotEmpty();
+        assertThat(finalPatch.totalNodeCount()).isGreaterThan(0);
     }
 
     @Test

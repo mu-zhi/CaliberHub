@@ -13,9 +13,12 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ServiceSpecP
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -74,6 +77,22 @@ public class ServiceSpecAppService {
         return toDTO(po);
     }
 
+    public List<ServiceSpecDTO> listRecent(Long sceneId, Integer limit) {
+        int safeLimit = limit == null ? 20 : Math.min(Math.max(limit, 1), 100);
+        List<ServiceSpecPO> rows;
+        if (sceneId != null) {
+            rows = serviceSpecMapper.findBySceneIdOrderBySpecVersionDesc(sceneId);
+            if (rows.size() > safeLimit) {
+                rows = rows.subList(0, safeLimit);
+            }
+        } else {
+            rows = serviceSpecMapper.findAll(
+                    PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "exportedAt"))
+            ).getContent();
+        }
+        return rows.stream().map(this::toDTO).toList();
+    }
+
     public long countBySceneId(Long sceneId) {
         return serviceSpecMapper.countBySceneId(sceneId);
     }
@@ -114,4 +133,3 @@ public class ServiceSpecAppService {
         );
     }
 }
-

@@ -129,7 +129,7 @@ public class GraphProjectionAppService {
         event.setStage("PREPARE");
         event.setStatus("PENDING");
         event.setMessage("正在准备图投影");
-        event.setPayloadJson(buildPayloadJson(sceneId));
+        event.setPayloadJson(buildPayloadJson(sceneId, snapshotId));
         projectionEventMapper.save(event);
 
         if (!graphRuntimeProperties.isProjectionEnabled()) {
@@ -325,7 +325,7 @@ public class GraphProjectionAppService {
     private GraphProjectionStatusDTO toDTO(ProjectionEventPO event) {
         return new GraphProjectionStatusDTO(
                 event.getSceneId(),
-                resolveSnapshotId(event.getSceneId()),
+                resolveProjectedSnapshotId(event),
                 event.getSceneCode(),
                 event.getStatus(),
                 event.getStage(),
@@ -336,9 +336,9 @@ public class GraphProjectionAppService {
         );
     }
 
-    private String buildPayloadJson(Long sceneId) {
+    private String buildPayloadJson(Long sceneId, Long snapshotId) {
         Map<String, Object> payload = new HashMap<>();
-        payload.put("snapshotId", resolveSnapshotId(sceneId));
+        payload.put("snapshotId", snapshotId);
         payload.put("plans", planMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).size());
         payload.put("evidences", evidenceFragmentMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).size());
         payload.put("contracts", outputContractMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).size());
@@ -351,6 +351,27 @@ public class GraphProjectionAppService {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private Long resolveProjectedSnapshotId(ProjectionEventPO event) {
+        if (event == null) {
+            return null;
+        }
+        String payloadJson = event.getPayloadJson();
+        if (payloadJson != null && !payloadJson.isBlank()) {
+            try {
+                var payloadNode = objectMapper.readTree(payloadJson);
+                Long snapshotId = payloadNode.path("snapshotId").isNumber()
+                        ? payloadNode.path("snapshotId").asLong()
+                        : null;
+                if (snapshotId != null && snapshotId > 0) {
+                    return snapshotId;
+                }
+            } catch (Exception ignored) {
+                // keep backward compatibility with old payload format
+            }
+        }
+        return resolveSnapshotId(event.getSceneId());
     }
 
     private Long resolveSnapshotId(Long sceneId) {

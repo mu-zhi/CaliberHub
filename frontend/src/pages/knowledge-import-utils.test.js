@@ -14,6 +14,8 @@ import {
 
 describe("knowledge import accordion utils", () => {
   it("resolves step states by active step", () => {
+    expect(resolveAccordionStepState(1, 0)).toBe("collapsed");
+    expect(resolveAccordionStepState(2, 0)).toBe("locked");
     expect(resolveAccordionStepState(1, 1)).toBe("expanded");
     expect(resolveAccordionStepState(1, 2)).toBe("collapsed");
     expect(resolveAccordionStepState(3, 2)).toBe("locked");

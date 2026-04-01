@@ -16,6 +16,11 @@ public record LlmPreprocessConfigDTO(
         String configSource,
         String endpointHost,
         String fallbackStrategy,
+        String providerCode,
+        String providerLabel,
+        Boolean supportsResponsesApi,
+        Boolean supportsStructuredOutputs,
+        Boolean supportsThinkingToggle,
         String updatedBy,
         OffsetDateTime updatedAt
 ) {

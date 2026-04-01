@@ -48,6 +48,11 @@ const PROJECTION_STATUS_PRESENTATIONS = {
     label: "已就绪",
     tone: "good",
   },
+  SUCCEEDED: {
+    code: "SUCCEEDED",
+    label: "已完成",
+    tone: "good",
+  },
   COMPLETED: {
     code: "COMPLETED",
     label: "已完成",
@@ -86,6 +91,21 @@ const PROJECTION_STATUS_PRESENTATIONS = {
   ARCHIVED: {
     code: "ARCHIVED",
     label: "已归档",
+    tone: "neutral",
+  },
+  SKIPPED: {
+    code: "SKIPPED",
+    label: "已关闭",
+    tone: "neutral",
+  },
+  IDLE: {
+    code: "IDLE",
+    label: "未触发",
+    tone: "neutral",
+  },
+  NOT_FOUND: {
+    code: "NOT_FOUND",
+    label: "未触发",
     tone: "neutral",
   },
 };
@@ -144,6 +164,13 @@ const COVERAGE_STATUS_PRESENTATIONS = {
     label: "未覆盖",
     tone: "bad",
   },
+};
+
+const COVERAGE_STATUS_ALIASES = {
+  FULL_MATCH: "FULL",
+  PARTIAL_MATCH: "PARTIAL",
+  COVERAGE_GAP: "GAP",
+  NO_COVERAGE: "NONE",
 };
 
 const DECISION_STATUS_PRESENTATIONS = {
@@ -288,7 +315,9 @@ export function describePublishStatus(status) {
 }
 
 export function describeCoverageStatus(status) {
-  return describeStatus(status, COVERAGE_STATUS_PRESENTATIONS);
+  const code = normalizeStatusCode(status);
+  const normalizedCode = COVERAGE_STATUS_ALIASES[code] || code;
+  return COVERAGE_STATUS_PRESENTATIONS[normalizedCode] || { ...UNKNOWN_STATUS_PRESENTATION, code: normalizedCode };
 }
 
 export function describeDecisionStatus(status) {

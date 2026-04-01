@@ -23,6 +23,11 @@ import {
   resolveAccordionStepState,
   toConfidenceLevelZh,
 } from "./knowledge-import-utils";
+import {
+  deriveKnowledgeTaskMainlineState,
+  shouldShowDataMapLink,
+  shouldShowRuntimeLink,
+} from "./knowledge-task-mainline";
 
 function safeStringify(value) {
   try {
@@ -641,6 +646,38 @@ function resolveStepByTask(task) {
   return directStep;
 }
 
+function localizeWorkflowStatus(status) {
+  const normalizedStatus = `${status || ""}`.trim().toUpperCase();
+  if (normalizedStatus === "FAILED") {
+    return "失败";
+  }
+  if (normalizedStatus === "RUNNING") {
+    return "处理中";
+  }
+  if (normalizedStatus === "QUALITY_REVIEWING") {
+    return "待质检";
+  }
+  if (normalizedStatus === "SCENE_REVIEWING") {
+    return "待对照";
+  }
+  if (normalizedStatus === "PUBLISHING") {
+    return "发布中";
+  }
+  if (normalizedStatus === "COMPLETED") {
+    return "已完成";
+  }
+  if (normalizedStatus === "DRAFT") {
+    return "草稿";
+  }
+  if (normalizedStatus === "PUBLISHED") {
+    return "已发布";
+  }
+  if (normalizedStatus === "DISCARDED") {
+    return "已弃用";
+  }
+  return normalizedStatus || "-";
+}
+
 export function KnowledgePage({ preset = "import", entry = "ingest" }) {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
@@ -675,7 +712,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
   const [taskListLoading, setTaskListLoading] = useState(false);
   const [sceneQueueKeyword, setSceneQueueKeyword] = useState("");
   const [showImportDone, setShowImportDone] = useState(false);
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(0);
   const [qualityConfirmed, setQualityConfirmed] = useState(false);
   const [compareConfirmed, setCompareConfirmed] = useState(false);
   const [lowConfidenceAckMap, setLowConfidenceAckMap] = useState({});
@@ -690,6 +727,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeVariantIndex, setActiveVariantIndex] = useState(-1);
   const [dropActive, setDropActive] = useState(false);
+  const domainSelectRef = useRef(null);
   const lineRefMap = useRef(new Map());
   const stepCardRefMap = useRef(new Map());
   const fileInputRef = useRef(null);
@@ -1105,10 +1143,19 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
     setSelectedSceneIndex(0);
     setForm(nextSceneForms[0] || EMPTY_FORM);
     setBatchUnmappedText(parsed.batchUnmappedText || "");
-    setImportLiveGraphState((prev) => restoreImportLiveGraphSnapshot(prev, response?.candidateGraph, {
-      stageKey: "finalize",
-      stageName: "导入完成",
-    }));
+    setImportLiveGraphState((prev) => {
+      const snapshot = response?.candidateGraph;
+      const hasSnapshotGraph = Array.isArray(snapshot?.nodes)
+        && Array.isArray(snapshot?.edges)
+        && (snapshot.nodes.length > 0 || snapshot.edges.length > 0);
+      if (!hasSnapshotGraph) {
+        return prev;
+      }
+      return restoreImportLiveGraphSnapshot(prev, snapshot, {
+        stageKey: "finalize",
+        stageName: "导入完成",
+      });
+    });
 
     const qualityConfidence = Number(parsed.confidenceScore ?? parsed.quality?.confidence ?? 0);
     setPreprocessWarnings(parsed.warnings);
@@ -1536,7 +1583,6 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
     setBatchUnmappedText("");
     setSelectedSceneIndex(0);
     setForm(EMPTY_FORM);
-    setCandidateGraphLoading(true);
     const start = Date.now();
     try {
       const requestBody = {
@@ -1592,16 +1638,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
           }
           if (event.event === "graph_patch") {
             const detail = event.data || {};
-            setCandidateGraph((current) => mergeCandidateGraphPatch(current, detail));
-            setCandidateGraphError("");
-            setCandidateGraphLoading(false);
-            const focusNodeId = Array.isArray(detail.focusNodeIds)
-              ? detail.focusNodeIds.map((item) => `${item || ""}`.trim()).find(Boolean)
-              : "";
-            if (focusNodeId) {
-              setSelectedCandidateNodeId((current) => current || focusNodeId);
-              setCandidateGraphMergeTarget((current) => current || focusNodeId);
-            }
+            setImportLiveGraphState((prev) => applyImportLiveGraphPatch(prev, detail));
           }
           if (event.event === "draft") {
             const detail = event.data || {};
@@ -1616,10 +1653,6 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
               warnings: Array.isArray(detail.warnings) ? detail.warnings : [],
             });
             return;
-          }
-          if (event.event === "graph_patch") {
-            const detail = event.data || {};
-            setImportLiveGraphState((prev) => applyImportLiveGraphPatch(prev, detail));
           }
         },
       });
@@ -1964,6 +1997,21 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
       lowConfidenceCount,
     };
   }, [queueItems]);
+  const mainlineState = useMemo(() => deriveKnowledgeTaskMainlineState({
+    importTaskId: importBatchId,
+    qualityConfirmed,
+    compareConfirmed,
+    queueStats,
+    currentDraft,
+  }), [compareConfirmed, currentDraft, importBatchId, qualityConfirmed, queueStats]);
+  const showDataMapLink = useMemo(
+    () => shouldShowDataMapLink({ queueStats, selectedScene, currentDraft }),
+    [currentDraft, queueStats, selectedScene],
+  );
+  const showRuntimeLink = useMemo(
+    () => shouldShowRuntimeLink({ queueStats, currentDraft }),
+    [queueStats, currentDraft],
+  );
   const domainOptions = useMemo(() => [...domains].sort((a, b) => {
     const sortA = Number(a?.sortOrder ?? 0);
     const sortB = Number(b?.sortOrder ?? 0);
@@ -2010,6 +2058,58 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
     : publishSummaryText;
   const getStepState = (stepNo) => resolveAccordionStepState(stepNo, activeStep);
   const canEditStep = (stepNo) => getStepState(stepNo) === "collapsed";
+  const currentTaskTitle = useMemo(() => {
+    if (`${sourceName || ""}`.trim()) {
+      return sourceName;
+    }
+    if (`${importBatchId || ""}`.trim()) {
+      return `导入任务 ${importBatchId.slice(0, 8)}`;
+    }
+    return "当前还没有有效导入任务";
+  }, [importBatchId, sourceName]);
+  const currentTaskSummary = useMemo(() => {
+    const stageText = mainlineState.title || "待导入";
+    const sourceText = sourceName ? sourceTypeConfig.label : "未导入材料";
+    const pendingCount = queueStats.draftCount;
+    return `${sourceText} · 当前阶段 ${stageText} · 待处理场景 ${pendingCount}`;
+  }, [mainlineState.title, queueStats.draftCount, sourceName, sourceTypeConfig.label]);
+  const recommendedSceneLabel = useMemo(() => {
+    const sceneNo = selectedSceneIndex + 1;
+    const draftTitle = `${currentDraft?.sceneTitle || ""}`.trim();
+    const sceneTitle = `${selectedScene?.scene_title || ""}`.trim();
+    if (draftTitle) {
+      return draftTitle;
+    }
+    if (sceneTitle) {
+      return sceneTitle;
+    }
+    return `待命名场景 ${sceneNo}`;
+  }, [currentDraft?.sceneTitle, selectedScene?.scene_title, selectedSceneIndex]);
+  function goDataMap() {
+    navigate("/map");
+  }
+  function goRuntimeWorkbench() {
+    navigate("/runtime");
+  }
+  function focusCurrentWorkItem() {
+    if (mainlineState.kind === "waiting_import") {
+      openStep(1);
+      return;
+    }
+    if (mainlineState.kind === "waiting_quality") {
+      openStep(2);
+      return;
+    }
+    if (mainlineState.kind === "waiting_compare") {
+      openStep(3);
+      return;
+    }
+    if (mainlineState.kind === "completed") {
+      navigate("/map/scenes");
+      return;
+    }
+    openStep(4);
+  }
   function bindStepCardRef(stepNo) {
     return (node) => {
       if (node) {
@@ -2181,33 +2281,111 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
       <section className="panel production-workbench-head">
         <div className="panel-head">
           <div>
-            <h2>{pageTitle}</h2>
-            <p>{pageSummary}</p>
+            <p className="eyebrow">当前导入任务</p>
+            <h2>{currentTaskTitle}</h2>
+            <p>{currentTaskSummary}</p>
           </div>
           <div className="knowledge-package-page-actions">
-            <a className="btn btn-ghost" href={SAMPLE_MATERIAL_URL} download>
-              下载样例材料
-            </a>
-            <button className="btn btn-ghost" type="button" onClick={() => navigate("/map")} disabled={!showImportDone && !sceneDrafts.length}>
-              去数据地图
+            <button className="btn btn-ghost" type="button" onClick={fillBestPracticeSample}>
+              载入样例
             </button>
-            <button className="btn btn-ghost" type="button" onClick={() => navigate("/runtime")}>
-              去运行决策台
-            </button>
+            {showDataMapLink ? (
+              <button className="btn btn-ghost" type="button" onClick={goDataMap}>
+                查看数据地图
+              </button>
+            ) : null}
+            {showRuntimeLink ? (
+              <button className="btn btn-ghost" type="button" onClick={goRuntimeWorkbench}>
+                查看运行决策台
+              </button>
+            ) : null}
           </div>
         </div>
-        <p className="subtle-note">当前正式工作台已接入真实导入链路。未上传材料前保持空态；样例只在你主动载入或下载后参与流程。</p>
+        <p className="subtle-note">{pageTitle}：{pageSummary}</p>
       </section>
 
-      <AccordionStepCard
-        ref={bindStepCardRef(1)}
-        stepNo={1}
-        title="01 导入并生成草稿"
-        state={getStepState(1)}
-        summaryText={step1HeaderText}
-        showEdit={canEditStep(1)}
-        onEdit={() => openStep(1)}
-      >
+      <section className="panel task-mainline-grid" aria-label="当前任务主线">
+        <article className="task-mainline-card">
+          <p className="eyebrow">当前待办</p>
+          <h3>{mainlineState.title}</h3>
+          <p className="subtle-note">推荐处理对象：{recommendedSceneLabel}</p>
+          {mainlineState.blockers.length > 0 ? (
+            <ul className="import-standard-list">
+              {mainlineState.blockers.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="subtle-note">当前没有额外阻断，可直接继续处理。</p>
+          )}
+          <div className="actions">
+            <button className="btn btn-primary" type="button" onClick={focusCurrentWorkItem}>
+              {mainlineState.primaryActionLabel}
+            </button>
+          </div>
+        </article>
+
+        <aside className="task-risk-card">
+          <p className="eyebrow">风险与状态</p>
+          <h3>次级结果区</h3>
+          <ul className="import-standard-list">
+            <li>场景队列：待处理 {queueStats.draftCount} 个</li>
+            <li>原文对照：已确认 {compareConfirmed ? preprocessScenes.length : processedSceneCount} 个</li>
+            <li>候选图谱：当前节点 {importLiveGraphState?.nodes?.length || 0} 个</li>
+            <li>导入明细：当前阶段 {importStageText || "待导入"}</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section className="panel secondary-results-zone" aria-label="次级结果区">
+        <div className="panel-head">
+          <div>
+            <h3>次级结果区</h3>
+            <p>场景队列、原文对照、候选图谱和导入明细统一收纳为辅助结果，不再与当前任务主线并列抢焦点。</p>
+          </div>
+        </div>
+        <div className="import-best-practice-grid">
+          <article className="best-practice-panel">
+            <h4>场景队列</h4>
+            <p className="subtle-note">用于切换当前批次内的待处理场景与发布状态。</p>
+          </article>
+          <article className="best-practice-panel">
+            <h4>原文对照</h4>
+            <p className="subtle-note">用于核对证据命中、原文定位和结构化结果。</p>
+          </article>
+          <article className="best-practice-panel">
+            <h4>候选图谱</h4>
+            <p className="subtle-note">用于查看导入中的候选实体图谱和关系补丁。</p>
+          </article>
+          <article className="best-practice-panel">
+            <h4>导入明细</h4>
+            <p className="subtle-note">用于查看导入阶段、批次耗时和任务恢复信息。</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="panel history-step-zone" aria-label="历史步骤摘要">
+        <div className="panel-head history-step-zone-head">
+          <div>
+            <p className="eyebrow">历史步骤摘要</p>
+            <h3>01-04 仅用于回看详情与有限回跳</h3>
+            <p>主线任务已经上收至首屏。这里保留步骤详情，但不再作为首屏主舞台。</p>
+          </div>
+        </div>
+
+        <div className="history-step-stack">
+          <AccordionStepCard
+            ref={bindStepCardRef(1)}
+            stepNo={1}
+            title="01 导入并生成草稿"
+            state={getStepState(1)}
+            summaryText={step1HeaderText}
+            showEdit={canEditStep(1)}
+            actionLabel="回到此阶段"
+            actionTestId="knowledge-step-1-reopen"
+            keepContentMounted={false}
+            onEdit={() => openStep(1)}
+          >
             <div className="row form-row">
               <label id="sourceTypeLabel">导入内容类型</label>
               <div className="import-type-picker" role="radiogroup" aria-labelledby="sourceTypeLabel">
@@ -2341,7 +2519,13 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
               </aside>
             </div>
             <div className="actions">
-              <button className="btn btn-primary" type="button" onClick={runPreprocess} disabled={loading || !sourceFileReady}>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={runPreprocess}
+                disabled={loading || !sourceFileReady}
+                data-testid="knowledge-step-1-submit"
+              >
                 {loading ? "处理中…" : "导入并生成草稿"}
               </button>
               <button className="btn btn-ghost" type="button" onClick={fillBestPracticeSample} disabled={loading}>
@@ -2383,7 +2567,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                 <span>
                   总耗时 {formatElapsedMs(totalElapsed)}
                   {importBatchId ? ` · 批次 ${importBatchId.slice(0, 8)}` : ""}
-                  {importTaskStatus ? ` · 状态 ${importTaskStatus}` : ""}
+                  {importTaskStatus ? ` · 状态 ${localizeWorkflowStatus(importTaskStatus)}` : ""}
                 </span>
               </div>
               <div className="import-stage-progress">
@@ -2435,7 +2619,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                             <strong>{task.sourceName || "未命名导入任务"}</strong>
                             <p className="subtle-note">
                               批次 {`${task.taskId || ""}`.slice(0, 8)}
-                              {` · 状态 ${taskStatus || "-"}`}
+                              {` · 状态 ${localizeWorkflowStatus(taskStatus)}`}
                               {` · 步骤 ${task.currentStep || "-"}`}
                               {` · 更新于 ${formatDateTimeLabel(task.updatedAt)}`}
                             </p>
@@ -2449,6 +2633,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                               type="button"
                               onClick={() => restoreImportTask(task.taskId)}
                               disabled={!task.taskId || !resumable}
+                              data-testid={task.taskId ? `knowledge-restore-task-${task.taskId}` : undefined}
                             >
                               {resumable ? "恢复处理" : "已结束"}
                             </button>
@@ -2460,17 +2645,19 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                 )}
               </div>
             ) : null}
-      </AccordionStepCard>
+          </AccordionStepCard>
 
-      <AccordionStepCard
-        ref={bindStepCardRef(2)}
-        stepNo={2}
-        title="02 抽取质量判断"
-        state={getStepState(2)}
-        summaryText={step2HeaderText}
-        showEdit={canEditStep(2)}
-        onEdit={() => openStep(2)}
-      >
+          <AccordionStepCard
+            ref={bindStepCardRef(2)}
+            stepNo={2}
+            title="02 抽取质量判断"
+            state={getStepState(2)}
+            summaryText={step2HeaderText}
+            showEdit={canEditStep(2)}
+            actionLabel="回到此阶段"
+            keepContentMounted={false}
+            onEdit={() => openStep(2)}
+          >
             <div className={`score-board ${queueItems.length === 0 ? "empty" : ""}`}>
               <div className="score-ring">
                 <span>{queueItems.length === 0 ? "--" : queueItems.length}</span>
@@ -2511,17 +2698,19 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                 确认质检，进入对照
               </button>
             </div>
-      </AccordionStepCard>
+          </AccordionStepCard>
 
-      <AccordionStepCard
-        ref={bindStepCardRef(3)}
-        stepNo={3}
-        title="03 抽取结果与原文对照"
-        state={getStepState(3)}
-        summaryText={step3HeaderText}
-        showEdit={canEditStep(3)}
-        onEdit={() => openStep(3)}
-      >
+          <AccordionStepCard
+            ref={bindStepCardRef(3)}
+            stepNo={3}
+            title="03 抽取结果与原文对照"
+            state={getStepState(3)}
+            summaryText={step3HeaderText}
+            showEdit={canEditStep(3)}
+            actionLabel="回到此阶段"
+            keepContentMounted={false}
+            onEdit={() => openStep(3)}
+          >
             <div className="import-master-detail">
               <div className="import-scene-queue">
                 <div className="panel-head">
@@ -2675,17 +2864,19 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                 确认对照，进入发布
               </button>
             </div>
-      </AccordionStepCard>
+          </AccordionStepCard>
 
-      <AccordionStepCard
-        ref={bindStepCardRef(4)}
-        stepNo={4}
-        title="04 场景编辑与发布"
-        state={getStepState(4)}
-        summaryText={step4HeaderText}
-        showEdit={canEditStep(4)}
-        onEdit={() => openStep(4)}
-      >
+          <AccordionStepCard
+            ref={bindStepCardRef(4)}
+            stepNo={4}
+            title="04 场景编辑与发布"
+            state={getStepState(4)}
+            summaryText={step4HeaderText}
+            showEdit={canEditStep(4)}
+            actionLabel="回到此阶段"
+            keepContentMounted={false}
+            onEdit={() => openStep(4)}
+          >
             <div className="row form-row">
               <label htmlFor="sceneTitle">场景标题</label>
               <input
@@ -2696,8 +2887,8 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                 onChange={(event) => updateFormField("sceneTitle", event.target.value)}
               />
             </div>
-          <div className="row form-row">
-            <label htmlFor="sceneDomain">业务领域</label>
+            <div className="row form-row">
+              <label htmlFor="sceneDomain">业务领域</label>
             <div className="domain-inline-row">
               <select
                 id="sceneDomain"
@@ -2707,6 +2898,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                 onChange={(event) => updateFormField("domainId", event.target.value)}
                 disabled={domainSelectDisabled}
                 className="domain-select-compact"
+                ref={domainSelectRef}
               >
                 <option value="">{domainLoading ? "业务领域加载中…" : "请选择业务领域"}</option>
                 {domainOptions.map((item) => (
@@ -2719,6 +2911,18 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                 <button className="btn btn-ghost" type="button" onClick={handleReloadDomains} disabled={domainLoading}>
                   {domainLoading ? "重载中…" : "重载业务领域"}
                 </button>
+                {domainOptions.length > 0 ? (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => {
+                      domainSelectRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      domainSelectRef.current?.focus();
+                    }}
+                  >
+                    选择业务领域
+                  </button>
+                ) : null}
                 {domainOptions.length === 0 ? (
                   <button className="btn btn-ghost" type="button" onClick={quickCreateDefaultDomain} disabled={domainLoading}>
                     快速创建默认业务领域
@@ -3079,10 +3283,12 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
             ) : null}
           </div>
           <p className="meta">
-            当前场景：{sceneId ? `#${sceneId}` : "未创建"} · 状态：{sceneStatus}
+            当前场景：{sceneId ? `#${sceneId}` : "未创建"} · 状态：{localizeWorkflowStatus(sceneStatus)}
             {currentDraft?.lowConfidence ? " · 低置信度（发布前请确认）" : ""}
           </p>
-      </AccordionStepCard>
+          </AccordionStepCard>
+        </div>
+      </section>
     </div>
   );
 }

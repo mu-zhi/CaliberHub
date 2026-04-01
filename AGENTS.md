@@ -5,6 +5,7 @@
 - 本仓库是文档优先项目，同时保留可运行的 `frontend（前端）` / `backend（后端）` 构建、测试与联调命令。
 - 根目录 `AGENTS.md` 只保留团队共享协作规则：项目边界、强制验证、文档同步、技能触发与交付格式。
 - 详细协作协议以 [`docs/engineering/collaboration-workflow.md`](docs/engineering/collaboration-workflow.md) 为准；个人提示词习惯、模型偏好或临时实验配置不进入共享文件。
+- 团队级开发流程、`Claude Code（代码智能体）` 启动方式、阶段模型映射、项目级工具入口与手册维护规则统一收口到 [`docs/engineering/development-manual.md`](docs/engineering/development-manual.md)。
 
 ## 共享协作协议
 
@@ -27,6 +28,7 @@
 - 实现完成后，不直接进入测试；必须先进入 `code-reviewing（代码检视技能）`，由 `Claude Code` 做只读代码检视，`Codex` 根据问题修复并复检通过后，才进入 `feature-test-report（特性测试与验收技能）` 所承载的测试文档与验收阶段。
 - 设计确认后、实施计划落地后、实现完成后、任务交接前，必须同步 [`docs/engineering/current-delivery-status.md`](docs/engineering/current-delivery-status.md)；未同步视为未完成交接。
 - 仓库是 `AI（人工智能）` 与团队共享执行上下文的唯一真源；凡影响实现、评审、验收或交接的正式约束，必须回写仓库文档、脚本、配置或测试。仅存在于聊天记录、口头说明或临时备注中的约束，不视为已生效约束。
+- 新增或调整项目级工具、桥接能力、脚本入口、模型路由、固定角色智能体、自动化规则或统一交付格式时，必须在同一轮协作中同步更新 [`docs/engineering/development-manual.md`](docs/engineering/development-manual.md)；未更新前，视为尚未形成正式项目级规则。
 - 实施计划中的测试入口、`Mock（模拟对象）`、纯逻辑抽离、测试文档骨架、脚本与断言工具等“脚手架任务”，必须先于对应业务任务出现；默认不新增额外标签，但要求在执行顺序上先固化边界、契约与反馈回路，再展开业务实现。
 - 能通过 `lint（静态检查）`、结构校验脚本、测试、`CI（持续集成，Continuous Integration）` 或目录约束表达的规则，应逐步转为可执行门禁；在对应基础设施未就绪前，暂按“文档约束 + 人工检查点”执行，并在相关状态文档或评审记录中显式写明仍处于人工门禁阶段。
 - 新增目录、共享组件、公共接口、页面主路径、数据契约、导航结构与协作规则时，必须同步补齐可复用的 `Golden Path（黄金路径样例）` 样例或模板；存量约束按优先级逐步补齐，当前默认从“数据地图高可见层首个真实执行样本”开始试点。
@@ -44,6 +46,7 @@
 ## 已知工作流
 
 - “更新项目文档”场景：遵循 [`README.md`](README.md) 中“项目文档同步更新规范（12条，生效版）”以及 [`docs/engineering/collaboration-workflow.md`](docs/engineering/collaboration-workflow.md) 中的共享协作协议。
+- 团队成员需要了解“本项目怎么开发、不同动作用什么模型、`Claude Code（代码智能体）` 怎么启动、有哪些项目级工具入口”时，统一先读 [`docs/engineering/development-manual.md`](docs/engineering/development-manual.md)。
 - 项目正式设计内容的默认路由固定为：前端页面结构、导航、交互、状态表达和前端评审留痕写入 [`docs/architecture/frontend-workbench-design.md`](docs/architecture/frontend-workbench-design.md)；方案对象、运行主线、接口契约和治理边界写入 [`docs/architecture/system-design.md`](docs/architecture/system-design.md)；已经从主方案拆出的场景级特性文档写入 [`docs/architecture/features/README.md`](docs/architecture/features/README.md) 所在目录。特性文档是主方案的展开，不是并行真源；同一需求若同时影响两类内容，必须拆分回写，不等待用户提醒。
 - 团队内部“当前开发进度 / 下个阶段工作”的默认路由固定为 [`docs/engineering/current-delivery-status.md`](docs/engineering/current-delivery-status.md)；它只承载当前事实、下一动作、阻塞项与任务接力，不替代正式设计文档和实施计划。
 - 文档更新时，英文术语、缩写、变量名、常量名、指标名都要附中文解释；若术语表缺项，先补 [`docs/glossary.md`](docs/glossary.md)。

@@ -62,8 +62,15 @@ function normalizeErrorMessage(error, fallback) {
   return raw;
 }
 
-function toneByCheck(passed) {
-  return passed ? "good" : "bad";
+function describeCheckResult(item) {
+  const level = `${item?.level || ""}`.trim().toLowerCase();
+  if (level === "warn" || level === "warning") {
+    return { tone: "warn", label: "预警" };
+  }
+  if (level === "info") {
+    return { tone: "neutral", label: "提示" };
+  }
+  return item?.passed ? { tone: "good", label: "通过" } : { tone: "bad", label: "阻断" };
 }
 
 function chooseDefaultScene(rows) {
@@ -126,6 +133,8 @@ export function PublishCenterPage() {
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
   const [bundleError, setBundleError] = useState("");
+  const [projectionMessage, setProjectionMessage] = useState("");
+  const [loadTimeout, setLoadTimeout] = useState(false);
   const [scenes, setScenes] = useState([]);
   const [selectedSceneId, setSelectedSceneId] = useState("");
   const [publishSummary, setPublishSummary] = useState("MVP 样板场景发布");
@@ -180,6 +189,40 @@ export function PublishCenterPage() {
     const ready = scenes.filter((item) => item.status === "PUBLISHED").length;
     return { draft, published, discarded, ready };
   }, [scenes]);
+  const publishBlockReason = useMemo(() => {
+    if (!selectedScene) {
+      return "请先选择一个场景。";
+    }
+    if (selectedScene.status === "PUBLISHED") {
+      return "当前场景已经发布，无需重复发布。";
+    }
+    if (!bundle.publishCheck?.publishReady) {
+      return "发布检查未通过，请先处理阻断项。";
+    }
+    if (!`${publishSummary || ""}`.trim()) {
+      return "请先填写本次发布摘要。";
+    }
+    return "";
+  }, [bundle.publishCheck?.publishReady, publishSummary, selectedScene]);
+  const projectionBlockReason = useMemo(() => {
+    const projectionStatus = `${bundle.projection?.status || ""}`.toUpperCase();
+    const projectionMessageText = `${bundle.projection?.message || ""}`;
+    if (projectionStatus === "SKIPPED" || /图投影已关闭/.test(projectionMessageText)) {
+      return "当前环境已关闭图谱投影，重建操作不可用。";
+    }
+    return "";
+  }, [bundle.projection?.message, bundle.projection?.status]);
+
+  useEffect(() => {
+    if (!loading) {
+      setLoadTimeout(false);
+      return undefined;
+    }
+    const timer = window.setTimeout(() => {
+      setLoadTimeout(true);
+    }, 8000);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   async function refreshSceneBundle(sceneId, { silent = false } = {}) {
     if (!sceneId) {
@@ -254,21 +297,28 @@ export function PublishCenterPage() {
   async function handleSceneChange(nextSceneId) {
     setSelectedSceneId(nextSceneId);
     setBundleError("");
+    setProjectionMessage("");
     await refreshSceneBundle(nextSceneId);
   }
 
   async function handleRebuildProjection() {
-    if (!selectedScene?.id) {
+    if (!selectedScene?.id || projectionBlockReason) {
       return;
     }
     setRebuilding(true);
     setBundleError("");
+    setProjectionMessage("");
     try {
       const projection = await apiRequest(buildApiPath("graphRebuild", { sceneId: selectedScene.id }), {
         method: "POST",
         body: {},
       });
       setBundle((prev) => ({ ...prev, projection }));
+      if (`${projection?.status || ""}`.toUpperCase() === "SKIPPED") {
+        setProjectionMessage("当前环境已关闭图谱投影，已切换为关系库运行时。");
+      } else {
+        setProjectionMessage("已触发图谱投影重建，请关注下方投影状态。");
+      }
     } catch (err) {
       setBundleError(normalizeErrorMessage(err, "图谱投影重建失败，请稍后重试"));
     } finally {
@@ -321,6 +371,20 @@ export function PublishCenterPage() {
             <p>正在加载候选场景、发布门禁和图谱投影状态…</p>
           </div>
         </div>
+        {loadTimeout ? (
+          <UiInlineError
+            message={error || "加载超时，请检查后端服务或稍后重试。"}
+            actionText="重新加载"
+            onAction={() => refreshScenes()}
+          />
+        ) : null}
+        {!loadTimeout ? (
+          <div className="panel-actions">
+            <UiButton variant="secondary" loading={refreshing} onClick={() => refreshScenes({ silent: true })}>
+              刷新状态
+            </UiButton>
+          </div>
+        ) : null}
       </section>
     );
   }
@@ -455,10 +519,21 @@ export function PublishCenterPage() {
               <UiButton as={Link} to={publishToRuntimeHref} variant="secondary" disabled={!selectedScene?.sceneCode}>
                 去运行决策台验证
               </UiButton>
-              <UiButton variant="secondary" loading={rebuilding} onClick={handleRebuildProjection}>
+              <UiButton
+                variant="secondary"
+                loading={rebuilding}
+                disabled={Boolean(projectionBlockReason)}
+                onClick={handleRebuildProjection}
+              >
                 重建图谱投影
               </UiButton>
             </div>
+            {projectionBlockReason ? (
+              <p className="subtle-note" role="status" aria-live="polite">{projectionBlockReason}</p>
+            ) : null}
+            {!projectionBlockReason && projectionMessage ? (
+              <p className="subtle-note" role="status" aria-live="polite">{projectionMessage}</p>
+            ) : null}
           </UiCard>
 
           <UiCard className="workbench-pane">
@@ -477,7 +552,10 @@ export function PublishCenterPage() {
                     <p>{item.message}</p>
                   </div>
                   <div className="workbench-row-side">
-                    <UiBadge tone={toneByCheck(item.passed)}>{item.passed ? "通过" : "阻断"}</UiBadge>
+                    {(() => {
+                      const checkResult = describeCheckResult(item);
+                      return <UiBadge tone={checkResult.tone}>{checkResult.label}</UiBadge>;
+                    })()}
                   </div>
                 </article>
               ))}
@@ -500,11 +578,14 @@ export function PublishCenterPage() {
               />
               <UiButton
                 loading={publishing}
-                disabled={!selectedScene || selectedScene.status === "PUBLISHED" || !bundle.publishCheck?.publishReady}
+                disabled={Boolean(publishBlockReason)}
                 onClick={handlePublish}
               >
                 {selectedScene?.status === "PUBLISHED" ? "当前已发布" : "执行发布"}
               </UiButton>
+              {publishBlockReason ? (
+                <p className="subtle-note" role="status" aria-live="polite">{publishBlockReason}</p>
+              ) : null}
             </div>
           </UiCard>
 

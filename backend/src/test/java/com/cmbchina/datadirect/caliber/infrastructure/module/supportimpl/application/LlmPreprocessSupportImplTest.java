@@ -296,7 +296,7 @@ class LlmPreprocessSupportImplTest {
             assertThat(root.path("scenes").get(0).path("code_mappings").get(0).path("mappings").path("020").asText()).isEqualTo("金卡");
 
             assertThat(requestBodyRef.get()).contains("[001]");
-            assertThat(requestBodyRef.get()).contains("[RAW_DOC]");
+            assertThat(requestBodyRef.get()).contains("[001] ## 场景一");
             assertThat(requestBodyRef.get()).contains("\"enable_thinking\":false");
         } finally {
             server.stop(0);
@@ -398,6 +398,60 @@ class LlmPreprocessSupportImplTest {
 
             assertThat(root.path("_meta").path("mode").asText()).isEqualTo("llm_enhanced");
             assertThat(requestCount.get()).isEqualTo(3);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void shouldUseResponsesApiPayloadForOpenAiEndpoint() throws Exception {
+        AtomicReference<String> requestBodyRef = new AtomicReference<>("");
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        String llmResponse = """
+                {
+                  "output": [
+                    {
+                      "content": [
+                        {
+                          "type": "output_text",
+                          "text": "{\\"prep_type\\":\\"CALIBER_PREP_V1\\",\\"schema_version\\":\\"1.2.0\\",\\"source_type\\":\\"PASTE_MD\\",\\"doc_profile\\":{\\"language\\":\\"zh\\",\\"has_sql\\":true,\\"estimated_scene_count\\":1,\\"ocr_noise_level\\":\\"LOW\\",\\"is_truncated\\":false},\\"context\\":{\\"domain_guess\\":\\"零售\\",\\"document_title\\":\\"Responses API 测试\\"},\\"normalized_text\\":\\"Responses API 测试\\",\\"scene_candidates\\":[{\\"scene_id\\":\\"S001\\",\\"scene_title\\":\\"场景一\\",\\"scene_description_hint\\":\\"查询客户信息\\",\\"sql_segment_ids\\":[\\"SQL_001\\"],\\"confidence\\":0.92,\\"evidence_lines\\":[1]}],\\"sql_segments\\":[{\\"segment_id\\":\\"SQL_001\\",\\"name_hint\\":\\"客户查询\\",\\"applicable_period\\":\\"2014至今\\",\\"sql_raw\\":\\"SELECT c.cust_id FROM dm_customer_info c;\\",\\"sql_type\\":\\"SELECT\\",\\"is_complete\\":true,\\"source_spans\\":[{\\"start_line\\":1,\\"end_line\\":1}],\\"warnings\\":[]}],\\"table_hints\\":[{\\"table\\":\\"dm_customer_info\\",\\"from_segment_id\\":\\"SQL_001\\",\\"confidence\\":0.9}],\\"field_hints\\":[],\\"risk_notes\\":[],\\"carry_over_text\\":\\"\\",\\"unresolved\\":[],\\"quality\\":{\\"confidence\\":0.9,\\"warnings\\":[],\\"errors\\":[]}}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """;
+        server.createContext("/v1/responses", exchange -> {
+            requestBodyRef.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            byte[] body = llmResponse.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, body.length);
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(body);
+            }
+        });
+        server.start();
+        try {
+            properties.setEnabled(true);
+            properties.setEndpoint("http://127.0.0.1:" + server.getAddress().getPort() + "/v1/responses");
+            properties.setModel("gpt-5.4");
+            properties.setFallbackToRule(false);
+            properties.setEnableThinking(false);
+            String result = support.preprocessToCaliberImportV2ByLlm("SELECT c.cust_id FROM dm_customer_info c;", "PASTE_MD", "responses.sql");
+            JsonNode root = objectMapper.readTree(result);
+
+            assertThat(root.path("_meta").path("mode").asText()).isEqualTo("llm_enhanced");
+            assertThat(root.path("scenes")).hasSize(1);
+            assertThat(root.path("scenes").get(0).path("sql_variants").get(0).path("sql_text").asText())
+                    .contains("dm_customer_info");
+
+            String requestBody = requestBodyRef.get();
+            assertThat(requestBody).contains("\"instructions\"");
+            assertThat(requestBody).contains("\"input\"");
+            assertThat(requestBody).contains("\"text\":{\"format\":{\"type\":\"json_object\"}}");
+            assertThat(requestBody).doesNotContain("\"messages\"");
+            assertThat(requestBody).doesNotContain("\"response_format\"");
+            assertThat(requestBody).doesNotContain("\"enable_thinking\"");
         } finally {
             server.stop(0);
         }

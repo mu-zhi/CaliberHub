@@ -1,6 +1,9 @@
 export function resolveAccordionStepState(stepNo, activeStep) {
   const step = Number(stepNo || 0);
-  const current = Number(activeStep || 1);
+  const current = Number(activeStep ?? 0);
+  if (current <= 0) {
+    return step === 1 ? "collapsed" : "locked";
+  }
   if (step === current) {
     return "expanded";
   }

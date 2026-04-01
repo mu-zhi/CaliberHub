@@ -7,6 +7,7 @@ import com.cmbchina.datadirect.caliber.domain.support.LlmPreprocessConfigDomainS
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPromptDefaults;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPromptFingerprint;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPrepSchemaJsonGenerator;
+import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmProviderCapabilityRegistry;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmPreprocessProperties;
 import com.cmbchina.datadirect.caliber.infrastructure.common.config.LlmSecretCodec;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +49,8 @@ public class LlmPreprocessConfigQueryAppService {
     public LlmPreprocessConfigDTO getCurrentConfig() {
         Optional<LlmPreprocessConfig> persisted = llmPreprocessConfigDomainSupport.findSingleton();
         LlmPreprocessConfig config = persisted.orElseGet(this::defaultConfig);
+        LlmProviderCapabilityRegistry.ProviderCapability capability =
+                LlmProviderCapabilityRegistry.resolve(config.getEndpoint(), config.getModel());
 
         String plainApiKey = decrypt(config.getApiKeyCiphertext());
         return new LlmPreprocessConfigDTO(
@@ -64,6 +67,11 @@ public class LlmPreprocessConfigQueryAppService {
                 persisted.isPresent() ? "PERSISTED" : "DEFAULT_PROPERTIES",
                 extractEndpointHost(config.getEndpoint()),
                 Boolean.TRUE.equals(config.getFallbackToRule()) ? "LLM -> RULE" : "LLM ONLY",
+                capability.providerCode(),
+                capability.providerLabel(),
+                capability.supportsResponsesApi(),
+                capability.supportsStructuredOutputs(),
+                capability.supportsThinkingToggle(),
                 config.getUpdatedBy(),
                 config.getUpdatedAt()
         );
@@ -78,6 +86,13 @@ public class LlmPreprocessConfigQueryAppService {
         String prepSchema = useDynamicSchema ? dynamicSchema : firstNonBlank(config.getPrepSchemaJson(), dynamicSchema);
         String promptHash = firstNonBlank(config.getPromptHash(), calculatePromptHash(systemPrompt, userTemplate, prepSchema));
         PromptConfigValidation validation = validatePromptConfig(userTemplate, prepSchema);
+        List<String> manualReviewReasons = buildManualReviewReasons(
+                systemPrompt,
+                userTemplate,
+                prepSchema,
+                dynamicSchema,
+                validation
+        );
         return new LlmPromptConfigDTO(
                 systemPrompt,
                 userTemplate,
@@ -89,6 +104,8 @@ public class LlmPreprocessConfigQueryAppService {
                 validation.schemaValidationMessage(),
                 validation.templateHasRequiredTokens(),
                 validation.templateMissingTokens(),
+                !manualReviewReasons.isEmpty(),
+                manualReviewReasons,
                 config.getUpdatedBy(),
                 config.getUpdatedAt()
         );
@@ -197,6 +214,30 @@ public class LlmPreprocessConfigQueryAppService {
             schemaValidationMessage = "Schema JSON 解析失败: " + trimOrEmpty(ex.getMessage());
         }
         return new PromptConfigValidation(schemaValid, schemaValidationMessage, missingTokens.isEmpty(), missingTokens);
+    }
+
+    private List<String> buildManualReviewReasons(String systemPrompt,
+                                                  String userTemplate,
+                                                  String prepSchema,
+                                                  String dynamicSchema,
+                                                  PromptConfigValidation validation) {
+        List<String> reasons = new ArrayList<>();
+        if (!validation.schemaValid()) {
+            reasons.add("schema_validation_failed");
+        }
+        if (!validation.templateHasRequiredTokens()) {
+            reasons.add("template_missing_required_tokens");
+        }
+        if (trimOrEmpty(userTemplate).contains("{{PREP_SCHEMA}}")) {
+            reasons.add("uses_legacy_static_schema_token");
+        }
+        boolean changedFromDefault = !trimOrEmpty(systemPrompt).equals(trimOrEmpty(LlmPromptDefaults.PREPROCESS_SYSTEM_PROMPT))
+                || !trimOrEmpty(userTemplate).equals(trimOrEmpty(LlmPromptDefaults.PREPROCESS_USER_PROMPT_TEMPLATE))
+                || !trimOrEmpty(prepSchema).equals(trimOrEmpty(dynamicSchema));
+        if (changedFromDefault) {
+            reasons.add("prompt_content_changed_from_default");
+        }
+        return reasons;
     }
 
     private String trimOrEmpty(String text) {

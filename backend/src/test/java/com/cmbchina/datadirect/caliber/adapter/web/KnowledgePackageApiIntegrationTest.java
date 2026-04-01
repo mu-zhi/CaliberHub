@@ -42,6 +42,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -280,6 +281,42 @@ class KnowledgePackageApiIntegrationTest {
                 .andExpect(jsonPath("$.clarification.subQuestions[1]").value("按公司户查询代发批次结果"))
                 .andExpect(jsonPath("$.clarification.mergeHints[0]").value("请先选择「代发明细查询」或「代发批次结果查询」，再分别提交运行请求"))
                 .andExpect(jsonPath("$.trace.traceId").exists());
+    }
+
+    @Test
+    void shouldKeepProjectionStatusBoundToPublishedSnapshotAfterCreatingNewDraftSnapshot() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        Fixture fixture = seedPayrollFixture();
+
+        mockMvc.perform(post("/api/graphrag/rebuild/{sceneId}", fixture.sceneId())
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "operator": "support"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sceneId").value(fixture.sceneId()))
+                .andExpect(jsonPath("$.snapshotId").value(fixture.snapshotId()));
+
+        mockMvc.perform(post("/api/scenes/{id}/versions", fixture.sceneId())
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "changeSummary": "发布后新增草稿快照",
+                                  "operator": "support"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.versionNo").value(2));
+
+        mockMvc.perform(get("/api/graphrag/projection/{sceneId}", fixture.sceneId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sceneId").value(fixture.sceneId()))
+                .andExpect(jsonPath("$.snapshotId").value(fixture.snapshotId()));
     }
 
     private Fixture seedPayrollFixture() {
@@ -535,7 +572,7 @@ class KnowledgePackageApiIntegrationTest {
         stamp(historySource, "PUBLISHED", version.getId(), versionTag, now);
         sourceContractMapper.save(historySource);
 
-        return new Fixture(sceneCode, currentPlan.getPlanCode(), historyPlan.getPlanCode(), versionTag);
+        return new Fixture(scene.getId(), version.getId(), sceneCode, currentPlan.getPlanCode(), historyPlan.getPlanCode(), versionTag);
     }
 
     private MultiSceneFixture seedMultiScenePayrollFixture() {
@@ -704,7 +741,12 @@ class KnowledgePackageApiIntegrationTest {
         return tokenNode.path("accessToken").asText();
     }
 
-    private record Fixture(String sceneCode, String currentPlanCode, String historyPlanCode, String versionTag) {
+    private record Fixture(Long sceneId,
+                           Long snapshotId,
+                           String sceneCode,
+                           String currentPlanCode,
+                           String historyPlanCode,
+                           String versionTag) {
     }
 
     private record MultiSceneFixture(String detailSceneCode,

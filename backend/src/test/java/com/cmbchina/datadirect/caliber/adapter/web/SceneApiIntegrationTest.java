@@ -1,18 +1,24 @@
 package com.cmbchina.datadirect.caliber.adapter.web;
 
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ContractViewMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.InputSlotSchemaMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.OutputContractMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceContractMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceIntakeContractMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.AbstractSnapshotGraphAuditablePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.ContractViewPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.DictionaryPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.IdentifierLineagePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.InputSlotSchemaPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.OutputContractPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.SourceContractPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.SourceIntakeContractPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.TimeSemanticSelectorPO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -64,6 +70,15 @@ class SceneApiIntegrationTest {
 
     @Autowired
     private SourceContractMapper sourceContractMapper;
+
+    @Autowired
+    private DictionaryMapper dictionaryMapper;
+
+    @Autowired
+    private IdentifierLineageMapper identifierLineageMapper;
+
+    @Autowired
+    private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
 
     @Test
     void shouldCompleteDraftToPublishFlow() throws Exception {
@@ -452,6 +467,68 @@ class SceneApiIntegrationTest {
                 .andExpect(jsonPath("$.items").isArray());
     }
 
+    @Test
+    void shouldExposeDictionaryIdentifierLineageAndTimeSemanticDiffBlocks() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        MvcResult createResult = mockMvc.perform(post("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sceneTitle": "差异块输出校验场景",
+                                  "rawInput": "raw",
+                                  "operator": "tester"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long sceneId = objectMapper.readTree(createResult.getResponse().getContentAsString()).path("id").asLong();
+
+        mockMvc.perform(post("/api/scenes/{id}/versions", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "changeSummary": "baseline",
+                                  "operator": "tester"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(put("/api/scenes/{id}", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sceneTitle": "差异块输出校验场景-更新",
+                                  "sceneDescription": "触发版本差异",
+                                  "operator": "editor"
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/scenes/{id}/versions", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "changeSummary": "after-edit",
+                                  "operator": "editor"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/scenes/{id}/diff", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .param("from", "1")
+                        .param("to", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.changedFields").isArray())
+                .andExpect(jsonPath("$.dictionaryChanges").isArray())
+                .andExpect(jsonPath("$.identifierLineageChanges").isArray())
+                .andExpect(jsonPath("$.timeSemanticSelectorChanges").isArray());
+    }
+
     private String loginAndGetToken(String username, String password) throws Exception {
         String loginBody = """
                 {
@@ -541,6 +618,52 @@ class SceneApiIntegrationTest {
             sourceContract.setNotes("用于验证发布快照绑定");
             stamp(sourceContract, now);
             sourceContractMapper.save(sourceContract);
+        }
+
+        if (dictionaryMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            DictionaryPO dictionary = new DictionaryPO();
+            dictionary.setSceneId(sceneId);
+            dictionary.setPlanId(primaryPlan.getId());
+            dictionary.setDictCode("DICT-" + sceneId + "-MAIN");
+            dictionary.setDictName("客户状态字典");
+            dictionary.setDictCategory("ENUM");
+            dictionary.setDictVersion("v1");
+            dictionary.setReleaseStatus("PUBLISHED");
+            dictionary.setEntriesJson("[{\"code\":\"01\",\"name\":\"正常\"}]");
+            dictionary.setReferencedByJson("[\"output_contract:main\"]");
+            stamp(dictionary, now);
+            dictionaryMapper.save(dictionary);
+        }
+
+        if (identifierLineageMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            IdentifierLineagePO lineage = new IdentifierLineagePO();
+            lineage.setSceneId(sceneId);
+            lineage.setPlanId(primaryPlan.getId());
+            lineage.setLineageCode("LIN-" + sceneId + "-MAIN");
+            lineage.setLineageName("客户号映射链");
+            lineage.setIdentifierType("CUST_ID");
+            lineage.setSourceIdentifierType("SRC_CUST_ID");
+            lineage.setTargetIdentifierType("CUST_ID");
+            lineage.setMappingRulesJson("[{\"rule\":\"trim\"}]");
+            lineage.setEvidenceRefsJson("[\"evidence:integration-test\"]");
+            lineage.setConfirmationStatus("CONFIRMED");
+            stamp(lineage, now);
+            identifierLineageMapper.save(lineage);
+        }
+
+        if (timeSemanticSelectorMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            TimeSemanticSelectorPO selector = new TimeSemanticSelectorPO();
+            selector.setSceneId(sceneId);
+            selector.setPlanId(primaryPlan.getId());
+            selector.setSelectorCode("TIME-" + sceneId + "-MAIN");
+            selector.setSelectorName("时间语义选择器");
+            selector.setDefaultSemantic("交易日期");
+            selector.setCandidateSemanticsJson("[\"交易日期\",\"记账日期\"]");
+            selector.setClarificationTermsJson("[\"当日\",\"最近\"]");
+            selector.setPriorityRulesJson("[{\"priority\":1,\"semantic\":\"交易日期\"}]");
+            selector.setMustClarifyFlag(false);
+            stamp(selector, now);
+            timeSemanticSelectorMapper.save(selector);
         }
     }
 

@@ -33,6 +33,17 @@ const SCENE_BUNDLE = {
   projection: { status: "READY", lastProjectedAt: "2026-03-28T10:00:00Z" },
 };
 
+const SECOND_PUBLISHED_SCENE = {
+  id: 2,
+  sceneCode: "SCN_PAYROLL_BATCH",
+  sceneTitle: "代发批次结果查询",
+  sceneType: "FACT_DETAIL",
+  sceneDescription: "代发批次场景",
+  domainId: 10,
+  publishedAt: "2026-03-29T10:00:00Z",
+  status: "PUBLISHED",
+};
+
 const CLARIFICATION_RESULT = {
   decision: "clarification_only",
   reasonCode: "MULTI_SCENE_AMBIGUOUS",
@@ -165,6 +176,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   globalThis.fetch = originalFetch;
   vi.restoreAllMocks();
   cleanup();
@@ -184,6 +196,26 @@ function renderWorkbench(graphQueryResult) {
 /* ------------------------------------------------------------------ */
 
 describe("KnowledgePackageWorkbenchPage interactive flow", () => {
+  it("shows timeout feedback when initial loading takes too long", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+
+    render(
+      <MemoryRouter>
+        <KnowledgePackageWorkbenchPage />
+      </MemoryRouter>,
+    );
+
+    await act(async () => {
+      vi.advanceTimersByTime(8000);
+    });
+
+    expect(screen.getByText("加载超时，请检查后端服务或稍后重试。")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "重新加载" })).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
   it("loads published scenes and renders the form", async () => {
     renderWorkbench();
 
@@ -231,6 +263,7 @@ describe("KnowledgePackageWorkbenchPage interactive flow", () => {
     expect(screen.getByText("完整覆盖 · 2021-Q1")).toBeTruthy();
     expect(screen.queryByText("allow")).toBeNull();
     expect(screen.getByText("检索过程")).toBeTruthy();
+    expect(screen.getByText("1 个候选场景")).toBeTruthy();
   });
 
   it("submits query and renders clarification result with interactive buttons", async () => {
@@ -394,5 +427,88 @@ describe("KnowledgePackageWorkbenchPage interactive flow", () => {
     await waitFor(() => {
       expect(screen.getByText("请提供协议号或客户号以执行检索。")).toBeTruthy();
     });
+  });
+
+  it("switches scenes and keeps coverage badges localized in multi-scene fixtures", async () => {
+    const sceneOneBundle = {
+      ...SCENE_BUNDLE,
+      coverages: [
+        {
+          id: 101,
+          coverageCode: "COV_DETAIL_2021Q1",
+          coverageTitle: "代发明细覆盖",
+          coverageStatus: "FULL",
+          applicablePeriod: "2021-Q1",
+        },
+      ],
+    };
+    const sceneTwoBundle = {
+      ...SCENE_BUNDLE,
+      plans: [{ planId: 2, planCode: "PLAN_PAYROLL_BATCH", planName: "代发批次结果方案" }],
+      coverages: [
+        {
+          id: 201,
+          coverageCode: "COV_BATCH_2021Q2",
+          coverageTitle: "代发批次覆盖",
+          status: "PARTIAL",
+          applicablePeriod: "2021-Q2",
+        },
+      ],
+      versions: [{ id: 43, versionTag: "v2", publishedAt: "2026-03-29T10:00:00Z" }],
+      projection: { status: "READY", lastProjectedAt: "2026-03-29T10:00:00Z" },
+    };
+
+    const fetchMock = vi.fn(async (url) => {
+      const path = typeof url === "string" ? url : url.toString();
+
+      if (path.includes("/api/scenes")) {
+        return mockJsonResponse([PUBLISHED_SCENE, SECOND_PUBLISHED_SCENE]);
+      }
+      if (path.includes("/api/scenes/1/versions")) return mockJsonResponse(sceneOneBundle.versions);
+      if (path.includes("/api/scenes/2/versions")) return mockJsonResponse(sceneTwoBundle.versions);
+      if (path.includes("/api/plans")) return mockJsonResponse(path.includes("sceneId=2") ? sceneTwoBundle.plans : sceneOneBundle.plans);
+      if (path.includes("/api/coverage-declarations")) {
+        return mockJsonResponse(path.includes("sceneId=2") ? sceneTwoBundle.coverages : sceneOneBundle.coverages);
+      }
+      if (path.includes("/api/policies")) return mockJsonResponse([]);
+      if (path.includes("/api/contract-views")) return mockJsonResponse([]);
+      if (path.includes("/api/source-contracts")) return mockJsonResponse([]);
+      if (path.includes("/api/publish-checks")) return mockJsonResponse(null);
+      if (path.includes("/api/input-slot-schemas")) return mockJsonResponse(sceneOneBundle.inputSlots);
+      if (path.includes("/api/output-contracts")) return mockJsonResponse(sceneOneBundle.outputContracts);
+      if (path.includes("/api/graphrag/projection")) {
+        return mockJsonResponse(path.includes("sceneId=2") ? sceneTwoBundle.projection : sceneOneBundle.projection);
+      }
+      if (path.includes("/api/scene-search")) return mockJsonResponse({ candidates: [], reasons: [] });
+      if (path.includes("/api/plan-select")) return mockJsonResponse({ candidates: [], reasons: [] });
+      if (path.includes("/api/graphrag/query")) return mockJsonResponse(ALLOW_RESULT);
+
+      return mockJsonResponse(null);
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <KnowledgePackageWorkbenchPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "生成知识包" })).toBeTruthy();
+    });
+
+    expect(screen.getByText("代发明细覆盖")).toBeTruthy();
+    expect(screen.getByText("完整覆盖")).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText("选择场景"), { target: { value: "2" } });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("代发批次覆盖")).toBeTruthy();
+    });
+    expect(screen.getByText("部分覆盖")).toBeTruthy();
+    expect(screen.queryByText("UNKNOWN")).toBeNull();
   });
 });

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/service-specs")
 @Validated
@@ -34,10 +36,15 @@ public class ServiceSpecController {
         return ResponseEntity.status(HttpStatus.CREATED).body(serviceSpecAppService.export(sceneId, payload));
     }
 
+    @GetMapping
+    public ResponseEntity<List<ServiceSpecDTO>> listRecent(@RequestParam(required = false) Long sceneId,
+                                                           @RequestParam(required = false, defaultValue = "20") Integer limit) {
+        return ResponseEntity.ok(serviceSpecAppService.listRecent(sceneId, limit));
+    }
+
     @GetMapping("/{specCode}")
     public ResponseEntity<ServiceSpecDTO> getByCode(@PathVariable String specCode,
                                                     @RequestParam(required = false) Integer version) {
         return ResponseEntity.ok(serviceSpecAppService.getByCode(specCode, version));
     }
 }
-

@@ -45,6 +45,11 @@ management:
   endpoint:
     health:
       show-details: never
+  health:
+    redis:
+      enabled: ${CALIBER_CACHE_REDIS_ENABLED:false}
+    neo4j:
+      enabled: ${CALIBER_GRAPH_HEALTH_ENABLED:false}
   info:
     env:
       enabled: true

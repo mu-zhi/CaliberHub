@@ -14,7 +14,7 @@ if [ -f "$ENV_FILE" ]; then
   done < "$ENV_FILE"
   echo "[env] 已加载 $ENV_FILE"
 else
-  echo "[env] 未找到 $ENV_FILE，使用 application.yml 默认值"
+  echo "[env] 未找到 ${ENV_FILE}，使用 application.yml 默认值"
 fi
 
 cd "$PROJECT_ROOT/backend"

@@ -10,11 +10,15 @@ import com.cmbchina.datadirect.caliber.application.service.command.graphrag.Cano
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.GraphProjectionAppService;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.SceneGraphAssetSyncService;
 import com.cmbchina.datadirect.caliber.application.service.query.graphrag.ScenePublishGateAppService;
+import com.cmbchina.datadirect.caliber.domain.exception.DomainValidationException;
 import com.cmbchina.datadirect.caliber.domain.model.Scene;
 import com.cmbchina.datadirect.caliber.domain.model.SceneStatus;
 import com.cmbchina.datadirect.caliber.domain.support.CaliberDomainSupport;
 import com.cmbchina.datadirect.caliber.domain.support.SceneDomainSupport;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneAuditLogMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.SceneAuditLogPO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -51,6 +55,15 @@ class SceneCommandAppServiceTest {
 
     @Mock
     private CanonicalSnapshotBindingService canonicalSnapshotBindingService;
+
+    @Mock
+    private DictionaryMapper dictionaryMapper;
+
+    @Mock
+    private IdentifierLineageMapper identifierLineageMapper;
+
+    @Mock
+    private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
 
     private AlignmentReportAppService alignmentReportAppService;
     private SceneGraphAssetSyncService sceneGraphAssetSyncService;
@@ -299,5 +312,37 @@ class SceneCommandAppServiceTest {
         ArgumentCaptor<SceneAuditLogPO> captor = ArgumentCaptor.forClass(SceneAuditLogPO.class);
         verify(sceneAuditLogMapper).save(captor.capture());
         assertThat(captor.getValue().getDetailJson()).contains("QG-102:id_mapping_notes_missing");
+    }
+
+    @Test
+    void shouldRejectPublishWhenDictionaryIdentifierLineageAndTimeSemanticSelectorMissing() {
+        OffsetDateTime now = OffsetDateTime.now();
+        Scene scene = Scene.builder()
+                .id(11L)
+                .sceneCode("SCN-MISSING-ASSET")
+                .sceneTitle("治理对象缺失校验")
+                .domainId(1L)
+                .domain("零售金融")
+                .status(SceneStatus.DRAFT)
+                .sceneDescription("用于测试治理对象缺失时的发布阻断")
+                .createdBy("tester")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        when(sceneDomainSupport.findById(11L)).thenReturn(Optional.of(scene));
+        sceneCommandAppService.setDictionaryMapper(dictionaryMapper);
+        sceneCommandAppService.setIdentifierLineageMapper(identifierLineageMapper);
+        sceneCommandAppService.setTimeSemanticSelectorMapper(timeSemanticSelectorMapper);
+        when(dictionaryMapper.findBySceneIdOrderByUpdatedAtDesc(11L)).thenReturn(java.util.List.of());
+        when(identifierLineageMapper.findBySceneIdOrderByUpdatedAtDesc(11L)).thenReturn(java.util.List.of());
+        when(timeSemanticSelectorMapper.findBySceneIdOrderByUpdatedAtDesc(11L)).thenReturn(java.util.List.of());
+
+        assertThatThrownBy(() -> sceneCommandAppService.publish(
+                11L,
+                new PublishSceneCmd(now, "发布说明", "reviewer")
+        )).isInstanceOf(DomainValidationException.class)
+                .hasMessageContaining("Dictionary")
+                .hasMessageContaining("Identifier Lineage")
+                .hasMessageContaining("Time Semantic Selector");
     }
 }

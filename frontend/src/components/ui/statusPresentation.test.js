@@ -68,6 +68,26 @@ describe("status presentation helpers", () => {
       label: "失败",
       tone: "bad",
     });
+    expect(describeProjectionStatus("SKIPPED")).toEqual({
+      code: "SKIPPED",
+      label: "已关闭",
+      tone: "neutral",
+    });
+    expect(describeProjectionStatus("SUCCEEDED")).toEqual({
+      code: "SUCCEEDED",
+      label: "已完成",
+      tone: "good",
+    });
+    expect(describeProjectionStatus("IDLE")).toEqual({
+      code: "IDLE",
+      label: "未触发",
+      tone: "neutral",
+    });
+    expect(describeProjectionStatus("NOT_FOUND")).toEqual({
+      code: "NOT_FOUND",
+      label: "未触发",
+      tone: "neutral",
+    });
   });
 
   it("describes publish status values with chinese labels and tones", () => {
@@ -102,6 +122,26 @@ describe("status presentation helpers", () => {
     expect(describeCoverageStatus("GAP")).toEqual({
       code: "GAP",
       label: "存在缺口",
+      tone: "bad",
+    });
+    expect(describeCoverageStatus("full_match")).toEqual({
+      code: "FULL",
+      label: "完整覆盖",
+      tone: "good",
+    });
+    expect(describeCoverageStatus("PARTIAL_MATCH")).toEqual({
+      code: "PARTIAL",
+      label: "部分覆盖",
+      tone: "warn",
+    });
+    expect(describeCoverageStatus("COVERAGE_GAP")).toEqual({
+      code: "GAP",
+      label: "存在缺口",
+      tone: "bad",
+    });
+    expect(describeCoverageStatus("NO_COVERAGE")).toEqual({
+      code: "NONE",
+      label: "未覆盖",
       tone: "bad",
     });
     expect(describeDecisionStatus("allow")).toEqual({

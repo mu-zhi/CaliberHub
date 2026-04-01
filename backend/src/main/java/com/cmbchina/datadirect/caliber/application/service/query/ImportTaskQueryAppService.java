@@ -1,13 +1,17 @@
 package com.cmbchina.datadirect.caliber.application.service.query;
 
+import com.cmbchina.datadirect.caliber.application.api.dto.response.CandidateGraphDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportTaskLifecycleDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportTaskDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.PreprocessResultDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
 import com.cmbchina.datadirect.caliber.application.exception.ResourceNotFoundException;
+import com.cmbchina.datadirect.caliber.application.service.command.ImportCandidateGraphAssembler;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.ImportTaskMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ImportTaskPO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,13 +26,16 @@ public class ImportTaskQueryAppService {
     private final ImportTaskMapper importTaskMapper;
     private final ObjectMapper objectMapper;
     private final SceneQueryAppService sceneQueryAppService;
+    private final ImportCandidateGraphAssembler importCandidateGraphAssembler;
 
     public ImportTaskQueryAppService(ImportTaskMapper importTaskMapper,
                                      ObjectMapper objectMapper,
-                                     SceneQueryAppService sceneQueryAppService) {
+                                     SceneQueryAppService sceneQueryAppService,
+                                     ImportCandidateGraphAssembler importCandidateGraphAssembler) {
         this.importTaskMapper = importTaskMapper;
         this.objectMapper = objectMapper;
         this.sceneQueryAppService = sceneQueryAppService;
+        this.importCandidateGraphAssembler = importCandidateGraphAssembler;
     }
 
     public ImportTaskDTO getByTaskId(String taskId) {
@@ -81,6 +88,7 @@ public class ImportTaskQueryAppService {
         if (po.getPreprocessResultJson() != null && !po.getPreprocessResultJson().isBlank()) {
             try {
                 preprocessResult = objectMapper.readTree(po.getPreprocessResultJson());
+                preprocessResult = enrichCandidateGraphIfMissing(po, preprocessResult);
             } catch (Exception ignore) {
                 // ignore parse failure
             }
@@ -103,6 +111,35 @@ public class ImportTaskQueryAppService {
                 po.getUpdatedAt(),
                 po.getCompletedAt()
         );
+    }
+
+    private JsonNode enrichCandidateGraphIfMissing(ImportTaskPO po, JsonNode preprocessResult) {
+        if (!(preprocessResult instanceof ObjectNode objectNode)) {
+            return preprocessResult;
+        }
+        JsonNode candidateGraphNode = objectNode.path("candidateGraph");
+        if (candidateGraphNode.isObject()
+                && candidateGraphNode.path("nodes").isArray()
+                && candidateGraphNode.path("edges").isArray()) {
+            boolean hasGraphContent = candidateGraphNode.path("nodes").size() > 0
+                    || candidateGraphNode.path("edges").size() > 0;
+            boolean hasSceneContent = objectNode.path("scenes").isArray() && objectNode.path("scenes").size() > 0;
+            if (hasGraphContent || !hasSceneContent) {
+                return preprocessResult;
+            }
+        }
+        try {
+            PreprocessResultDTO result = objectMapper.treeToValue(preprocessResult, PreprocessResultDTO.class);
+            CandidateGraphDTO candidateGraph = importCandidateGraphAssembler.buildSnapshotFromResult(
+                    po.getTaskId(),
+                    po.getMaterialId(),
+                    result
+            );
+            objectNode.set("candidateGraph", objectMapper.valueToTree(candidateGraph));
+        } catch (Exception ignore) {
+            // keep original payload when legacy graph backfill fails
+        }
+        return objectNode;
     }
 
     private ImportTaskLifecycleDTO toLifecycle(ImportTaskPO po) {

@@ -1,20 +1,26 @@
 package com.cmbchina.datadirect.caliber.adapter.web;
 
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ContractViewMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.InputSlotSchemaMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.OutputContractMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanSchemaLinkMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceContractMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceIntakeContractMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.AbstractSnapshotGraphAuditablePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.ContractViewPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.DictionaryPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.IdentifierLineagePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.InputSlotSchemaPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.OutputContractPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanSchemaLinkPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.SourceContractPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.SourceIntakeContractPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.TimeSemanticSelectorPO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -68,6 +74,15 @@ class M2M3ApiIntegrationTest {
 
     @Autowired
     private SourceContractMapper sourceContractMapper;
+
+    @Autowired
+    private DictionaryMapper dictionaryMapper;
+
+    @Autowired
+    private IdentifierLineageMapper identifierLineageMapper;
+
+    @Autowired
+    private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
 
     @Test
     void shouldCompleteM2M3CoreFlow() throws Exception {
@@ -230,6 +245,14 @@ class M2M3ApiIntegrationTest {
                 .andExpect(jsonPath("$.specCode").value(specCode))
                 .andExpect(jsonPath("$.specVersion").value(1));
 
+        mockMvc.perform(get("/api/service-specs")
+                        .header("Authorization", "Bearer " + token)
+                        .queryParam("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].sceneId").value(sceneId))
+                .andExpect(jsonPath("$[0].specCode").value(specCode))
+                .andExpect(jsonPath("$[0].specVersion").value(1));
+
         MvcResult planResult = mockMvc.perform(post("/api/nl/query")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -294,6 +317,24 @@ class M2M3ApiIntegrationTest {
 
         long snapshotId = objectMapper.readTree(publishResult.getResponse().getContentAsString()).path("snapshotId").asLong();
         assertThat(snapshotId).isPositive();
+
+        mockMvc.perform(get("/api/graphrag/projection/{sceneId}", sceneId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sceneId").value(sceneId))
+                .andExpect(jsonPath("$.snapshotId").value(snapshotId));
+
+        mockMvc.perform(post("/api/scenes/{id}/versions", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "changeSummary": "发布后草稿快照",
+                                  "operator": "support"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.versionNo").value(2));
 
         mockMvc.perform(get("/api/graphrag/projection/{sceneId}", sceneId)
                         .header("Authorization", "Bearer " + token))
@@ -460,6 +501,52 @@ class M2M3ApiIntegrationTest {
             sourceContract.setNotes("用于验证发布门禁与快照");
             stamp(sourceContract, now);
             sourceContractMapper.save(sourceContract);
+        }
+
+        if (dictionaryMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            DictionaryPO dictionary = new DictionaryPO();
+            dictionary.setSceneId(sceneId);
+            dictionary.setPlanId(primaryPlan.getId());
+            dictionary.setDictCode("DICT-" + sceneId + "-DEFAULT");
+            dictionary.setDictName("M2M3 默认术语字典");
+            dictionary.setDictCategory("BUSINESS_TERM");
+            dictionary.setDictVersion("v1");
+            dictionary.setReleaseStatus("ACTIVE");
+            dictionary.setEntriesJson("[{\"term\":\"cust_id\",\"meaning\":\"客户号\"}]");
+            dictionary.setReferencedByJson("[\"PLAN:" + primaryPlan.getPlanCode() + "\"]");
+            stamp(dictionary, now);
+            dictionaryMapper.save(dictionary);
+        }
+
+        if (identifierLineageMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            IdentifierLineagePO lineage = new IdentifierLineagePO();
+            lineage.setSceneId(sceneId);
+            lineage.setPlanId(primaryPlan.getId());
+            lineage.setLineageCode("LIN-" + sceneId + "-CUST");
+            lineage.setLineageName("客户号到客户号");
+            lineage.setIdentifierType("CUST_ID");
+            lineage.setSourceIdentifierType("CUST_ID");
+            lineage.setTargetIdentifierType("CUST_ID");
+            lineage.setMappingRulesJson("[{\"rule\":\"identity\"}]");
+            lineage.setEvidenceRefsJson("[]");
+            lineage.setConfirmationStatus("CONFIRMED");
+            stamp(lineage, now);
+            identifierLineageMapper.save(lineage);
+        }
+
+        if (timeSemanticSelectorMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            TimeSemanticSelectorPO selector = new TimeSemanticSelectorPO();
+            selector.setSceneId(sceneId);
+            selector.setPlanId(primaryPlan.getId());
+            selector.setSelectorCode("TS-" + sceneId + "-DEFAULT");
+            selector.setSelectorName("默认时间语义");
+            selector.setDefaultSemantic("交易日期");
+            selector.setCandidateSemanticsJson("[\"交易日期\"]");
+            selector.setClarificationTermsJson("[\"交易日期\"]");
+            selector.setPriorityRulesJson("[{\"priority\":1,\"semantic\":\"交易日期\"}]");
+            selector.setMustClarifyFlag(false);
+            stamp(selector, now);
+            timeSemanticSelectorMapper.save(selector);
         }
 
         for (PlanPO plan : plans) {

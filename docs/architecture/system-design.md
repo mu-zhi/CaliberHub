@@ -209,6 +209,14 @@
 3. 运行时 `LLM（大语言模型）` 输出不得回写 `Inference Assertion（推理结论）`、`Inference Chain（推理链）`、`Evidence Fragment（证据片段）`、`Scene（业务场景）`、`Plan（方案资产）` 或 `Source Contract（来源契约）`。
 4. `LLM（大语言模型）` 服务异常时，运行面退回规则抽取、关键词归一和澄清问题路径；不能因 `LLM（大语言模型）` 不可用而放宽正式推理门禁。
 
+### 4.4.7.1 导入预处理 OpenAI 集成迁移拆分
+
+1. 导入预处理链路的 OpenAI 集成迁移不得作为一个“大特性”直接整体推进，必须拆成三个专题特性：`provider 路由与模型治理`、`OpenAI Responses 预处理适配`、`预处理结构化输出与 Prompt 治理`。
+2. `provider 路由与模型治理` 负责 provider 预设、模型能力矩阵、参数白名单、切换审计、灰度验证与回退；不负责具体 Prompt 文案和响应解析。
+3. `OpenAI Responses 预处理适配` 负责把统一预处理域请求映射到 OpenAI `Responses API（响应式接口）` 并回收统一结果；不得通过“只替换 endpoint”方式硬迁移。
+4. `预处理结构化输出与 Prompt 治理` 负责 Prompt 版本、Schema、结构化校验、预览测试和人工审核标记；它不定义 provider 路由规则，只消费 provider 能力矩阵。
+5. 三个专题特性必须按“provider 治理先行 -> Responses 适配 -> Prompt / Schema 治理收口”的顺序实施；若任一前置专题未落地，后续专题不得直接越级实现。
+
 ### 4.4.8 推理链归档与规模控制
 
 1. `Inference Chain（推理链）` 不是所有中间路径的无差别全量归档对象，而应分级管理。
