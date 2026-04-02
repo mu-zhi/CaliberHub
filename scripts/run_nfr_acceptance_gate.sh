@@ -6,7 +6,7 @@ BACKEND_DIR="${ROOT_DIR}/backend"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8082}"
 
 AUTH_USER="${AUTH_USER:-admin}"
-AUTH_PASS="${AUTH_PASS:-admin123}"
+AUTH_PASS="${AUTH_PASS:-${CALIBER_ADMIN_PASSWORD:-}}"
 VERIFY_MODE="${VERIFY_MODE:-strict}"
 ELASTIC_MAX_FAIL="${ELASTIC_MAX_FAIL:-1}"
 ELASTIC_RETRY_PER_FAIL="${ELASTIC_RETRY_PER_FAIL:-1}"
@@ -22,6 +22,11 @@ fi
 if [[ "${NFR_PROFILE}" != "llm_strict" && "${NFR_PROFILE}" != "fallback_observe" ]]; then
   echo "invalid NFR_PROFILE=${NFR_PROFILE}, fallback to llm_strict"
   NFR_PROFILE="llm_strict"
+fi
+
+if [[ -z "${AUTH_PASS}" ]]; then
+  echo "missing AUTH_PASS or CALIBER_ADMIN_PASSWORD for authenticated NFR verification"
+  exit 1
 fi
 
 echo "[1/4] 获取认证令牌"

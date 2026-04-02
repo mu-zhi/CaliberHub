@@ -202,9 +202,15 @@ bash scripts/claude_mux.sh <provider> <model> [claude args...]
 - `cd frontend && npm run dev`：启动前端，默认端口 `5174`。
 - `cd frontend && npm run test:e2e:install`：安装 `Playwright（浏览器自动化框架）` 所需的 Chromium 浏览器。
 - `cd frontend && npm run test:e2e`：执行浏览器级 `E2E（端到端，End-to-End）` 回归；默认由 `Playwright` 拉起本地前端 `5174`，并在用例内部 mock `API（应用程序接口，Application Programming Interface）` 响应。
-- `bash scripts/run_system_test_flow.sh`：执行系统联调主链路验证；默认探活后端 `8082` 与前端 `5174`，可用 `BASE_URL` / `FRONTEND_URL` 覆盖。
-- `bash scripts/run_nfr_acceptance_gate.sh`：执行 `NFR（非功能需求，Non-Functional Requirement）` 验收门禁。
+- `bash scripts/run_system_test_flow.sh`：执行系统联调主链路验证；默认探活后端 `8082` 与前端 `5174`，可用 `BASE_URL` / `FRONTEND_URL` 覆盖；认证探活不再内置弱口令，需显式提供 `AUTH_PASS` 或 `CALIBER_ADMIN_PASSWORD`，缺失时只跳过认证探活。
+- `bash scripts/run_nfr_acceptance_gate.sh`：执行 `NFR（非功能需求，Non-Functional Requirement）` 验收门禁；该脚本依赖认证令牌，不再内置弱口令，运行前需显式提供 `AUTH_PASS` 或 `CALIBER_ADMIN_PASSWORD`。
 - `bash scripts/sync_frontend_dist.sh`：将现有前端静态产物同步到后端，不再负责执行前端构建。
+
+安全收口补充约束：
+
+- 前端 `apiRequest（接口请求封装）`、`apiRequestWithMeta` 与 `apiSseRequest` 在调用方未显式传入 `token（令牌）` 时，会优先复用会话中的 `dd_auth_token`；登录接口 `/api/system/auth/token` 例外，不自动附带旧令牌。
+- 后端 `SecurityConfig（安全配置）` 默认要求登录后访问 `GET /api/**`，并把 `/api/system/**` 固定收口为 `ADMIN（管理员）` 角色；`require-write-auth=false` 仅用于缩窄后的内容写接口放松，不再代表系统接口整体放开。
+- `ApiRateLimitFilter（接口限流过滤器）` 当前对 `GET / POST / PUT / DELETE` 的 `/api/**` 请求统一施加分钟级限流，并在每次请求前清理过期计数，避免进程内计数无界增长。
 
 ### 7.3 常用命令
 

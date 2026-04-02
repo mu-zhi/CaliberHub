@@ -67,8 +67,8 @@ public class SecurityConfig {
                     requests.requestMatchers("/actuator/health", "/actuator/info").permitAll();
                     requests.requestMatchers("/api/system/auth/token").permitAll();
                     requests.requestMatchers("/actuator/**").hasRole("ADMIN");
+                    requests.requestMatchers("/api/system/**").hasRole("ADMIN");
                     if (caliberSecurityProperties.isRequireWriteAuth()) {
-                        requests.requestMatchers("/api/system/**").hasRole("ADMIN");
                         requests.requestMatchers(HttpMethod.POST, "/api/import/**").hasAnyRole("SUPPORT", "EXPERT", "GOVERNANCE", "ADMIN");
                         requests.requestMatchers(HttpMethod.POST, "/api/scenes/**").hasAnyRole("SUPPORT", "EXPERT", "GOVERNANCE", "ADMIN");
                         requests.requestMatchers(HttpMethod.PUT, "/api/scenes/**").hasAnyRole("SUPPORT", "EXPERT", "GOVERNANCE", "ADMIN");
@@ -79,12 +79,17 @@ public class SecurityConfig {
                         requests.requestMatchers(HttpMethod.PUT, "/api/**").authenticated();
                         requests.requestMatchers(HttpMethod.DELETE, "/api/**").authenticated();
                     } else {
-                        requests.requestMatchers("/api/system/**").permitAll();
-                        requests.requestMatchers(HttpMethod.POST, "/api/**").permitAll();
-                        requests.requestMatchers(HttpMethod.PUT, "/api/**").permitAll();
-                        requests.requestMatchers(HttpMethod.DELETE, "/api/**").permitAll();
+                        requests.requestMatchers(HttpMethod.POST, "/api/import/**").permitAll();
+                        requests.requestMatchers(HttpMethod.POST, "/api/scenes/**").permitAll();
+                        requests.requestMatchers(HttpMethod.PUT, "/api/scenes/**").permitAll();
+                        requests.requestMatchers(HttpMethod.DELETE, "/api/scenes/**").permitAll();
+                        requests.requestMatchers(HttpMethod.POST, "/api/domains/**").permitAll();
+                        requests.requestMatchers(HttpMethod.PUT, "/api/domains/**").permitAll();
+                        requests.requestMatchers(HttpMethod.POST, "/api/**").authenticated();
+                        requests.requestMatchers(HttpMethod.PUT, "/api/**").authenticated();
+                        requests.requestMatchers(HttpMethod.DELETE, "/api/**").authenticated();
                     }
-                    requests.requestMatchers(HttpMethod.GET, "/api/**").permitAll();
+                    requests.requestMatchers(HttpMethod.GET, "/api/**").authenticated();
                     requests.anyRequest().permitAll();
                 })
                 .addFilterBefore(requestAuditFilter, UsernamePasswordAuthenticationFilter.class)

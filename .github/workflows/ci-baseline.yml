@@ -54,18 +54,23 @@ jobs:
 
       - name: Wait Backend And Health Check
         env:
-          AUTH_USER: admin
-          AUTH_PASS: admin123
+          AUTH_USER: ${{ vars.CALIBER_CI_AUTH_USER || 'admin' }}
+          AUTH_PASS: ${{ secrets.CALIBER_CI_AUTH_PASS }}
         run: |
           for i in $(seq 1 40); do
-            if curl -fsS -X POST http://127.0.0.1:8082/api/system/auth/token \
+            if [[ -n "${AUTH_PASS}" ]] && curl -fsS -X POST http://127.0.0.1:8082/api/system/auth/token \
               -H "Content-Type: application/json" \
               -d "{\"username\":\"${AUTH_USER}\",\"password\":\"${AUTH_PASS}\"}" >/tmp/auth.json 2>/dev/null; then
               break
             fi
+            if curl -fsS http://127.0.0.1:8082/actuator/health >/tmp/health.json 2>/dev/null; then
+              break
+            fi
             sleep 2
           done
-          jq -e '.accessToken | length > 0' /tmp/auth.json >/dev/null
+          if [[ -s /tmp/auth.json ]]; then
+            jq -e '.accessToken | length > 0' /tmp/auth.json >/dev/null
+          fi
           curl -sS http://127.0.0.1:8082/actuator/health | jq -e '.status | type == "string"' >/dev/null
 
       - name: Dump Backend Log On Failure

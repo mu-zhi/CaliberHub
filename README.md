@@ -64,6 +64,7 @@ npm run dev
 
 后端启动前提：`scripts/start_backend.sh` 会读取仓库根目录 `.env.local`，至少需要提供 `CALIBER_JWT_SECRET` 与本地联调用账号口令环境变量。
 可直接从 [`.env.example`](/Users/rlc/Code/CaliberHub/.env.example) 复制一份生成本地 `.env.local`。
+`.env.example` 仅提供变量名与强口令占位符，不再提供可直接登录的弱默认密码。
 
 ### Recommended Verification
 
@@ -76,6 +77,8 @@ NFR 门禁：
 ```bash
 bash scripts/run_nfr_acceptance_gate.sh
 ```
+
+执行 `run_system_test_flow.sh` 或 `run_nfr_acceptance_gate.sh` 前，如需认证探活或认证型门禁，请先在环境中提供 `AUTH_PASS` 或 `CALIBER_ADMIN_PASSWORD`。
 
 ---
 

@@ -1,5 +1,6 @@
 const API_BASE = "/api";
 const AUTH_TOKEN_PATH = "/system/auth/token";
+const SESSION_TOKEN_KEY = "dd_auth_token";
 
 function dispatchApiError(detail) {
   if (typeof window === "undefined") {
@@ -71,8 +72,9 @@ export async function apiRequest(path, options = {}) {
     "Content-Type": "application/json",
     ...headers,
   };
-  if (token) {
-    finalHeaders.Authorization = `Bearer ${token}`;
+  const resolvedToken = resolveAuthToken(path, token);
+  if (resolvedToken) {
+    finalHeaders.Authorization = `Bearer ${resolvedToken}`;
   }
   let response;
   try {
@@ -111,8 +113,9 @@ export async function apiRequestWithMeta(path, options = {}) {
     "Content-Type": "application/json",
     ...headers,
   };
-  if (token) {
-    finalHeaders.Authorization = `Bearer ${token}`;
+  const resolvedToken = resolveAuthToken(path, token);
+  if (resolvedToken) {
+    finalHeaders.Authorization = `Bearer ${resolvedToken}`;
   }
   let response;
   try {
@@ -181,8 +184,9 @@ export async function apiSseRequest(path, options = {}) {
     Accept: "text/event-stream",
     ...headers,
   };
-  if (token) {
-    finalHeaders.Authorization = `Bearer ${token}`;
+  const resolvedToken = resolveAuthToken(path, token);
+  if (resolvedToken) {
+    finalHeaders.Authorization = `Bearer ${resolvedToken}`;
   }
   let response;
   try {
@@ -263,5 +267,19 @@ export function parseJsonText(text, fallback) {
     return JSON.parse(text);
   } catch (_) {
     return fallback;
+  }
+}
+
+function resolveAuthToken(path, explicitToken) {
+  if (explicitToken) {
+    return explicitToken;
+  }
+  if (path === AUTH_TOKEN_PATH || typeof window === "undefined") {
+    return "";
+  }
+  try {
+    return window.sessionStorage.getItem(SESSION_TOKEN_KEY) || "";
+  } catch (_) {
+    return "";
   }
 }

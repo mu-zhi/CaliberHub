@@ -50,6 +50,9 @@ public class ApiRateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
+        long now = System.currentTimeMillis();
+        cleanupExpiredCounters(now);
+
         int limit = resolveLimit(request);
         if (limit <= 0) {
             filterChain.doFilter(request, response);
@@ -58,9 +61,8 @@ public class ApiRateLimitFilter extends OncePerRequestFilter {
 
         String path = normalizePath(request);
         String key = request.getMethod() + "|" + resolveIdentity(request) + "|" + path;
-        RateCounter counter = counters.computeIfAbsent(key, ignored -> new RateCounter(System.currentTimeMillis(), new AtomicInteger(0)));
+        RateCounter counter = counters.computeIfAbsent(key, ignored -> new RateCounter(now, new AtomicInteger(0)));
         synchronized (counter) {
-            long now = System.currentTimeMillis();
             if (now - counter.windowStartMs() >= WINDOW_MS) {
                 counter.counter().set(0);
                 counter.setWindowStartMs(now);
@@ -88,14 +90,24 @@ public class ApiRateLimitFilter extends OncePerRequestFilter {
     private int resolveLimit(HttpServletRequest request) {
         String method = request.getMethod();
         String path = normalizePath(request);
-        boolean writeApi = "POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "DELETE".equalsIgnoreCase(method);
-        if (!writeApi) {
+        if (!path.startsWith("/api/")) {
             return 0;
         }
         if (path.startsWith("/api/import/preprocess") || path.startsWith("/api/system/llm-preprocess-config")) {
             return Math.max(1, caliberSecurityProperties.getLlmPerMinute());
         }
+        boolean apiRequest = "GET".equalsIgnoreCase(method)
+                || "POST".equalsIgnoreCase(method)
+                || "PUT".equalsIgnoreCase(method)
+                || "DELETE".equalsIgnoreCase(method);
+        if (!apiRequest) {
+            return 0;
+        }
         return Math.max(1, caliberSecurityProperties.getWritePerMinute());
+    }
+
+    private void cleanupExpiredCounters(long now) {
+        counters.entrySet().removeIf(entry -> now - entry.getValue().windowStartMs() >= WINDOW_MS);
     }
 
     private String normalizePath(HttpServletRequest request) {

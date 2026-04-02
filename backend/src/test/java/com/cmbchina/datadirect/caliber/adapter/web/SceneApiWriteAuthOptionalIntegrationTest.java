@@ -55,9 +55,35 @@ class SceneApiWriteAuthOptionalIntegrationTest {
     }
 
     @Test
-    void shouldAllowAnonymousSystemApiWhenWriteAuthDisabled() throws Exception {
+    void shouldKeepSystemApiProtectedWhenWriteAuthDisabled() throws Exception {
         mockMvc.perform(get("/api/system/llm-preprocess-config"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldAllowAdminSystemApiWhenWriteAuthDisabled() throws Exception {
+        String token = loginAndGetToken("admin", "admin123");
+
+        mockMvc.perform(get("/api/system/llm-preprocess-config")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.model").exists());
+    }
+
+    private String loginAndGetToken(String username, String password) throws Exception {
+        String loginBody = """
+                {
+                  "username": "%s",
+                  "password": "%s"
+                }
+                """.formatted(username, password);
+        return mockMvc.perform(post("/api/system/auth/token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString()
+                .replaceAll(".*\"accessToken\":\"([^\"]+)\".*", "$1");
     }
 }
