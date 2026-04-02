@@ -19,18 +19,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-          cache: gradle
-      - name: Cache Gradle wrapper
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/wrapper
-            ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('backend/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          cache: maven
       - name: Run tests
-        run: ./gradlew test --no-daemon
+        run: mvn -q test
 
   frontend:
     runs-on: ubuntu-latest

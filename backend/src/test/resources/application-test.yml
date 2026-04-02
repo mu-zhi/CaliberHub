@@ -24,22 +24,22 @@ caliber:
     rate-limit-enabled: false
     users:
       - username: admin
-        password: admin123
+        password: $2y$10$hg6A0/dS1XzC2XEuDmj3D.izdAKY55ucy1SjAySnMffKUXjr4bri.
         roles: [ADMIN, SUPPORT]
       - username: support
-        password: support123
+        password: $2y$10$3jTJxjRbTcNaTpb2QAmgVeY0SlNaJvRS9KVE6seDZ/hBjEw/5fqIu
         roles: [SUPPORT]
       - username: expert
-        password: expert123
+        password: $2y$10$e31EkcTR483pUsc5PfcaqewquNxI218bmPg07WUsPpkFny9qe4lea
         roles: [EXPERT]
       - username: governance
-        password: governance123
+        password: $2y$10$rP1YnRbtz4c1fKaMyNw6ou2x0jf1zyBRGCtZqgNg1rOJ8OP0fs99S
         roles: [GOVERNANCE]
       - username: frontline
-        password: frontline123
+        password: $2y$10$emX7AL6fdJLeRKXmq3AuhOwvTu5ZV9nsDESOagUiTH9NQZMNxHrnC
         roles: [FRONTLINE]
       - username: compliance
-        password: compliance123
+        password: $2y$10$Z4UxpGKVzMripqXXUkc41OizZx7yxsaUDBM9NEsb6SGwm2H4s0TAe
         roles: [COMPLIANCE]
   llm:
     preprocess:

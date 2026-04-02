@@ -198,13 +198,13 @@ bash scripts/claude_mux.sh <provider> <model> [claude args...]
 
 ### 7.2 运行与验证类脚本
 
-- `bash scripts/start_backend.sh`：启动后端，默认端口 `8082`，自动加载 `.env.local`。
+- `bash scripts/start_backend.sh`：启动后端，默认端口 `8082`，自动加载 `.env.local`；安全默认值已开启，至少需要在 `.env.local` 中提供 `CALIBER_JWT_SECRET` 与本地联调用账号口令环境变量。
 - `cd frontend && npm run dev`：启动前端，默认端口 `5174`。
 - `cd frontend && npm run test:e2e:install`：安装 `Playwright（浏览器自动化框架）` 所需的 Chromium 浏览器。
 - `cd frontend && npm run test:e2e`：执行浏览器级 `E2E（端到端，End-to-End）` 回归；默认由 `Playwright` 拉起本地前端 `5174`，并在用例内部 mock `API（应用程序接口，Application Programming Interface）` 响应。
 - `bash scripts/run_system_test_flow.sh`：执行系统联调主链路验证；默认探活后端 `8082` 与前端 `5174`，可用 `BASE_URL` / `FRONTEND_URL` 覆盖。
 - `bash scripts/run_nfr_acceptance_gate.sh`：执行 `NFR（非功能需求，Non-Functional Requirement）` 验收门禁。
-- `bash scripts/sync_frontend_dist.sh`：将前端静态产物同步到后端。
+- `bash scripts/sync_frontend_dist.sh`：将现有前端静态产物同步到后端，不再负责执行前端构建。
 
 ### 7.3 常用命令
 

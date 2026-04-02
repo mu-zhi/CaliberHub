@@ -3,7 +3,11 @@
     "allow": [
       "Bash(./gradlew:*)",
       "Bash(npm run dev)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(npm list:*)",
+      "Bash(npm install:*)",
+      "Bash(npm view:*)",
+      "Bash(vitest:*)"
     ],
     "deny": []
   }

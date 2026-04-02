@@ -55,12 +55,14 @@ bash scripts/start_backend.sh
 ### Frontend
 
 ```bash
-cd /Users/rlc/LingChao_Ren/1.2、数据直通车/frontend
+cd frontend
 npm install
 npm run dev
 ```
 
 默认地址：`http://127.0.0.1:5174`
+
+后端启动前提：`scripts/start_backend.sh` 会读取仓库根目录 `.env.local`，至少需要提供 `CALIBER_JWT_SECRET` 与本地联调用账号口令环境变量。
 
 ### Recommended Verification
 

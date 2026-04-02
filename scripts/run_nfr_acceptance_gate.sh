@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND_DIR="${ROOT_DIR}/backend"
-BASE_URL="${BASE_URL:-http://127.0.0.1:8080}"
+BASE_URL="${BASE_URL:-http://127.0.0.1:8082}"
 
 AUTH_USER="${AUTH_USER:-admin}"
 AUTH_PASS="${AUTH_PASS:-admin123}"

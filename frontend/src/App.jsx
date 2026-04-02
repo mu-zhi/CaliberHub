@@ -269,6 +269,15 @@ function AppShell({ children }) {
 }
 
 function PageContainer() {
+  const role = useAuthStore((state) => state.role);
+
+  function guardRoute(topKey, element) {
+    if (!isTopModuleAccessible(topKey, role)) {
+      return <Navigate to="/overview" replace />;
+    }
+    return element;
+  }
+
   const legacyRedirectRoutes = Object.entries(LEGACY_ROUTE_REDIRECTS).map(([path, target]) => (
     <Route key={path} path={path} element={<Navigate to={target} replace />} />
   ));
@@ -278,33 +287,33 @@ function PageContainer() {
       <Routes>
         <Route path="/overview" element={<HomePage />} />
 
-        <Route path="/map" element={<AssetsPage view="map" />} />
-        <Route path="/map/scenes" element={<AssetsPage view="scenes" />} />
-        <Route path="/map/lineage" element={<AssetsPage view="lineage" />} />
-        <Route path="/map/views" element={<AssetsPage view="views" />} />
-        <Route path="/map/dicts" element={<AssetsPage view="dicts" />} />
-        <Route path="/map/rules" element={<AssetsPage view="rules" />} />
-        <Route path="/map/topics" element={<AssetsPage view="topics" />} />
-        <Route path="/map/services" element={<AssetsPage view="services" />} />
-        <Route path="/map/guide" element={<AssetsPage view="guide" />} />
-        <Route path="/map/market" element={<AssetsPage view="market" />} />
+        <Route path="/map" element={guardRoute("map", <AssetsPage view="map" />)} />
+        <Route path="/map/scenes" element={guardRoute("map", <AssetsPage view="scenes" />)} />
+        <Route path="/map/lineage" element={guardRoute("map", <AssetsPage view="lineage" />)} />
+        <Route path="/map/views" element={guardRoute("map", <AssetsPage view="views" />)} />
+        <Route path="/map/dicts" element={guardRoute("map", <AssetsPage view="dicts" />)} />
+        <Route path="/map/rules" element={guardRoute("map", <AssetsPage view="rules" />)} />
+        <Route path="/map/topics" element={guardRoute("map", <AssetsPage view="topics" />)} />
+        <Route path="/map/services" element={guardRoute("map", <AssetsPage view="services" />)} />
+        <Route path="/map/guide" element={guardRoute("map", <AssetsPage view="guide" />)} />
+        <Route path="/map/market" element={guardRoute("map", <AssetsPage view="market" />)} />
 
-        <Route path="/production" element={<Navigate to="/production/ingest" replace />} />
+        <Route path="/production" element={guardRoute("production", <Navigate to="/production/ingest" replace />)} />
         <Route
           path="/production/ingest"
-          element={<KnowledgePage preset="import" entry="ingest" />}
+          element={guardRoute("production", <KnowledgePage preset="import" entry="ingest" />)}
         />
         <Route
           path="/production/modeling"
-          element={<KnowledgePage preset="import" entry="modeling" />}
+          element={guardRoute("production", <KnowledgePage preset="import" entry="modeling" />)}
         />
-        <Route path="/production/domains" element={<DomainManagementPage />} />
-        <Route path="/production/feedback" element={<Navigate to="/production/modeling" replace />} />
+        <Route path="/production/domains" element={guardRoute("production", <DomainManagementPage />)} />
+        <Route path="/production/feedback" element={guardRoute("production", <Navigate to="/production/modeling" replace />)} />
 
-        <Route path="/publish" element={<PublishCenterPage />} />
-        <Route path="/runtime" element={<KnowledgePackageWorkbenchPage />} />
-        <Route path="/approval" element={<ApprovalExportPage />} />
-        <Route path="/monitoring" element={<MonitoringAuditPage />} />
+        <Route path="/publish" element={guardRoute("publish", <PublishCenterPage />)} />
+        <Route path="/runtime" element={guardRoute("runtime", <KnowledgePackageWorkbenchPage />)} />
+        <Route path="/approval" element={guardRoute("approval", <ApprovalExportPage />)} />
+        <Route path="/monitoring" element={guardRoute("monitoring", <MonitoringAuditPage />)} />
 
         <Route path="/workspace/todo" element={<WorkspacePage view="todo" />} />
         <Route path="/workspace/notice" element={<WorkspacePage view="notice" />} />

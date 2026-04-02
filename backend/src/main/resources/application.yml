@@ -66,10 +66,10 @@ logging:
 
 caliber:
   security:
-    enabled: ${CALIBER_SECURITY_ENABLED:false}
+    enabled: ${CALIBER_SECURITY_ENABLED:true}
     jwt-secret: ${CALIBER_JWT_SECRET:}
     token-expire-minutes: ${CALIBER_JWT_EXPIRE_MINUTES:480}
-    require-write-auth: ${CALIBER_REQUIRE_WRITE_AUTH:false}
+    require-write-auth: ${CALIBER_REQUIRE_WRITE_AUTH:true}
     rate-limit-enabled: ${CALIBER_RATE_LIMIT_ENABLED:true}
     write-per-minute: ${CALIBER_WRITE_RATE_LIMIT:120}
     llm-per-minute: ${CALIBER_LLM_RATE_LIMIT:30}

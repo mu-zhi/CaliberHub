@@ -55,7 +55,7 @@ jobs:
       - name: Wait Backend And Health Check
         run: |
           for i in $(seq 1 40); do
-            if curl -fsS -X POST http://127.0.0.1:8080/api/system/auth/token \
+            if curl -fsS -X POST http://127.0.0.1:8082/api/system/auth/token \
               -H "Content-Type: application/json" \
               -d '{"username":"admin","password":"admin123"}' >/tmp/auth.json 2>/dev/null; then
               break
@@ -63,7 +63,7 @@ jobs:
             sleep 2
           done
           jq -e '.accessToken | length > 0' /tmp/auth.json >/dev/null
-          curl -sS http://127.0.0.1:8080/actuator/health | jq -e '.status | type == "string"' >/dev/null
+          curl -sS http://127.0.0.1:8082/actuator/health | jq -e '.status | type == "string"' >/dev/null
 
       - name: Dump Backend Log On Failure
         if: failure()
