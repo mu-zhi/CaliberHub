@@ -53,11 +53,14 @@ jobs:
           echo $! >/tmp/datadirect-backend-ci.pid
 
       - name: Wait Backend And Health Check
+        env:
+          AUTH_USER: admin
+          AUTH_PASS: admin123
         run: |
           for i in $(seq 1 40); do
             if curl -fsS -X POST http://127.0.0.1:8082/api/system/auth/token \
               -H "Content-Type: application/json" \
-              -d '{"username":"admin","password":"admin123"}' >/tmp/auth.json 2>/dev/null; then
+              -d "{\"username\":\"${AUTH_USER}\",\"password\":\"${AUTH_PASS}\"}" >/tmp/auth.json 2>/dev/null; then
               break
             fi
             sleep 2

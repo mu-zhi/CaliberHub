@@ -66,14 +66,19 @@ public class JwtTokenService {
         String safe = secret.trim();
         if (safe.matches("^[A-Za-z0-9+/=]+$") && safe.length() >= 44) {
             try {
-                return Keys.hmacShaKeyFor(Decoders.BASE64.decode(safe));
+                byte[] decoded = Decoders.BASE64.decode(safe);
+                if (decoded.length < 32) {
+                    throw new IllegalStateException("caliber.security.jwt-secret decoded length must be at least 32 bytes");
+                }
+                return Keys.hmacShaKeyFor(decoded);
             } catch (Exception ignored) {
-                // fallback to utf-8 bytes
+                // fallback to utf-8 validation below
             }
         }
         byte[] bytes = safe.getBytes(StandardCharsets.UTF_8);
-        byte[] padded = new byte[Math.max(32, bytes.length)];
-        System.arraycopy(bytes, 0, padded, 0, Math.min(bytes.length, padded.length));
-        return Keys.hmacShaKeyFor(padded);
+        if (bytes.length < 32) {
+            throw new IllegalStateException("caliber.security.jwt-secret must be at least 32 bytes");
+        }
+        return Keys.hmacShaKeyFor(bytes);
     }
 }

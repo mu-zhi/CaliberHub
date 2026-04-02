@@ -198,7 +198,7 @@ bash scripts/claude_mux.sh <provider> <model> [claude args...]
 
 ### 7.2 运行与验证类脚本
 
-- `bash scripts/start_backend.sh`：启动后端，默认端口 `8082`，自动加载 `.env.local`；安全默认值已开启，至少需要在 `.env.local` 中提供 `CALIBER_JWT_SECRET` 与本地联调用账号口令环境变量。
+- `bash scripts/start_backend.sh`：启动后端，默认端口 `8082`，自动加载 `.env.local`；安全默认值已开启，至少需要在 `.env.local` 中提供 `CALIBER_JWT_SECRET` 与本地联调用账号口令环境变量，可从仓库根目录 `.env.example` 复制模板。
 - `cd frontend && npm run dev`：启动前端，默认端口 `5174`。
 - `cd frontend && npm run test:e2e:install`：安装 `Playwright（浏览器自动化框架）` 所需的 Chromium 浏览器。
 - `cd frontend && npm run test:e2e`：执行浏览器级 `E2E（端到端，End-to-End）` 回归；默认由 `Playwright` 拉起本地前端 `5174`，并在用例内部 mock `API（应用程序接口，Application Programming Interface）` 响应。

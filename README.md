@@ -63,6 +63,7 @@ npm run dev
 默认地址：`http://127.0.0.1:5174`
 
 后端启动前提：`scripts/start_backend.sh` 会读取仓库根目录 `.env.local`，至少需要提供 `CALIBER_JWT_SECRET` 与本地联调用账号口令环境变量。
+可直接从 [`.env.example`](/Users/rlc/Code/CaliberHub/.env.example) 复制一份生成本地 `.env.local`。
 
 ### Recommended Verification
 

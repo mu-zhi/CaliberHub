@@ -7,6 +7,8 @@ BACKEND_DIR="${ROOT_DIR}/backend"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8082}"
 FRONTEND_URL="${FRONTEND_URL:-http://127.0.0.1:5174}"
 CI_SKIP_BACKEND_TESTS="${CI_SKIP_BACKEND_TESTS:-false}"
+AUTH_USER="${AUTH_USER:-admin}"
+AUTH_PASS="${AUTH_PASS:-${CALIBER_ADMIN_PASSWORD:-}}"
 
 echo "[1/5] 前端 lint"
 cd "${FRONTEND_DIR}"
@@ -29,10 +31,12 @@ else
 fi
 
 echo "[5/5] 轻量健康检查（如服务在线）"
-if curl -fsS -X POST "${BASE_URL%/}/api/system/auth/token" \
+if [[ -n "${AUTH_PASS}" ]] && curl -fsS -X POST "${BASE_URL%/}/api/system/auth/token" \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}' >/dev/null 2>&1; then
-  echo "  - backend 8082 可访问"
+  -d "{\"username\":\"${AUTH_USER}\",\"password\":\"${AUTH_PASS}\"}" >/dev/null 2>&1; then
+  echo "  - backend 8082 可访问，认证探活通过"
+elif [[ -z "${AUTH_PASS}" ]]; then
+  echo "  - backend 8082 认证探活已跳过（未提供 AUTH_PASS 或 CALIBER_ADMIN_PASSWORD）"
 else
   echo "  - backend 8082 未在线（非阻断，按需先启动）"
 fi

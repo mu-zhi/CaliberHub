@@ -37,10 +37,13 @@ describe("repository runtime contracts", () => {
     const syncScript = readRepoFile("scripts/sync_frontend_dist.sh");
     const systemFlowScript = readRepoFile("scripts/run_system_test_flow.sh");
     const nfrGateScript = readRepoFile("scripts/run_nfr_acceptance_gate.sh");
+    const ciBaselineWorkflow = readRepoFile(".github/workflows/ci-baseline.yml");
 
     expect(syncScript).not.toContain("npm run build");
     expect(systemFlowScript).toContain('BASE_URL="${BASE_URL:-http://127.0.0.1:8082}"');
     expect(nfrGateScript).toContain('BASE_URL="${BASE_URL:-http://127.0.0.1:8082}"');
     expect(nfrGateScript).not.toContain('BASE_URL="${BASE_URL:-http://127.0.0.1:8080}"');
+    expect(systemFlowScript).not.toContain('"password":"admin123"');
+    expect(ciBaselineWorkflow).not.toContain('"password":"admin123"');
   });
 });
