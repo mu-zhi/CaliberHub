@@ -15,20 +15,6 @@ import {
 /* Fixtures                                                           */
 /* ------------------------------------------------------------------ */
 
-const PUBLISHED_SCENE = {
-  id: 1,
-  sceneCode: "SCN_PAYROLL_DETAIL",
-  sceneTitle: "代发明细查询",
-  sceneType: "FACT_DETAIL",
-  sceneDescription: "代发交易明细场景",
-  domainId: 10,
-  publishedAt: "2026-03-28T10:00:00Z",
-};
-
-const SCENE_BUNDLE_PLANS = [
-  { planId: 1, planCode: "PLAN_PAYROLL_DETAIL", planName: "代发明细方案", sourceTables: ["t_payroll"] },
-];
-
 const NORMAL_RESULT = {
   decision: "allow",
   scene: { sceneId: 1, sceneCode: "SCN_PAYROLL_DETAIL", sceneTitle: "代发明细查询" },

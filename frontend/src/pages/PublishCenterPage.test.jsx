@@ -150,7 +150,7 @@ describe("PublishCenterPage status presentation", () => {
   });
 
   it("shows projection disabled feedback and blocks rebuild when projection is skipped", async () => {
-    globalThis.fetch = vi.fn(async (url, options) => {
+    globalThis.fetch = vi.fn(async (url) => {
       const path = typeof url === "string" ? url : url.toString();
       if (path.includes("/api/scenes")) return mockJsonResponse(SCENES);
       if (path.includes("/api/publish-checks")) return mockJsonResponse(PUBLISH_CHECK);

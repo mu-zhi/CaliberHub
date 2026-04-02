@@ -19,7 +19,6 @@ import {
   buildStep1Summary,
   buildStep2Summary,
   buildStep3Summary,
-  mergeCandidateGraphPatch,
   resolveAccordionStepState,
   toConfidenceLevelZh,
 } from "./knowledge-import-utils";
@@ -2119,7 +2118,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
       }
     };
   }
-  const openStep = async (stepNo) => {
+  async function openStep(stepNo) {
     if (stepNo <= 0 || stepNo > 4) {
       return;
     }
@@ -2162,7 +2161,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
       setShowImportDone(false);
     }
     setActiveStep(stepNo);
-  };
+  }
   const qualityVerdict = useMemo(() => {
     if (!selectedScene) {
       return qualityMsg;

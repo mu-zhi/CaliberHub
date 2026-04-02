@@ -139,7 +139,7 @@ function LocationProbe() {
 beforeEach(() => {
   window.localStorage.clear();
   window.scrollTo = vi.fn();
-  global.ResizeObserver = class {
+  globalThis.ResizeObserver = class {
     observe() {}
     disconnect() {}
   };

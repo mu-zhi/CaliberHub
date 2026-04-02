@@ -143,8 +143,6 @@ export function LineageGraphView({
   showEdgeLabels = true,
   selectedNodeId = "",
   selectedEdgeId = "",
-  highlightedNodeIds = [],
-  highlightedEdgeIds = [],
   onNodeSelect,
   onEdgeSelect,
   onRetry,

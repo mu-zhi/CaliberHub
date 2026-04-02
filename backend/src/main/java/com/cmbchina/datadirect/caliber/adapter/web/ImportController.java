@@ -1,12 +1,17 @@
 package com.cmbchina.datadirect.caliber.adapter.web;
 
+import com.cmbchina.datadirect.caliber.application.api.dto.request.ConfirmImportSceneCandidateCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.PreprocessImportCmd;
+import com.cmbchina.datadirect.caliber.application.api.dto.request.ReviewImportCandidateGraphCmd;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportCandidateGraphDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportTaskLifecycleDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportTaskDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.PreprocessResultDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
+import com.cmbchina.datadirect.caliber.application.service.command.ImportCandidateGraphCommandAppService;
 import com.cmbchina.datadirect.caliber.application.service.command.ImportCommandAppService;
 import com.cmbchina.datadirect.caliber.application.service.command.ImportTaskCommandAppService;
+import com.cmbchina.datadirect.caliber.application.service.query.ImportCandidateGraphQueryAppService;
 import com.cmbchina.datadirect.caliber.application.service.query.ImportTaskQueryAppService;
 import com.cmbchina.datadirect.caliber.infrastructure.common.security.SecurityOperator;
 import jakarta.validation.Valid;
@@ -34,13 +39,19 @@ import java.util.concurrent.CompletableFuture;
 public class ImportController {
 
     private final ImportCommandAppService importCommandAppService;
+    private final ImportCandidateGraphCommandAppService importCandidateGraphCommandAppService;
+    private final ImportCandidateGraphQueryAppService importCandidateGraphQueryAppService;
     private final ImportTaskCommandAppService importTaskCommandAppService;
     private final ImportTaskQueryAppService importTaskQueryAppService;
 
     public ImportController(ImportCommandAppService importCommandAppService,
+                            ImportCandidateGraphCommandAppService importCandidateGraphCommandAppService,
+                            ImportCandidateGraphQueryAppService importCandidateGraphQueryAppService,
                             ImportTaskCommandAppService importTaskCommandAppService,
                             ImportTaskQueryAppService importTaskQueryAppService) {
         this.importCommandAppService = importCommandAppService;
+        this.importCandidateGraphCommandAppService = importCandidateGraphCommandAppService;
+        this.importCandidateGraphQueryAppService = importCandidateGraphQueryAppService;
         this.importTaskCommandAppService = importTaskCommandAppService;
         this.importTaskQueryAppService = importTaskQueryAppService;
     }
@@ -97,6 +108,39 @@ public class ImportController {
     @GetMapping("/tasks/{taskId}/scenes")
     public ResponseEntity<List<SceneDTO>> listTaskScenes(@PathVariable String taskId) {
         return ResponseEntity.ok(importTaskQueryAppService.listTaskScenes(taskId));
+    }
+
+    @GetMapping("/tasks/{taskId}/candidate-graph")
+    public ResponseEntity<ImportCandidateGraphDTO> getCandidateGraph(@PathVariable String taskId) {
+        return ResponseEntity.ok(importCandidateGraphQueryAppService.getByTaskId(taskId));
+    }
+
+    @PostMapping("/tasks/{taskId}/candidate-graph/review")
+    public ResponseEntity<ImportCandidateGraphDTO> reviewCandidateGraph(@PathVariable String taskId,
+                                                                        @RequestBody ReviewImportCandidateGraphCmd cmd) {
+        return ResponseEntity.ok(importCandidateGraphCommandAppService.review(
+                taskId,
+                new ReviewImportCandidateGraphCmd(
+                        cmd.targetType(),
+                        cmd.targetCode(),
+                        cmd.action(),
+                        cmd.reason(),
+                        cmd.mergeIntoCode(),
+                        cmd.splitLabels(),
+                        SecurityOperator.currentOperator(cmd.operator())
+                )
+        ));
+    }
+
+    @PostMapping("/candidates/{candidateCode}/confirm")
+    public ResponseEntity<SceneDTO> confirmCandidate(@PathVariable String candidateCode,
+                                                     @RequestBody ConfirmImportSceneCandidateCmd cmd) {
+        return ResponseEntity.ok(importTaskCommandAppService.confirmSceneCandidate(
+                candidateCode,
+                cmd.domainId(),
+                cmd.domain(),
+                SecurityOperator.currentOperator(cmd.operator())
+        ));
     }
 
     @PostMapping("/tasks/{taskId}/quality-confirm")

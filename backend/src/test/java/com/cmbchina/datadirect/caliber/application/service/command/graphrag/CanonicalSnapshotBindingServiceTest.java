@@ -17,13 +17,19 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.converter.CaliberDo
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneAuditLogMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneVersionMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMembershipMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ScenePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityMembershipPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.DictionaryPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.IdentifierLineagePO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.TimeSemanticSelectorPO;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
@@ -64,6 +70,15 @@ class CanonicalSnapshotBindingServiceTest {
     @Autowired
     private CanonicalSnapshotMembershipMapper canonicalSnapshotMembershipMapper;
 
+    @Autowired
+    private DictionaryMapper dictionaryMapper;
+
+    @Autowired
+    private IdentifierLineageMapper identifierLineageMapper;
+
+    @Autowired
+    private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
+
     @MockBean
     private CaliberDictSyncService caliberDictSyncService;
 
@@ -88,6 +103,7 @@ class CanonicalSnapshotBindingServiceTest {
         CanonicalEntityPO canonicalEntity = seedCanonicalEntity();
         CanonicalEntityMembershipPO activeMembership = seedMembership(sceneId, canonicalEntity.getId(), 101L, true);
         seedMembership(sceneId, canonicalEntity.getId(), 102L, false);
+        seedRequiredGovernanceAssets(sceneId);
 
         SceneDTO published = sceneCommandAppService.publish(sceneId, new PublishSceneCmd(
                 OffsetDateTime.now(),
@@ -167,6 +183,57 @@ class CanonicalSnapshotBindingServiceTest {
         membership.setUpdatedBy("tester");
         membership.setUpdatedAt(now);
         return canonicalEntityMembershipMapper.save(membership);
+    }
+
+    private void seedRequiredGovernanceAssets(Long sceneId) {
+        OffsetDateTime now = OffsetDateTime.now();
+
+        DictionaryPO dictionary = new DictionaryPO();
+        dictionary.setSceneId(sceneId);
+        dictionary.setDictCode("DICT-" + sceneId + "-MAIN");
+        dictionary.setDictName("客户状态字典");
+        dictionary.setDictCategory("ENUM");
+        dictionary.setDictVersion("v1");
+        dictionary.setReleaseStatus("PUBLISHED");
+        dictionary.setEntriesJson("[{\"code\":\"01\",\"name\":\"正常\"}]");
+        dictionary.setReferencedByJson("[\"output_contract:main\"]");
+        stamp(dictionary, now);
+        dictionaryMapper.save(dictionary);
+
+        IdentifierLineagePO lineage = new IdentifierLineagePO();
+        lineage.setSceneId(sceneId);
+        lineage.setLineageCode("LIN-" + sceneId + "-MAIN");
+        lineage.setLineageName("客户号映射链");
+        lineage.setIdentifierType("CUST_ID");
+        lineage.setSourceIdentifierType("SRC_CUST_ID");
+        lineage.setTargetIdentifierType("CUST_ID");
+        lineage.setMappingRulesJson("[{\"rule\":\"trim\"}]");
+        lineage.setEvidenceRefsJson("[\"evidence:integration-test\"]");
+        lineage.setConfirmationStatus("CONFIRMED");
+        stamp(lineage, now);
+        identifierLineageMapper.save(lineage);
+
+        TimeSemanticSelectorPO selector = new TimeSemanticSelectorPO();
+        selector.setSceneId(sceneId);
+        selector.setSelectorCode("TIME-" + sceneId + "-MAIN");
+        selector.setSelectorName("时间语义选择器");
+        selector.setDefaultSemantic("交易日期");
+        selector.setCandidateSemanticsJson("[\"交易日期\",\"记账日期\"]");
+        selector.setClarificationTermsJson("[\"当日\",\"最近\"]");
+        selector.setPriorityRulesJson("[{\"priority\":1,\"semantic\":\"交易日期\"}]");
+        selector.setMustClarifyFlag(false);
+        stamp(selector, now);
+        timeSemanticSelectorMapper.save(selector);
+    }
+
+    private void stamp(com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.AbstractSnapshotGraphAuditablePO po,
+                       OffsetDateTime now) {
+        po.setStatus("ACTIVE");
+        po.setSnapshotId(null);
+        po.setCreatedBy("tester");
+        po.setCreatedAt(now);
+        po.setUpdatedBy("tester");
+        po.setUpdatedAt(now);
     }
 
     @TestConfiguration

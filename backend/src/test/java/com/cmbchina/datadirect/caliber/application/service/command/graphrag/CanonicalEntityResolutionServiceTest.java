@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -78,7 +79,10 @@ class CanonicalEntityResolutionServiceTest {
         resolutionService.resolveScene(sceneA, "tester");
         resolutionService.resolveScene(sceneB, "tester");
 
-        Map<String, CanonicalEntityPO> entitiesByType = canonicalEntityMapper.findAll().stream()
+        List<CanonicalEntityMembershipPO> scopedMemberships = membershipsForScenes(sceneA, sceneB);
+        Map<String, CanonicalEntityPO> entitiesByType = canonicalEntityMapper.findAllById(scopedMemberships.stream()
+                        .map(CanonicalEntityMembershipPO::getCanonicalEntityId)
+                        .collect(Collectors.toCollection(LinkedHashSet::new))).stream()
                 .collect(Collectors.toMap(CanonicalEntityPO::getEntityType, Function.identity()));
 
         assertThat(entitiesByType).hasSize(4);
@@ -87,7 +91,7 @@ class CanonicalEntityResolutionServiceTest {
         assertThat(entitiesByType.get("EVIDENCE").getCanonicalKey()).isEqualTo("EVD::SQL_FRAGMENT::PAYROLL_DETAIL::LINE_10");
         assertThat(entitiesByType.get("OUTPUT_CONTRACT").getCanonicalKey()).isEqualTo("OUT::PAYROLL::OUTPUT::PRIMARY");
         assertThat(entitiesByType.values()).allMatch(entity -> "ACTIVE".equals(entity.getResolutionStatus()));
-        assertThat(membershipMapper.findAll())
+        assertThat(scopedMemberships)
                 .hasSize(8)
                 .allMatch(CanonicalEntityMembershipPO::isActiveFlag)
                 .allMatch(membership -> "canonical_key".equals(membership.getMatchBasis()));
@@ -104,11 +108,14 @@ class CanonicalEntityResolutionServiceTest {
 
         resolutionService.resolveScene(sceneId, "tester");
 
-        List<CanonicalEntityPO> entities = canonicalEntityMapper.findAll();
+        List<CanonicalEntityMembershipPO> scopedMemberships = membershipsForScenes(sceneId);
+        List<CanonicalEntityPO> entities = canonicalEntityMapper.findAllById(scopedMemberships.stream()
+                .map(CanonicalEntityMembershipPO::getCanonicalEntityId)
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
         assertThat(entities).hasSize(4);
         assertThat(entities).extracting(CanonicalEntityPO::getResolutionStatus)
                 .containsOnly("NEEDS_REVIEW");
-        assertThat(membershipMapper.findAll())
+        assertThat(scopedMemberships)
                 .hasSize(4)
                 .allMatch(membership -> !membership.isManualOverride())
                 .allMatch(membership -> "missing_key".equals(membership.getMatchBasis()));
@@ -125,10 +132,11 @@ class CanonicalEntityResolutionServiceTest {
         resolutionService.resolveScene(activeSceneId, "tester");
         resolutionService.resolveScene(deprecatedSceneId, "tester");
 
-        CanonicalEntityPO entity = canonicalEntityMapper.findAll().stream()
-                .filter(item -> "POLICY".equals(item.getEntityType()))
+        CanonicalEntityMembershipPO activeMembership = membershipsForScenes(activeSceneId).stream()
+                .filter(item -> "POLICY".equals(item.getSceneAssetType()))
                 .findFirst()
                 .orElseThrow();
+        CanonicalEntityPO entity = canonicalEntityMapper.findById(activeMembership.getCanonicalEntityId()).orElseThrow();
 
         assertThat(entity.getLifecycleStatus()).isEqualTo("ACTIVE");
         assertThat(membershipMapper.findByCanonicalEntityIdAndActiveFlagTrueOrderByUpdatedAtDesc(entity.getId()))
@@ -141,10 +149,13 @@ class CanonicalEntityResolutionServiceTest {
 
         sceneGraphAssetSyncService.syncSceneAssetsFromLegacy(sceneId, "tester");
 
-        assertThat(canonicalEntityMapper.findAll())
+        List<CanonicalEntityMembershipPO> scopedMemberships = membershipsForScenes(sceneId);
+        assertThat(canonicalEntityMapper.findAllById(scopedMemberships.stream()
+                        .map(CanonicalEntityMembershipPO::getCanonicalEntityId)
+                        .collect(Collectors.toCollection(LinkedHashSet::new))))
                 .extracting(CanonicalEntityPO::getEntityType)
                 .containsExactlyInAnyOrder("SOURCE_CONTRACT", "POLICY", "EVIDENCE", "OUTPUT_CONTRACT");
-        assertThat(membershipMapper.findAll())
+        assertThat(scopedMemberships)
                 .hasSize(4)
                 .allMatch(CanonicalEntityMembershipPO::isActiveFlag);
     }
@@ -156,7 +167,7 @@ class CanonicalEntityResolutionServiceTest {
         sceneGraphAssetSyncService.syncSceneAssetsFromLegacy(sceneId, "tester");
         sceneGraphAssetSyncService.syncSceneAssetsFromLegacy(sceneId, "tester");
 
-        List<CanonicalEntityMembershipPO> memberships = membershipMapper.findAll();
+        List<CanonicalEntityMembershipPO> memberships = membershipsForScenes(sceneId);
 
         assertThat(memberships).hasSize(7);
         assertThat(memberships.stream().filter(CanonicalEntityMembershipPO::isActiveFlag)).hasSize(4);
@@ -169,6 +180,13 @@ class CanonicalEntityResolutionServiceTest {
         assertThat(memberships.stream()
                 .filter(item -> "OUTPUT_CONTRACT".equals(item.getSceneAssetType()) && item.isActiveFlag()))
                 .hasSize(1);
+    }
+
+    private List<CanonicalEntityMembershipPO> membershipsForScenes(Long... sceneIds) {
+        return List.of(sceneIds).stream()
+                .flatMap(sceneId -> List.of("SOURCE_CONTRACT", "POLICY", "EVIDENCE", "OUTPUT_CONTRACT").stream()
+                        .flatMap(assetType -> membershipMapper.findBySceneIdAndSceneAssetTypeOrderByUpdatedAtDesc(sceneId, assetType).stream()))
+                .collect(Collectors.toList());
     }
 
     private Long seedScene(String sceneCode, String domain) {
