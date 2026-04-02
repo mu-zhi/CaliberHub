@@ -2,6 +2,7 @@ package com.cmbchina.datadirect.caliber.application.service.command;
 
 import com.cmbchina.datadirect.caliber.application.api.dto.request.PreprocessImportCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.CreateSceneCmd;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.ConfirmImportSceneCandidateResultDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.CandidateGraphDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportCandidateGraphDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportCandidateGraphEdgeDTO;
@@ -11,6 +12,7 @@ import com.cmbchina.datadirect.caliber.application.api.dto.response.PreprocessRe
 import com.cmbchina.datadirect.caliber.application.api.dto.request.UpdateSceneCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
 import com.cmbchina.datadirect.caliber.application.exception.ResourceNotFoundException;
+import com.cmbchina.datadirect.caliber.application.service.governance.SceneGovernanceGateAppService;
 import com.cmbchina.datadirect.caliber.domain.exception.DomainValidationException;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.ImportCandidateGraphEdgeMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.ImportCandidateGraphNodeMapper;
@@ -18,19 +20,12 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.ImportEv
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.ImportSceneCandidateMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.ImportTaskMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SourceMaterialMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ImportCandidateGraphEdgePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ImportCandidateGraphNodePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ImportEvidenceCandidatePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ImportSceneCandidatePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ImportTaskPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.SourceMaterialPO;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.AbstractSnapshotGraphAuditablePO;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.DictionaryPO;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.IdentifierLineagePO;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.TimeSemanticSelectorPO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -65,9 +60,7 @@ public class ImportTaskCommandAppService {
     private final ImportCandidateGraphAssembler importCandidateGraphAssembler;
     private final ImportCandidateGraphBuildService importCandidateGraphBuildService;
     private final SceneCommandAppService sceneCommandAppService;
-    private final DictionaryMapper dictionaryMapper;
-    private final IdentifierLineageMapper identifierLineageMapper;
-    private final TimeSemanticSelectorMapper timeSemanticSelectorMapper;
+    private final SceneGovernanceGateAppService sceneGovernanceGateAppService;
     private final ObjectMapper objectMapper;
 
     public ImportTaskCommandAppService(ImportTaskMapper importTaskMapper,
@@ -79,9 +72,7 @@ public class ImportTaskCommandAppService {
                                        ImportCandidateGraphAssembler importCandidateGraphAssembler,
                                        ImportCandidateGraphBuildService importCandidateGraphBuildService,
                                        SceneCommandAppService sceneCommandAppService,
-                                       DictionaryMapper dictionaryMapper,
-                                       IdentifierLineageMapper identifierLineageMapper,
-                                       TimeSemanticSelectorMapper timeSemanticSelectorMapper,
+                                       SceneGovernanceGateAppService sceneGovernanceGateAppService,
                                        ObjectMapper objectMapper) {
         this.importTaskMapper = importTaskMapper;
         this.sourceMaterialMapper = sourceMaterialMapper;
@@ -92,9 +83,7 @@ public class ImportTaskCommandAppService {
         this.importCandidateGraphAssembler = importCandidateGraphAssembler;
         this.importCandidateGraphBuildService = importCandidateGraphBuildService;
         this.sceneCommandAppService = sceneCommandAppService;
-        this.dictionaryMapper = dictionaryMapper;
-        this.identifierLineageMapper = identifierLineageMapper;
-        this.timeSemanticSelectorMapper = timeSemanticSelectorMapper;
+        this.sceneGovernanceGateAppService = sceneGovernanceGateAppService;
         this.objectMapper = objectMapper;
     }
 
@@ -247,7 +236,7 @@ public class ImportTaskCommandAppService {
     }
 
     @Transactional
-    public SceneDTO confirmSceneCandidate(String candidateCode, Long domainId, String domain, String operator) {
+    public ConfirmImportSceneCandidateResultDTO confirmSceneCandidate(String candidateCode, Long domainId, String domain, String operator) {
         ImportSceneCandidatePO candidate = importSceneCandidateMapper.findByCandidateCode(candidateCode)
                 .orElseThrow(() -> new ResourceNotFoundException("scene candidate not found: " + candidateCode));
         JsonNode scene = readJson(candidate.getCandidatePayloadJson());
@@ -295,8 +284,14 @@ public class ImportTaskCommandAppService {
         candidate.setConfirmationStatus("CONFIRMED");
         candidate.setUpdatedAt(OffsetDateTime.now());
         importSceneCandidateMapper.save(candidate);
-        seedRequiredGovernanceAssets(updated);
-        return updated;
+        return new ConfirmImportSceneCandidateResultDTO(
+                updated,
+                sceneGovernanceGateAppService.evaluateAndSync(
+                        updated.id(),
+                        SceneGovernanceGateAppService.STAGE_IMPORT_CONFIRM,
+                        resolvedOperator
+                )
+        );
     }
 
     @Transactional
@@ -647,78 +642,6 @@ public class ImportTaskCommandAppService {
             }
         }
         return false;
-    }
-
-    private void seedRequiredGovernanceAssets(SceneDTO scene) {
-        if (scene == null || scene.id() == null) {
-            return;
-        }
-        OffsetDateTime now = OffsetDateTime.now();
-
-        if (dictionaryMapper.findBySceneIdOrderByUpdatedAtDesc(scene.id()).isEmpty()) {
-            DictionaryPO dictionary = new DictionaryPO();
-            dictionary.setSceneId(scene.id());
-            dictionary.setDictCode("DICT-" + scene.id() + "-MAIN");
-            dictionary.setDictName(scene.sceneTitle() + "字典");
-            dictionary.setDictCategory("ENUM");
-            dictionary.setDictVersion("v1");
-            dictionary.setReleaseStatus("PUBLISHED");
-            dictionary.setEntriesJson("[{\"code\":\"DEFAULT\",\"name\":\"默认值\"}]");
-            dictionary.setReferencedByJson("[\"scene:" + scene.id() + "\"]");
-            stamp(dictionary, now);
-            dictionaryMapper.save(dictionary);
-        }
-
-        if (identifierLineageMapper.findBySceneIdOrderByUpdatedAtDesc(scene.id()).isEmpty()) {
-            IdentifierLineagePO lineage = new IdentifierLineagePO();
-            lineage.setSceneId(scene.id());
-            lineage.setLineageCode("LIN-" + scene.id() + "-MAIN");
-            lineage.setLineageName(scene.sceneTitle() + "标识链");
-            lineage.setIdentifierType("SCENE_IDENTIFIER");
-            lineage.setSourceIdentifierType("SRC_IDENTIFIER");
-            lineage.setTargetIdentifierType("SCENE_IDENTIFIER");
-            lineage.setMappingRulesJson("[{\"rule\":\"direct-pass-through\"}]");
-            lineage.setEvidenceRefsJson("[\"scene:" + scene.id() + "\"]");
-            lineage.setConfirmationStatus("CONFIRMED");
-            stamp(lineage, now);
-            identifierLineageMapper.save(lineage);
-        }
-
-        if (timeSemanticSelectorMapper.findBySceneIdOrderByUpdatedAtDesc(scene.id()).isEmpty()) {
-            TimeSemanticSelectorPO selector = new TimeSemanticSelectorPO();
-            selector.setSceneId(scene.id());
-            selector.setSelectorCode("TIME-" + scene.id() + "-MAIN");
-            selector.setSelectorName(scene.sceneTitle() + "时间语义");
-            selector.setDefaultSemantic(extractDefaultTimeSemantic(scene.sqlVariantsJson()));
-            selector.setCandidateSemanticsJson("[\"TRX_DT\",\"交易日期\"]");
-            selector.setClarificationTermsJson("[\"当日\",\"时间范围\"]");
-            selector.setPriorityRulesJson("[{\"priority\":1,\"semantic\":\"TRX_DT\"}]");
-            selector.setMustClarifyFlag(false);
-            stamp(selector, now);
-            timeSemanticSelectorMapper.save(selector);
-        }
-    }
-
-    private void stamp(AbstractSnapshotGraphAuditablePO po, OffsetDateTime now) {
-        po.setStatus("ACTIVE");
-        po.setSnapshotId(null);
-        po.setCreatedBy("system");
-        po.setCreatedAt(now);
-        po.setUpdatedBy("system");
-        po.setUpdatedAt(now);
-    }
-
-    private String extractDefaultTimeSemantic(String sqlVariantsJson) {
-        JsonNode variants = readJson(sqlVariantsJson);
-        if (variants.isArray()) {
-            for (JsonNode variant : variants) {
-                String semantic = trimToNull(variant.path("default_time_semantic").asText());
-                if (semantic != null) {
-                    return semantic;
-                }
-            }
-        }
-        return "TRX_DT";
     }
 
     private String buildEvidenceCandidateCode(String taskId, int sceneIndex) {

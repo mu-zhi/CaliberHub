@@ -7,7 +7,9 @@ import com.cmbchina.datadirect.caliber.application.api.dto.request.UpdateSceneCm
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneMinimumUnitCheckDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneMinimumUnitDefinitionDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.governance.SceneGovernanceSummaryDTO;
 import com.cmbchina.datadirect.caliber.application.service.command.SceneCommandAppService;
+import com.cmbchina.datadirect.caliber.application.service.governance.SceneGovernanceGateAppService;
 import com.cmbchina.datadirect.caliber.application.service.query.SceneQueryAppService;
 import com.cmbchina.datadirect.caliber.infrastructure.common.security.SecurityOperator;
 import jakarta.validation.Valid;
@@ -32,10 +34,14 @@ public class SceneController {
 
     private final SceneCommandAppService sceneCommandAppService;
     private final SceneQueryAppService sceneQueryAppService;
+    private final SceneGovernanceGateAppService sceneGovernanceGateAppService;
 
-    public SceneController(SceneCommandAppService sceneCommandAppService, SceneQueryAppService sceneQueryAppService) {
+    public SceneController(SceneCommandAppService sceneCommandAppService,
+                           SceneQueryAppService sceneQueryAppService,
+                           SceneGovernanceGateAppService sceneGovernanceGateAppService) {
         this.sceneCommandAppService = sceneCommandAppService;
         this.sceneQueryAppService = sceneQueryAppService;
+        this.sceneGovernanceGateAppService = sceneGovernanceGateAppService;
     }
 
     @PostMapping
@@ -87,6 +93,12 @@ public class SceneController {
     })
     public ResponseEntity<SceneDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(sceneQueryAppService.getById(id));
+    }
+
+    @GetMapping("/{id}/governance-gaps")
+    public ResponseEntity<SceneGovernanceSummaryDTO> governanceSummary(@PathVariable Long id) {
+        sceneQueryAppService.getById(id);
+        return ResponseEntity.ok(sceneGovernanceGateAppService.summarize(id, SceneGovernanceGateAppService.STAGE_PRE_PUBLISH));
     }
 
     @GetMapping("/minimum-unit")

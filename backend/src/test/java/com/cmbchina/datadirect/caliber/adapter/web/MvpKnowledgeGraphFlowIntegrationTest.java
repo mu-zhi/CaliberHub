@@ -3,6 +3,15 @@ package com.cmbchina.datadirect.caliber.adapter.web;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.AbstractSnapshotGraphAuditablePO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.DictionaryPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.IdentifierLineagePO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.TimeSemanticSelectorPO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,6 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,6 +54,18 @@ class MvpKnowledgeGraphFlowIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PlanMapper planMapper;
+
+    @Autowired
+    private DictionaryMapper dictionaryMapper;
+
+    @Autowired
+    private IdentifierLineageMapper identifierLineageMapper;
+
+    @Autowired
+    private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
 
     @Test
     void shouldFinishImportPublishGraphAndRetrievalMvpFlow() throws Exception {
@@ -99,12 +122,23 @@ class MvpKnowledgeGraphFlowIntegrationTest {
                                 """.formatted(domainId)))
                 .andExpect(status().isOk())
                 .andReturn();
-        JsonNode confirmedScene = objectMapper.readTree(confirmResult.getResponse().getContentAsString());
+        JsonNode confirmedPayload = objectMapper.readTree(confirmResult.getResponse().getContentAsString());
+        JsonNode confirmedScene = confirmedPayload.path("scene");
         long sceneId = confirmedScene.path("id").asLong();
         assertThat(sceneId).isPositive();
         assertThat(confirmedScene.path("sqlVariantsJson").asText()).contains("default_time_semantic");
         assertThat(confirmedScene.path("sqlVariantsJson").asText()).contains("TRX_DT");
         assertThat(confirmedScene.path("sqlVariantsJson").asText()).contains("PDM_VHIS.T05_AGN_DTL");
+        assertThat(confirmedPayload.path("governanceSummary").path("publishReady").asBoolean()).isFalse();
+        assertThat(confirmedPayload.path("governanceSummary").path("failedRules")).hasSize(3);
+        assertThat(confirmedPayload.path("governanceSummary").path("openBlockingGaps")).hasSize(3);
+
+        mockMvc.perform(get("/api/publish-checks/{sceneId}", sceneId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.publishReady").value(false))
+                .andExpect(jsonPath("$.failedRules.length()").value(3))
+                .andExpect(jsonPath("$.openBlockingGaps.length()").value(3));
 
         mockMvc.perform(post("/api/import/tasks/{taskId}/quality-confirm", taskId)
                         .header("Authorization", "Bearer " + token))
@@ -146,6 +180,8 @@ class MvpKnowledgeGraphFlowIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.domainId").value(domainId));
+
+        ensureGovernanceAssets(sceneId);
 
         MvcResult publishResult = mockMvc.perform(post("/api/scenes/{id}/publish", sceneId)
                         .header("Authorization", "Bearer " + token)
@@ -373,5 +409,66 @@ class MvpKnowledgeGraphFlowIntegrationTest {
             }
         }
         throw new IllegalStateException("candidate scene not found");
+    }
+
+    private void ensureGovernanceAssets(long sceneId) {
+        OffsetDateTime now = OffsetDateTime.now();
+        PlanPO primaryPlan = planMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("plan missing for scene " + sceneId));
+
+        if (dictionaryMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            DictionaryPO dictionary = new DictionaryPO();
+            dictionary.setSceneId(sceneId);
+            dictionary.setPlanId(primaryPlan.getId());
+            dictionary.setDictCode("DICT-" + sceneId + "-MAIN");
+            dictionary.setDictName("代发协议状态字典");
+            dictionary.setDictCategory("ENUM");
+            dictionary.setDictVersion("v1");
+            dictionary.setReleaseStatus("PUBLISHED");
+            dictionary.setEntriesJson("[{\"code\":\"DEFAULT\",\"name\":\"默认值\"}]");
+            dictionary.setReferencedByJson("[\"scene:" + sceneId + "\"]");
+            stamp(dictionary, now);
+            dictionaryMapper.save(dictionary);
+        }
+
+        if (identifierLineageMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            IdentifierLineagePO lineage = new IdentifierLineagePO();
+            lineage.setSceneId(sceneId);
+            lineage.setPlanId(primaryPlan.getId());
+            lineage.setLineageCode("LIN-" + sceneId + "-MAIN");
+            lineage.setLineageName("代发协议主标识链");
+            lineage.setIdentifierType("PROTOCOL_NBR");
+            lineage.setSourceIdentifierType("MCH_AGR_NBR");
+            lineage.setTargetIdentifierType("PROTOCOL_NBR");
+            lineage.setMappingRulesJson("[{\"rule\":\"direct-pass-through\"}]");
+            lineage.setEvidenceRefsJson("[\"scene:" + sceneId + "\"]");
+            lineage.setConfirmationStatus("CONFIRMED");
+            stamp(lineage, now);
+            identifierLineageMapper.save(lineage);
+        }
+
+        if (timeSemanticSelectorMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            TimeSemanticSelectorPO selector = new TimeSemanticSelectorPO();
+            selector.setSceneId(sceneId);
+            selector.setPlanId(primaryPlan.getId());
+            selector.setSelectorCode("TIME-" + sceneId + "-MAIN");
+            selector.setSelectorName("代发交易日期时间语义");
+            selector.setDefaultSemantic("TRX_DT");
+            selector.setCandidateSemanticsJson("[\"TRX_DT\",\"交易日期\"]");
+            selector.setClarificationTermsJson("[\"交易日\",\"时间范围\"]");
+            selector.setPriorityRulesJson("[{\"priority\":1,\"semantic\":\"TRX_DT\"}]");
+            selector.setMustClarifyFlag(false);
+            stamp(selector, now);
+            timeSemanticSelectorMapper.save(selector);
+        }
+    }
+
+    private void stamp(AbstractSnapshotGraphAuditablePO po, OffsetDateTime now) {
+        po.setStatus("ACTIVE");
+        po.setSnapshotId(null);
+        po.setCreatedBy("tester");
+        po.setCreatedAt(now);
+        po.setUpdatedBy("tester");
+        po.setUpdatedAt(now);
     }
 }

@@ -2,6 +2,8 @@ package com.cmbchina.datadirect.caliber.application.service.query.graphrag;
 
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.PublishCheckDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.PublishCheckItemDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.governance.SceneGovernanceSummaryDTO;
+import com.cmbchina.datadirect.caliber.application.service.governance.SceneGovernanceGateAppService;
 import com.cmbchina.datadirect.caliber.domain.exception.DomainValidationException;
 import com.cmbchina.datadirect.caliber.domain.model.Scene;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CoverageDeclarationMapper;
@@ -39,6 +41,7 @@ public class ScenePublishGateAppService {
     private final PlanEvidenceRefMapper planEvidenceRefMapper;
     private final PlanSchemaLinkMapper planSchemaLinkMapper;
     private final PolicyMapper policyMapper;
+    private final SceneGovernanceGateAppService sceneGovernanceGateAppService;
 
     public ScenePublishGateAppService(OutputContractMapper outputContractMapper,
                                       InputSlotSchemaMapper inputSlotSchemaMapper,
@@ -51,7 +54,8 @@ public class ScenePublishGateAppService {
                                       EvidenceFragmentMapper evidenceFragmentMapper,
                                       PlanEvidenceRefMapper planEvidenceRefMapper,
                                       PlanSchemaLinkMapper planSchemaLinkMapper,
-                                      PolicyMapper policyMapper) {
+                                      PolicyMapper policyMapper,
+                                      SceneGovernanceGateAppService sceneGovernanceGateAppService) {
         this.outputContractMapper = outputContractMapper;
         this.inputSlotSchemaMapper = inputSlotSchemaMapper;
         this.sourceIntakeContractMapper = sourceIntakeContractMapper;
@@ -64,6 +68,7 @@ public class ScenePublishGateAppService {
         this.planEvidenceRefMapper = planEvidenceRefMapper;
         this.planSchemaLinkMapper = planSchemaLinkMapper;
         this.policyMapper = policyMapper;
+        this.sceneGovernanceGateAppService = sceneGovernanceGateAppService;
     }
 
     public PublishCheckDTO check(Scene scene) {
@@ -108,8 +113,21 @@ public class ScenePublishGateAppService {
                 && sourceContractReady;
         items.add(item("snapshot_bindable", "版本快照", snapshotReady, "block", "发布前必须满足快照生成条件"));
 
-        boolean publishReady = items.stream().filter(item -> !"warn".equalsIgnoreCase(item.level())).allMatch(item -> Boolean.TRUE.equals(item.passed()));
-        return new PublishCheckDTO(scene == null ? null : scene.getId(), publishReady, items);
+        SceneGovernanceSummaryDTO governanceSummary = scene == null || scene.getId() == null
+                ? new SceneGovernanceSummaryDTO(null, SceneGovernanceGateAppService.STAGE_PRE_PUBLISH, true, List.of(), List.of(), List.of(), "未提供场景")
+                : sceneGovernanceGateAppService.summarize(scene.getId(), SceneGovernanceGateAppService.STAGE_PRE_PUBLISH);
+        boolean publishReady = items.stream()
+                .filter(item -> !"warn".equalsIgnoreCase(item.level()))
+                .allMatch(item -> Boolean.TRUE.equals(item.passed()))
+                && governanceSummary.publishReady();
+        return new PublishCheckDTO(
+                scene == null ? null : scene.getId(),
+                publishReady,
+                items,
+                governanceSummary.failedRules(),
+                governanceSummary.openBlockingGaps(),
+                governanceSummary.summary()
+        );
     }
 
     public void assertPublishable(Scene scene) {
@@ -121,7 +139,10 @@ public class ScenePublishGateAppService {
                 .filter(item -> !Boolean.TRUE.equals(item.passed()))
                 .map(item -> item.name() + "：" + item.message())
                 .reduce((left, right) -> left + "；" + right)
-                .orElse("发布门禁未通过");
+                .orElseGet(() -> {
+                    String governanceSummary = check.summary();
+                    return governanceSummary == null || governanceSummary.isBlank() ? "发布门禁未通过" : governanceSummary;
+                });
         throw new DomainValidationException("发布失败，控制资产不完整：" + message);
     }
 

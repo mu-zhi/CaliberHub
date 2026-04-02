@@ -74,11 +74,13 @@ class DomainApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.domainName").value("零售业务-更新"));
 
-        mockMvc.perform(get("/api/domains/{id}", id))
+        mockMvc.perform(get("/api/domains/{id}", id)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.domainOverview").value("更新后的概述"));
 
-        mockMvc.perform(get("/api/domains"))
+        mockMvc.perform(get("/api/domains")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.domainCode == 'RETAIL_API')]").isArray());
     }

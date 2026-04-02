@@ -11,8 +11,8 @@ import com.cmbchina.datadirect.caliber.application.exception.ResourceNotFoundExc
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.GraphProjectionAppService;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.CanonicalSnapshotBindingService;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.SceneGraphAssetSyncService;
+import com.cmbchina.datadirect.caliber.application.service.governance.SceneGovernanceGateAppService;
 import com.cmbchina.datadirect.caliber.application.service.query.graphrag.ScenePublishGateAppService;
-import com.cmbchina.datadirect.caliber.domain.exception.DomainValidationException;
 import com.cmbchina.datadirect.caliber.domain.model.CaliberDomain;
 import com.cmbchina.datadirect.caliber.domain.model.Scene;
 import com.cmbchina.datadirect.caliber.domain.model.SceneDraftUpdate;
@@ -20,16 +20,12 @@ import com.cmbchina.datadirect.caliber.domain.model.SceneStatus;
 import com.cmbchina.datadirect.caliber.domain.support.CaliberDomainSupport;
 import com.cmbchina.datadirect.caliber.domain.support.SceneDomainSupport;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneAuditLogMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.SceneAuditLogPO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,12 +57,10 @@ public class SceneCommandAppService {
     private final SceneVersionAppService sceneVersionAppService;
     private final CanonicalSnapshotBindingService canonicalSnapshotBindingService;
     private final GraphProjectionAppService graphProjectionAppService;
+    private final SceneGovernanceGateAppService sceneGovernanceGateAppService;
     private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper;
     private final SceneAuditLogMapper sceneAuditLogMapper;
-    private DictionaryMapper dictionaryMapper;
-    private IdentifierLineageMapper identifierLineageMapper;
-    private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
 
     public SceneCommandAppService(SceneDomainSupport sceneDomainSupport,
                                   CaliberDomainSupport caliberDomainSupport,
@@ -78,6 +72,7 @@ public class SceneCommandAppService {
                                   SceneVersionAppService sceneVersionAppService,
                                   CanonicalSnapshotBindingService canonicalSnapshotBindingService,
                                   GraphProjectionAppService graphProjectionAppService,
+                                  SceneGovernanceGateAppService sceneGovernanceGateAppService,
                                   MeterRegistry meterRegistry,
                                   ObjectMapper objectMapper,
                                   SceneAuditLogMapper sceneAuditLogMapper) {
@@ -91,24 +86,10 @@ public class SceneCommandAppService {
         this.sceneVersionAppService = sceneVersionAppService;
         this.canonicalSnapshotBindingService = canonicalSnapshotBindingService;
         this.graphProjectionAppService = graphProjectionAppService;
+        this.sceneGovernanceGateAppService = sceneGovernanceGateAppService;
         this.meterRegistry = meterRegistry;
         this.objectMapper = objectMapper;
         this.sceneAuditLogMapper = sceneAuditLogMapper;
-    }
-
-    @Autowired(required = false)
-    public void setDictionaryMapper(DictionaryMapper dictionaryMapper) {
-        this.dictionaryMapper = dictionaryMapper;
-    }
-
-    @Autowired(required = false)
-    public void setIdentifierLineageMapper(IdentifierLineageMapper identifierLineageMapper) {
-        this.identifierLineageMapper = identifierLineageMapper;
-    }
-
-    @Autowired(required = false)
-    public void setTimeSemanticSelectorMapper(TimeSemanticSelectorMapper timeSemanticSelectorMapper) {
-        this.timeSemanticSelectorMapper = timeSemanticSelectorMapper;
     }
 
     @Transactional
@@ -170,9 +151,9 @@ public class SceneCommandAppService {
                     .orElseThrow(() -> new ResourceNotFoundException("scene not found: " + id));
             sceneGraphAssetSyncService.ensureGovernanceAssets(scene.getId(), cmd.operator());
             scenePublishGateAppService.assertPublishable(scene);
+            sceneGovernanceGateAppService.assertPublishable(scene.getId(), cmd.operator());
             alignmentReportAppService.assertPublishAllowed(scene.getId());
             List<String> softGateWarnings = collectPublishSoftGateWarnings(scene);
-            assertRequiredGovernanceAssets(scene);
 
             scene.publish(cmd.verifiedAt(), cmd.changeSummary(), cmd.operator());
             Scene saved = saveWithConflictGuard(scene);
@@ -294,33 +275,6 @@ public class SceneCommandAppService {
             warnings.add(SOFT_GATE_QG102);
         }
         return warnings;
-    }
-
-    private void assertRequiredGovernanceAssets(Scene scene) {
-        if (!isGovernanceAssetValidationEnabled() || scene == null || scene.getId() == null) {
-            return;
-        }
-        List<String> missingAssets = new ArrayList<>();
-        if (dictionaryMapper == null || !hasSceneScopedAsset(dictionaryMapper.findBySceneIdOrderByUpdatedAtDesc(scene.getId()))) {
-            missingAssets.add("Dictionary");
-        }
-        if (identifierLineageMapper == null || !hasSceneScopedAsset(identifierLineageMapper.findBySceneIdOrderByUpdatedAtDesc(scene.getId()))) {
-            missingAssets.add("Identifier Lineage");
-        }
-        if (timeSemanticSelectorMapper == null || !hasSceneScopedAsset(timeSemanticSelectorMapper.findBySceneIdOrderByUpdatedAtDesc(scene.getId()))) {
-            missingAssets.add("Time Semantic Selector");
-        }
-        if (!missingAssets.isEmpty()) {
-            throw new DomainValidationException("发布失败，治理对象不完整：" + String.join("、", missingAssets));
-        }
-    }
-
-    private boolean isGovernanceAssetValidationEnabled() {
-        return dictionaryMapper != null || identifierLineageMapper != null || timeSemanticSelectorMapper != null;
-    }
-
-    private boolean hasSceneScopedAsset(List<?> assets) {
-        return assets != null && !assets.isEmpty();
     }
 
     private boolean hasIdMappingNotes(String codeMappingsJson) {

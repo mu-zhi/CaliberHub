@@ -157,7 +157,8 @@ class SceneApiIntegrationTest {
                 .andExpect(jsonPath("$.status").value("PUBLISHED"))
                 .andExpect(jsonPath("$.publishedBy").value("support"));
 
-        mockMvc.perform(get("/api/scenes/{id}", id))
+        mockMvc.perform(get("/api/scenes/{id}", id)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("PUBLISHED"));
 
@@ -269,7 +270,9 @@ class SceneApiIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.domainId").value(domainId));
 
-        mockMvc.perform(get("/api/scenes").param("domainId", String.valueOf(domainId)))
+        mockMvc.perform(get("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .param("domainId", String.valueOf(domainId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].domainId").value(domainId))
                 .andExpect(jsonPath("$[0].domainName").value("零售业务"));
@@ -293,7 +296,9 @@ class SceneApiIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.domain").value("零售金融-旧口径"));
 
-        mockMvc.perform(get("/api/scenes").param("domain", "零售金融-旧口径"))
+        mockMvc.perform(get("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .param("domain", "零售金融-旧口径"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].domain").value("零售金融-旧口径"));
     }
@@ -364,7 +369,9 @@ class SceneApiIntegrationTest {
                 .andExpect(jsonPath("$.sqlBlocksJson").value(org.hamcrest.Matchers.containsString("dm_customer_info")))
                 .andExpect(jsonPath("$.sqlVariantsJson").value(org.hamcrest.Matchers.containsString("dm_customer_info")));
 
-        mockMvc.perform(get("/api/scenes").param("keyword", "dm_customer_info"))
+        mockMvc.perform(get("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .param("keyword", "dm_customer_info"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(sceneId));
     }
@@ -425,12 +432,15 @@ class SceneApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DISCARDED"));
 
-        mockMvc.perform(get("/api/scenes").param("keyword", title))
+        mockMvc.perform(get("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
+                        .param("keyword", title))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
         mockMvc.perform(get("/api/scenes")
+                        .header("Authorization", "Bearer " + token)
                         .param("status", "DISCARDED")
                         .param("keyword", title))
                 .andExpect(status().isOk())
@@ -455,12 +465,14 @@ class SceneApiIntegrationTest {
                 .andReturn();
         long sceneId = objectMapper.readTree(createResult.getResponse().getContentAsString()).path("id").asLong();
 
-        mockMvc.perform(get("/api/scenes/minimum-unit"))
+        mockMvc.perform(get("/api/scenes/minimum-unit")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.unitType").value("CALIBER_SCENE_UNIT_V1"))
                 .andExpect(jsonPath("$.requiredFields").isArray());
 
-        mockMvc.perform(get("/api/scenes/{id}/minimum-unit-check", sceneId))
+        mockMvc.perform(get("/api/scenes/{id}/minimum-unit-check", sceneId)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sceneId").value(sceneId))
                 .andExpect(jsonPath("$.publishReady").value(false))

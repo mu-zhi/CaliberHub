@@ -29,6 +29,9 @@ const PUBLISH_CHECK = {
   items: [
     { key: "projection", name: "图谱投影", message: "投影已完成", passed: true },
   ],
+  failedRules: [],
+  openBlockingGaps: [],
+  summary: "治理规则已通过，当前无阻断级缺口。",
 };
 
 const VERSIONS = [
@@ -147,6 +150,58 @@ describe("PublishCenterPage status presentation", () => {
 
     expect(screen.getByText("发布检查未通过，请先处理阻断项。")).toBeTruthy();
     expect(screen.getByRole("button", { name: "执行发布" }).hasAttribute("disabled")).toBe(true);
+  });
+
+  it("shows explicit governance failures from publish checks", async () => {
+    globalThis.fetch = vi.fn(async (url) => {
+      const path = typeof url === "string" ? url : url.toString();
+      if (path.includes("/api/scenes")) return mockJsonResponse(SCENES);
+      if (path.includes("/api/publish-checks")) {
+        return mockJsonResponse({
+          publishReady: false,
+          items: [{ key: "projection", name: "图谱投影", message: "投影已完成", passed: true }],
+          failedRules: [
+            {
+              ruleCode: "GR-DICT-001",
+              name: "字典治理对象",
+              message: "场景至少需要 1 个活动中的 Dictionary（字典）",
+            },
+          ],
+          openBlockingGaps: [
+            {
+              taskCode: "GAP-GOV-1-GR-DICT-001",
+              taskTitle: "字典治理对象缺口",
+              status: "OPEN",
+            },
+          ],
+          summary: "失败规则：字典治理对象；阻断缺口：字典治理对象缺口",
+        });
+      }
+      if (path.includes("/versions")) return mockJsonResponse(VERSIONS);
+      if (path.includes("/api/graphrag/projection")) return mockJsonResponse(PROJECTION);
+      if (path.includes("/api/plans")) return mockJsonResponse([]);
+      if (path.includes("/api/coverage-declarations")) return mockJsonResponse([]);
+      if (path.includes("/api/policies")) return mockJsonResponse([]);
+      if (path.includes("/api/contract-views")) return mockJsonResponse([]);
+      if (path.includes("/api/source-contracts")) return mockJsonResponse([]);
+      if (path.includes("/api/output-contracts")) return mockJsonResponse([]);
+      if (path.includes("/api/input-slot-schemas")) return mockJsonResponse([]);
+      return mockJsonResponse(null);
+    });
+
+    render(
+      <MemoryRouter>
+        <PublishCenterPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("字典治理对象")).toBeTruthy();
+    });
+
+    expect(screen.getByText("阻断级缺口")).toBeTruthy();
+    expect(screen.getByText("字典治理对象缺口")).toBeTruthy();
+    expect(screen.getByText("失败规则：字典治理对象；阻断缺口：字典治理对象缺口")).toBeTruthy();
   });
 
   it("shows projection disabled feedback and blocks rebuild when projection is skipped", async () => {

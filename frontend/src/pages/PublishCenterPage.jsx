@@ -563,6 +563,35 @@ export function PublishCenterPage() {
                 <p className="subtle-note">当前场景还没有生成发布检查结果。</p>
               ) : null}
             </div>
+            {bundle.publishCheck?.failedRules?.length ? (
+              <div className="workbench-list">
+                {bundle.publishCheck.failedRules.map((rule) => (
+                  <article key={rule.ruleCode} className="workbench-list-row">
+                    <div>
+                      <strong>{rule.name}</strong>
+                      <p>{rule.message}</p>
+                    </div>
+                    <div className="workbench-row-side">
+                      <UiBadge tone="bad">治理阻断</UiBadge>
+                    </div>
+                  </article>
+                ))}
+                {(bundle.publishCheck.openBlockingGaps || []).map((gap) => (
+                  <article key={gap.taskCode} className="workbench-list-row">
+                    <div>
+                      <strong>阻断级缺口</strong>
+                      <p>{gap.taskTitle}</p>
+                    </div>
+                    <div className="workbench-row-side">
+                      <UiBadge tone="bad">{gap.status || "OPEN"}</UiBadge>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+            {bundle.publishCheck?.summary ? (
+              <p className="subtle-note">{bundle.publishCheck.summary}</p>
+            ) : null}
             <div className="publish-center-ops">
               <UiInput
                 type="datetime-local"

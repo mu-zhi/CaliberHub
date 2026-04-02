@@ -1,6 +1,7 @@
 package com.cmbchina.datadirect.caliber.adapter.web;
 
 import com.cmbchina.datadirect.caliber.application.api.dto.request.ConfirmImportSceneCandidateCmd;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.ConfirmImportSceneCandidateResultDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.PreprocessImportCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.request.ReviewImportCandidateGraphCmd;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.ImportCandidateGraphDTO;
@@ -133,8 +134,8 @@ public class ImportController {
     }
 
     @PostMapping("/candidates/{candidateCode}/confirm")
-    public ResponseEntity<SceneDTO> confirmCandidate(@PathVariable String candidateCode,
-                                                     @RequestBody ConfirmImportSceneCandidateCmd cmd) {
+    public ResponseEntity<ConfirmImportSceneCandidateResultDTO> confirmCandidate(@PathVariable String candidateCode,
+                                                                                 @RequestBody ConfirmImportSceneCandidateCmd cmd) {
         return ResponseEntity.ok(importTaskCommandAppService.confirmSceneCandidate(
                 candidateCode,
                 cmd.domainId(),

@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface GapTaskMapper extends JpaRepository<GapTaskPO, Long> {
     List<GapTaskPO> findBySceneIdOrderByUpdatedAtDesc(Long sceneId);
+    java.util.Optional<GapTaskPO> findByTaskCode(String taskCode);
 }

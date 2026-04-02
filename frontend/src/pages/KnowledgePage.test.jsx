@@ -169,6 +169,25 @@ beforeEach(() => {
     if (path === buildApiPath("minimumUnitCheck", { id: 101 })) {
       return {};
     }
+    if (path === "/scenes/101/governance-gaps") {
+      return {
+        publishReady: false,
+        failedRules: [
+          {
+            ruleCode: "GR-DICT-001",
+            name: "字典治理对象",
+            message: "场景至少需要 1 个活动中的 Dictionary（字典）",
+          },
+        ],
+        openBlockingGaps: [
+          {
+            taskCode: "GAP-GOV-101-GR-DICT-001",
+            taskTitle: "字典治理对象缺口",
+          },
+        ],
+        summary: "失败规则：字典治理对象；阻断缺口：字典治理对象缺口",
+      };
+    }
     return {};
   });
 });
@@ -211,6 +230,10 @@ describe("KnowledgePage status localization", () => {
     expect(await screen.findByText(/状态 处理中/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "继续处理当前场景" })).toBeTruthy();
     expect(screen.getAllByText(/当前任务停留在场景整理与发布/).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "继续处理当前场景" }));
+    await waitFor(() => {
+      expect(apiRequest).toHaveBeenCalledWith("/scenes/101/governance-gaps", { token: "" });
+    });
 
     expect(screen.getByText(/推荐处理对象：/)).toBeTruthy();
     expect(screen.getByText(/代发协议查询/)).toBeTruthy();
@@ -408,6 +431,14 @@ describe("KnowledgePage status localization", () => {
       }
       if (path === buildApiPath("minimumUnitCheck", { id: 201 })) {
         return {};
+      }
+      if (path === "/scenes/201/governance-gaps") {
+        return {
+          publishReady: true,
+          failedRules: [],
+          openBlockingGaps: [],
+          summary: "治理规则已通过，当前无阻断级缺口。",
+        };
       }
       return {};
     });

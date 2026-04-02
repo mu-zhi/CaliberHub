@@ -718,6 +718,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
   const [publishVerifiedAt, setPublishVerifiedAt] = useState(nowLocalInputValue());
   const [publishSummary, setPublishSummary] = useState("");
   const [minimumUnitCheck, setMinimumUnitCheck] = useState(null);
+  const [governanceSummary, setGovernanceSummary] = useState(null);
   const [minimumUnitLoading, setMinimumUnitLoading] = useState(false);
   const [qualityMsg, setQualityMsg] = useState("待导入");
   const [loading, setLoading] = useState(false);
@@ -813,6 +814,22 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
     }
   }, [token]);
 
+  const loadGovernanceSummary = useCallback(async (sceneIdInput) => {
+    const id = Number(sceneIdInput || 0);
+    if (!id) {
+      setGovernanceSummary(null);
+      return null;
+    }
+    try {
+      const result = await apiRequest(`/scenes/${id}/governance-gaps`, { token });
+      setGovernanceSummary(result || null);
+      return result;
+    } catch (_) {
+      setGovernanceSummary(null);
+      return null;
+    }
+  }, [token]);
+
   useEffect(() => {
     loadDomains();
     if (preset === "import") {
@@ -886,10 +903,12 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
     const currentSceneId = draft?.sceneId || sceneId;
     if (!currentSceneId) {
       setMinimumUnitCheck(null);
+      setGovernanceSummary(null);
       return;
     }
     loadMinimumUnitCheck(currentSceneId);
-  }, [sceneDrafts, selectedSceneIndex, sceneId, loadMinimumUnitCheck]);
+    loadGovernanceSummary(currentSceneId);
+  }, [sceneDrafts, selectedSceneIndex, sceneId, loadGovernanceSummary, loadMinimumUnitCheck]);
 
   useEffect(() => {
     const target = stepCardRefMap.current.get(activeStep);
@@ -1811,6 +1830,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
       setHasUnsavedChanges(false);
       setPreprocessMeta(`草稿已保存 #${currentSceneId}${notices.length > 0 ? ` · ${notices.join("；")}` : ""}`);
       loadMinimumUnitCheck(currentSceneId);
+      loadGovernanceSummary(currentSceneId);
       loadRecentImportTasks();
       focusNextProcessable(selectedSceneIndex, sceneDrafts);
     } catch (err) {
@@ -1866,6 +1886,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
       setHasUnsavedChanges(false);
       setPreprocessMeta(`已发布场景 #${currentSceneId}${persistResult.notices.length > 0 ? ` · ${persistResult.notices.join("；")}` : ""}`);
       setImportTaskStatus("PUBLISHING");
+      loadGovernanceSummary(currentSceneId);
       const allProcessed = nextDrafts.length > 0 && nextDrafts.every((item) => {
         const status = `${item?.status || ""}`.toUpperCase();
         return status === "PUBLISHED" || status === "DISCARDED";
@@ -3239,6 +3260,40 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
               </div>
             ) : (
               <p className="subtle-note">保存场景后会自动生成最小单元校验结果。</p>
+            )}
+          </div>
+
+          <div className="publish-check-panel">
+            <div className="publish-check-head">
+              <strong>治理缺口摘要</strong>
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={() => loadGovernanceSummary(currentDraft?.sceneId || sceneId)}
+                disabled={!(currentDraft?.sceneId || sceneId)}
+              >
+                重新检查
+              </button>
+            </div>
+            {governanceSummary?.failedRules?.length ? (
+              <div className="publish-checklist">
+                {governanceSummary.failedRules.map((rule) => (
+                  <div key={rule.ruleCode} className="publish-check-item is-warn">
+                    <span className="publish-check-dot" aria-hidden="true">!</span>
+                    <span>{rule.name}：{rule.message}</span>
+                  </div>
+                ))}
+                {(governanceSummary.openBlockingGaps || []).map((gap) => (
+                  <div key={gap.taskCode} className="publish-check-item is-warn">
+                    <span className="publish-check-dot" aria-hidden="true">!</span>
+                    <span>阻断级缺口：{gap.taskTitle}</span>
+                  </div>
+                ))}
+              </div>
+            ) : governanceSummary ? (
+              <p className="subtle-note">{governanceSummary.summary || "当前无治理阻断项。"}</p>
+            ) : (
+              <p className="subtle-note">保存场景后会自动生成治理缺口摘要。</p>
             )}
           </div>
 

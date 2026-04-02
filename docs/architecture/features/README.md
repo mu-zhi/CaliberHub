@@ -26,6 +26,7 @@
 - [`05-元数据对齐与来源契约固化.md`](iteration-01-knowledge-production/05-元数据对齐与来源契约固化.md)：元数据对齐与来源契约固化
 - [`05a-join-relation-governance.md`](iteration-01-knowledge-production/05a-join-relation-governance.md)：表间关联关系治理
 - [`06-复核与缺口任务协同.md`](iteration-01-knowledge-production/06-复核与缺口任务协同.md)：复核与缺口任务协同
+- [`06a-explicit-governance-rules-and-dual-stage-gates.md`](iteration-01-knowledge-production/06a-explicit-governance-rules-and-dual-stage-gates.md)：显式治理规则与双阶段发布门禁
 
 ### 迭代二：运行与治理工作台
 

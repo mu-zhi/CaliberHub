@@ -9,6 +9,7 @@ import com.cmbchina.datadirect.caliber.application.exception.ResourceNotFoundExc
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.CanonicalSnapshotBindingService;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.GraphProjectionAppService;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.SceneGraphAssetSyncService;
+import com.cmbchina.datadirect.caliber.application.service.governance.SceneGovernanceGateAppService;
 import com.cmbchina.datadirect.caliber.application.service.query.graphrag.ScenePublishGateAppService;
 import com.cmbchina.datadirect.caliber.domain.exception.DomainValidationException;
 import com.cmbchina.datadirect.caliber.domain.model.Scene;
@@ -16,9 +17,6 @@ import com.cmbchina.datadirect.caliber.domain.model.SceneStatus;
 import com.cmbchina.datadirect.caliber.domain.support.CaliberDomainSupport;
 import com.cmbchina.datadirect.caliber.domain.support.SceneDomainSupport;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneAuditLogMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.SceneAuditLogPO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -57,13 +55,7 @@ class SceneCommandAppServiceTest {
     private CanonicalSnapshotBindingService canonicalSnapshotBindingService;
 
     @Mock
-    private DictionaryMapper dictionaryMapper;
-
-    @Mock
-    private IdentifierLineageMapper identifierLineageMapper;
-
-    @Mock
-    private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
+    private SceneGovernanceGateAppService sceneGovernanceGateAppService;
 
     private AlignmentReportAppService alignmentReportAppService;
     private SceneGraphAssetSyncService sceneGraphAssetSyncService;
@@ -103,7 +95,7 @@ class SceneCommandAppServiceTest {
                 // no-op for unit test
             }
         };
-        scenePublishGateAppService = new ScenePublishGateAppService(null, null, null, null, null, null, null, null, null, null, null, null) {
+        scenePublishGateAppService = new ScenePublishGateAppService(null, null, null, null, null, null, null, null, null, null, null, null, sceneGovernanceGateAppService) {
             @Override
             public void assertPublishable(Scene scene) {
                 // no-op for unit test
@@ -177,6 +169,7 @@ class SceneCommandAppServiceTest {
                 sceneVersionAppService,
                 canonicalSnapshotBindingService,
                 graphProjectionAppService,
+                sceneGovernanceGateAppService,
                 new SimpleMeterRegistry(),
                 objectMapper,
                 sceneAuditLogMapper
@@ -315,7 +308,7 @@ class SceneCommandAppServiceTest {
     }
 
     @Test
-    void shouldRejectPublishWhenDictionaryIdentifierLineageAndTimeSemanticSelectorMissing() {
+    void shouldRejectPublishWhenExplicitGovernanceRulesFail() {
         OffsetDateTime now = OffsetDateTime.now();
         Scene scene = Scene.builder()
                 .id(11L)
@@ -330,19 +323,16 @@ class SceneCommandAppServiceTest {
                 .updatedAt(now)
                 .build();
         when(sceneDomainSupport.findById(11L)).thenReturn(Optional.of(scene));
-        sceneCommandAppService.setDictionaryMapper(dictionaryMapper);
-        sceneCommandAppService.setIdentifierLineageMapper(identifierLineageMapper);
-        sceneCommandAppService.setTimeSemanticSelectorMapper(timeSemanticSelectorMapper);
-        when(dictionaryMapper.findBySceneIdOrderByUpdatedAtDesc(11L)).thenReturn(java.util.List.of());
-        when(identifierLineageMapper.findBySceneIdOrderByUpdatedAtDesc(11L)).thenReturn(java.util.List.of());
-        when(timeSemanticSelectorMapper.findBySceneIdOrderByUpdatedAtDesc(11L)).thenReturn(java.util.List.of());
+        org.mockito.Mockito.doThrow(new DomainValidationException("发布失败，治理规则未通过：字典治理对象、标识链治理对象、时间语义治理对象"))
+                .when(sceneGovernanceGateAppService)
+                .assertPublishable(11L, "reviewer");
 
         assertThatThrownBy(() -> sceneCommandAppService.publish(
                 11L,
                 new PublishSceneCmd(now, "发布说明", "reviewer")
         )).isInstanceOf(DomainValidationException.class)
-                .hasMessageContaining("Dictionary")
-                .hasMessageContaining("Identifier Lineage")
-                .hasMessageContaining("Time Semantic Selector");
+                .hasMessageContaining("字典治理对象")
+                .hasMessageContaining("标识链治理对象")
+                .hasMessageContaining("时间语义治理对象");
     }
 }

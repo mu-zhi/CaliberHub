@@ -9,6 +9,7 @@ import com.cmbchina.datadirect.caliber.application.service.command.SceneCommandA
 import com.cmbchina.datadirect.caliber.application.service.command.SceneVersionAppService;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.GraphProjectionAppService;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.SceneGraphAssetSyncService;
+import com.cmbchina.datadirect.caliber.application.service.governance.SceneGovernanceGateAppService;
 import com.cmbchina.datadirect.caliber.application.service.query.graphrag.ScenePublishGateAppService;
 import com.cmbchina.datadirect.caliber.domain.model.SceneStatus;
 import com.cmbchina.datadirect.caliber.domain.support.CaliberDomainSupport;
@@ -93,6 +94,9 @@ class CanonicalSnapshotBindingServiceTest {
 
     @MockBean
     private GraphProjectionAppService graphProjectionAppService;
+
+    @MockBean
+    private SceneGovernanceGateAppService sceneGovernanceGateAppService;
 
     @MockBean
     private SceneAuditLogMapper sceneAuditLogMapper;
@@ -456,6 +460,7 @@ class CanonicalSnapshotBindingServiceTest {
                                                       SceneVersionAppService sceneVersionAppService,
                                                       CanonicalSnapshotBindingService canonicalSnapshotBindingService,
                                                       GraphProjectionAppService graphProjectionAppService,
+                                                      SceneGovernanceGateAppService sceneGovernanceGateAppService,
                                                       MeterRegistry meterRegistry,
                                                       com.fasterxml.jackson.databind.ObjectMapper objectMapper,
                                                       SceneAuditLogMapper sceneAuditLogMapper) {
@@ -470,6 +475,7 @@ class CanonicalSnapshotBindingServiceTest {
                     sceneVersionAppService,
                     canonicalSnapshotBindingService,
                     graphProjectionAppService,
+                    sceneGovernanceGateAppService,
                     meterRegistry,
                     objectMapper,
                     sceneAuditLogMapper
