@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.rlc.caliberhub.chatgpt-heartbeat</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/bin/python3</string>
+      <string>/Users/rlc/Code/CaliberHub/scripts/chatgpt_heartbeat_runner.py</string>
+      <string>--repo</string>
+      <string>/Users/rlc/Code/CaliberHub</string>
+      <string>--target-url</string>
+      <string>https://chatgpt.com/</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StartInterval</key>
+    <integer>600</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/rlc/Library/Logs/caliberhub-chatgpt-heartbeat.launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/rlc/Library/Logs/caliberhub-chatgpt-heartbeat.launchd.err.log</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/rlc/Code/CaliberHub</string>
+  </dict>
+</plist>

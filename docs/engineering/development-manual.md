@@ -154,11 +154,22 @@ bash scripts/claude_mux.sh <provider> <model> [claude args...]
 - `bash scripts/claude_review.sh`：问问 `claude-sonnet-4-6-20260218`
 - `bash scripts/claude-review-deep.sh`：问问 `claude-opus-4-6-20260205`
 
+全局快捷入口：
+
+- `claude1`：百炼 `qwen3.5-plus`
+- `claude2`：百炼 `qwen3-coder-plus`
+- `claude3`：百炼 `glm-5`
+- `claude4`：问问 `claude-sonnet-4-6-20260218`
+- `claude5`：问问 `claude-opus-4-6-20260205`
+
+全局命令当前安装在本机 `PATH` 目录 `/Users/rlc/.npm-global/bin`，底层统一转发到 [`scripts/claude_mux.sh`](/Users/rlc/Code/CaliberHub/scripts/claude_mux.sh)。该组命令依赖当前仓库路径与 `tooling/claude-providers/*.env.local` 私有配置保持可用；若仓库搬迁或重建本机环境，需要同步更新对应 wrapper。
+
 使用约束：
 
 - `claude_mux.sh` 只负责本地 `Claude Code（代码智能体）` provider 切换，不替代当前 `Codex（代码智能体）` 主会话。
 - 代码检视主入口固定为 `bash scripts/claude_review.sh`。
 - 编码备选入口固定为 `bash scripts/claude-coder.sh`。
+- 任意目录下的快速启动优先使用 `claude1` 到 `claude5`；需要显式指定 provider + model 或临时追加不同模型时，再回退到 `bash scripts/claude_mux.sh <provider> <model>`。
 - 强模型文档 / 计划备选入口可直接使用 `bash scripts/claude_mux.sh wenwen claude-sonnet-4-6-20260218 --print "<prompt>"`。
 - 只有 `runtime=codex` 的模型可直接参与 `spawn_agent`；`Claude Code（代码智能体）` 备选通过本地脚本执行。
 
@@ -168,7 +179,22 @@ bash scripts/claude_mux.sh <provider> <model> [claude args...]
 
 - [`scripts/chatgpt_browser_bridge.py`](/Users/rlc/Code/CaliberHub/scripts/chatgpt_browser_bridge.py)：桥接已打开的 `ChatGPT（对话式人工智能产品）` 页面，提供 `list-tabs / read / type / send` 四个子命令。
 - [`docs/engineering/chatgpt-browser-bridge-capability.md`](/Users/rlc/Code/CaliberHub/docs/engineering/chatgpt-browser-bridge-capability.md)：说明浏览器桥接边界、错误码与安全约束。
+- [`scripts/chatgpt_heartbeat_runner.py`](/Users/rlc/Code/CaliberHub/scripts/chatgpt_heartbeat_runner.py)：每 10 分钟轮询当前唯一已打开的 `ChatGPT（对话式人工智能产品）` 标签页；浏览器桥接可读时会落快照，判断“上下文是否已同步 / 当前进行到哪个阶段 / 是否出现新回复”。当检测到新的 `assistant（助手）` 回复时，会前台激活 `Codex（代码智能体）` 桌面应用并继续尝试调用 `Codex CLI（命令行版 Codex）` 生成下一轮跟进消息；若本轮刚成功发送跟进消息，还会进入一个短观察窗口，按秒级轮询继续接住 GPT 的下一次回复，而不必等到下一个 10 分钟周期。这条链路基于轮询，不是浏览器事件订阅。
+- [`scripts/chatgpt_accessibility_send.py`](/Users/rlc/Code/CaliberHub/scripts/chatgpt_accessibility_send.py)：当 `System Events（系统事件）` 辅助功能权限可用时，使用剪贴板 + 粘贴发送把文本发到指定 `ChatGPT（对话式人工智能产品）` 会话，不依赖页面 JavaScript 读写。
+- [`docs/engineering/chatgpt-heartbeat-launchd.plist`](/Users/rlc/Code/CaliberHub/docs/engineering/chatgpt-heartbeat-launchd.plist)：本机 `launchd（macOS 定时任务守护）` 样板，按 600 秒间隔执行浏览器 GPT 巡检。
+
+浏览器 GPT 协作默认规则固定如下：
+
+1. 当用户提到“和浏览器里的 GPT 继续讨论”“盯着当前 ChatGPT”“有回复就继续推进”这一类意图时，默认行为是持续盯守当前会话，直到细节讨论清楚或双方明确确认“可作为最终稿”。
+2. 用户若未特别说明“只读一次”或“只发这一条”，不得把浏览器桥接当成一次性 `read / send` 动作后就停止。
+3. 若前台标签页被切到其他网站，但 `Google Chrome（谷歌浏览器）` 中仍存在已打开的 `chatgpt.com` 标签页，巡检与桥接应优先切回该会话再继续，而不是把会话误判为结束。
+4. 只有在用户明确说“只读一次”“先别继续追问”“只发这条”时，才降级成单次读取或单次发送模式。
 - [`scripts/claude_mux.sh`](/Users/rlc/Code/CaliberHub/scripts/claude_mux.sh)：本地 `Claude Code（代码智能体）` provider + model 统一入口。
+- `claude1`：全局 `Claude Code（代码智能体）` 快捷命令，对应百炼 `qwen3.5-plus`。
+- `claude2`：全局 `Claude Code（代码智能体）` 快捷命令，对应百炼 `qwen3-coder-plus`。
+- `claude3`：全局 `Claude Code（代码智能体）` 快捷命令，对应百炼 `glm-5`。
+- `claude4`：全局 `Claude Code（代码智能体）` 快捷命令，对应问问 `claude-sonnet-4-6-20260218`。
+- `claude5`：全局 `Claude Code（代码智能体）` 快捷命令，对应问问 `claude-opus-4-6-20260205`。
 
 ### 7.2 运行与验证类脚本
 

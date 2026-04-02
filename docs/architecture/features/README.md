@@ -17,6 +17,8 @@
 - [`02-解析抽取与证据确认.md`](iteration-01-knowledge-production/02-解析抽取与证据确认.md)：解析抽取与证据确认
 - [`02b-openai-responses-preprocess-adapter.md`](iteration-01-knowledge-production/02b-openai-responses-preprocess-adapter.md)：OpenAI Responses 预处理适配
 - [`02c-preprocess-structured-output-and-prompt-governance.md`](iteration-01-knowledge-production/02c-preprocess-structured-output-and-prompt-governance.md)：预处理结构化输出与 Prompt 治理
+- [`02d-knowledge-task-mainline-finalization.md`](iteration-01-knowledge-production/02d-knowledge-task-mainline-finalization.md)：知识生产台任务主线页收口
+- [`02e-knowledge-production-real-service-e2e-hardening.md`](iteration-01-knowledge-production/02e-knowledge-production-real-service-e2e-hardening.md)：知识生产台真实服务 E2E 收口
 - [`03-资产建模与治理对象编辑.md`](iteration-01-knowledge-production/03-资产建模与治理对象编辑.md)：资产建模与治理对象编辑
 - [`03a-dictionary-governance.md`](iteration-01-knowledge-production/03a-dictionary-governance.md)：字典治理
 - [`04-推理校验与推理链复核.md`](iteration-01-knowledge-production/04-推理校验与推理链复核.md)：推理校验与推理链复核

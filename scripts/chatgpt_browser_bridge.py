@@ -458,7 +458,12 @@ def build_type_javascript(text: str) -> str:
     encoded_text = base64.b64encode(text.encode("utf-8")).decode("ascii")
     return f"""
 (() => {{
-  const decodedText = atob('{encoded_text}');
+  const decodeBase64Utf8 = (value) => {{
+    const binary = atob(value);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
+  }};
+  const decodedText = decodeBase64Utf8('{encoded_text}');
   const textarea = document.querySelector('textarea:not([disabled])');
   const rich = document.querySelector('[contenteditable="true"][role="textbox"], div.ProseMirror[contenteditable="true"]');
   const node = rich || textarea;

@@ -91,7 +91,7 @@
 - 实现任务完成后、进入测试前，自动执行 `code-reviewing（代码检视技能）`；代码检视未通过时，由 `Codex` 修复后再次进入 `code-reviewing（代码检视技能）`，复检通过后才允许进入测试。
 - 用户提到“测试文档”“验收报告”“test report”“进入验收”“退出 reviewing”或工作项状态切换为 `reviewing（测试与评审中）` 时，执行 `feature-test-report（特性测试与验收技能）`。
 - 当实现完成且测试全部通过时，自动进入 `finishing-a-development-branch（开发分支收尾技能）`。
-- 用户提到“已打开的 ChatGPT”“不要新开浏览器”“抓取当前 ChatGPT 对话”“向当前 ChatGPT 页面输入”“浏览器桥接”时，执行 `ai/skills/chatgpt-browser-bridge/SKILL.md`，并由 `AI（人工智能）` 自行调用内部脚本，不要求用户手动运行命令。
+- 用户提到“已打开的 ChatGPT”“不要新开浏览器”“抓取当前 ChatGPT 对话”“向当前 ChatGPT 页面输入”“浏览器桥接”时，执行 `ai/skills/chatgpt-browser-bridge/SKILL.md`，并由 `AI（人工智能）` 自行调用内部脚本，不要求用户手动运行命令。若请求语义包含“继续讨论”“有回复就继续”“盯着当前会话”“持续推进”，默认进入持续盯守模式，直到细节讨论清楚；只有用户明确要求“只读一次”或“只发一条”时才降级为单次动作。
 - 用户提到 `Swagger`、`SpringDoc`、`OpenAPI`、`同步接口文档`、`接口文档自动生成`、`文档与实现漂移`、`/v3/api-docs`、`swagger-ui` 时，执行 `ai/project/agents/skills/springdoc-api-sync/SKILL.md`。
 - 用户提到 `前端`、`页面`、`界面`、`UI`、`交互`、`导航`、`样式`、`图谱`、`组件` 时，执行 `ai/skills/frontend-design-governance/SKILL.md`。
 - 用户提到 `质询`、`口径文档提问`、`对抗评审`、`红队评审`、`challenge case` 时，不自动执行 `ai/skills/caliber-redteam-review/SKILL.md`；当前技能停用，需先确认恢复范围与输出路径。
