@@ -16,7 +16,10 @@ test-results/
 
 # Build artifacts
 backend/.gradle-user/
+backend/.m2/
 backend/target/
+backend/src/main/resources/static/index.html
+backend/src/main/resources/static/assets/
 dist/
 frontend/dist/
 
