@@ -464,12 +464,22 @@ public class DataMapGraphDtoAdapter {
         if (bundle.canonicalRelations() == null || bundle.canonicalRelations().isEmpty()) {
             return;
         }
+        Map<Long, CanonicalEntityPO> canonicalEntityMap = bundle.canonicalEntities().stream()
+                .collect(Collectors.toMap(CanonicalEntityPO::getId, item -> item, (left, right) -> left, LinkedHashMap::new));
         for (CanonicalEntityRelationPO relation : bundle.canonicalRelations()) {
             if (relation == null) {
                 continue;
             }
             String sourceRef = canonicalAssetRef(relation.getSourceCanonicalEntityId());
             String targetRef = canonicalAssetRef(relation.getTargetCanonicalEntityId());
+            CanonicalEntityPO sourceEntity = canonicalEntityMap.get(relation.getSourceCanonicalEntityId());
+            CanonicalEntityPO targetEntity = canonicalEntityMap.get(relation.getTargetCanonicalEntityId());
+            if (sourceEntity != null) {
+                nodeMap.putIfAbsent(sourceRef, canonicalEntityNode(sourceEntity, null));
+            }
+            if (targetEntity != null) {
+                nodeMap.putIfAbsent(targetRef, canonicalEntityNode(targetEntity, null));
+            }
             if (!nodeMap.containsKey(sourceRef) || !nodeMap.containsKey(targetRef)) {
                 continue;
             }

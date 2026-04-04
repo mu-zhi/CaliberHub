@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.CanonicalEntityResolutionService;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityRelationMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.EvidenceFragmentMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
@@ -79,6 +82,15 @@ class MvpKnowledgeGraphFlowIntegrationTest {
 
     @Autowired
     private CanonicalEntityResolutionService canonicalEntityResolutionService;
+
+    @Autowired
+    private CanonicalEntityMembershipMapper canonicalEntityMembershipMapper;
+
+    @Autowired
+    private CanonicalEntityRelationMapper canonicalEntityRelationMapper;
+
+    @Autowired
+    private CanonicalSnapshotMembershipMapper canonicalSnapshotMembershipMapper;
 
     @Autowired
     private PolicyMapper policyMapper;
@@ -428,6 +440,9 @@ class MvpKnowledgeGraphFlowIntegrationTest {
                 .andReturn();
         long snapshotId = objectMapper.readTree(publishResult.getResponse().getContentAsString()).path("snapshotId").asLong();
         assertThat(snapshotId).isPositive();
+        assertThat(canonicalSnapshotMembershipMapper.findBySnapshotIdAndSceneIdOrderByUpdatedAtDesc(snapshotId, sceneId))
+                .as("发布后的 canonical snapshot membership 必须包含 EVIDENCE，才能暴露 SUPPORTED_BY")
+                .anyMatch(item -> "EVIDENCE".equals(item.getSceneAssetType()) && item.getCanonicalEntityId() != null);
 
         MvcResult domainGraphResult = mockMvc.perform(get("/api/datamap/graph")
                         .header("Authorization", "Bearer " + token)
@@ -684,6 +699,12 @@ class MvpKnowledgeGraphFlowIntegrationTest {
             evidenceFragmentMapper.save(evidence);
         }
         canonicalEntityResolutionService.resolveScene(sceneId, "tester");
+        assertThat(canonicalEntityMembershipMapper.findBySceneIdAndSceneAssetTypeOrderByUpdatedAtDesc(sceneId, "EVIDENCE"))
+                .as("发布前必须已生成 active EVIDENCE canonical membership")
+                .anyMatch(item -> item.isActiveFlag() && item.getCanonicalEntityId() != null);
+        assertThat(canonicalEntityRelationMapper.findAll())
+                .as("resolveScene 后必须已生成 SUPPORTED_BY canonical relation")
+                .anyMatch(item -> "SUPPORTED_BY".equals(item.getRelationType()));
     }
 
     private void stamp(AbstractSnapshotGraphAuditablePO po, OffsetDateTime now) {
