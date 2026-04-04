@@ -56,37 +56,36 @@
 | `11-监控审计与影响分析.md` | 通过 | 正文已满足指标口径、通用补充项与存储落位边界，本轮仅缺 `对应实施计划` 头注 | 本轮新增 `2026-04-04-monitoring-audit-impact-analysis-implementation-plan.md` 并回填头注 |
 | `12-全局壳层、导航与跨工作台上下文跳转.md` | 通过 | 正文已满足指标口径、通用补充项与存储落位边界，本轮仅缺 `对应实施计划` 头注 | 本轮新增 `2026-04-04-global-shell-navigation-context-implementation-plan.md` 并回填头注 |
 | `12a-首页总览与状态分发.md` | 通过 | 正文已满足指标口径、通用补充项与存储落位边界，本轮仅缺 `对应实施计划` 头注 | 本轮新增 `2026-04-04-home-overview-status-dispatch-implementation-plan.md` 并回填头注 |
-| `13-代发明细查询.md` | 未通过 | 已有计划引用，但缺显式 `通用补充项` 小结、逐指标分子 / 分母 / 统计窗口、存储落位边界 | 先补文档门禁，不生成新计划 |
-| `14-代发批次结果查询.md` | 未通过 | 已有计划引用，但缺显式 `通用补充项` 小结、逐指标分子 / 分母 / 统计窗口、存储落位边界 | 先补文档门禁，不生成新计划 |
-| `15-基金申购、赎回申请记录查询.md` | 未通过 | 缺 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径、存储落位边界 | 先补文档门禁，不生成新计划 |
-| `16-基金资金交易与分红记录查询.md` | 未通过 | 同 `15` | 先补文档门禁，不生成新计划 |
-| `17-SA理财交易查询.md` | 未通过 | 缺 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径、存储落位边界 | 先补文档门禁，不生成新计划 |
-| `18-零售客户基础信息查询.md` | 未通过 | 缺 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径、存储落位边界 | 先补文档门禁，不生成新计划 |
-| `19-零售户口开户机构变更查询.md` | 未通过 | 同 `18` | 先补文档门禁，不生成新计划 |
-| `20-客户密码修改日志查询.md` | 未通过 | 缺 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径、存储落位边界 | 先补文档门禁，不生成新计划 |
-| `21-断卡排查账户管控核验.md` | 未通过 | 缺 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径、存储落位边界 | 先补文档门禁，不生成新计划 |
+| `13-代发明细查询.md` | 通过 | 已补显式 `通用补充项`、逐指标分子 / 分母 / 统计窗口与存储落位边界；沿用既有实施计划 | 继续沿用 `2026-03-29-payroll-runtime-knowledge-package-implementation-plan.md` |
+| `14-代发批次结果查询.md` | 通过 | 已补显式 `通用补充项`、逐指标分子 / 分母 / 统计窗口与存储落位边界；沿用既有实施计划 | 继续沿用 `2026-03-29-payroll-runtime-knowledge-package-implementation-plan.md` |
+| `15-基金申购、赎回申请记录查询.md` | 通过 | 本轮补齐 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径与存储落位边界 | 本轮新增 `2026-04-04-fund-subscription-redemption-application-query-implementation-plan.md` |
+| `16-基金资金交易与分红记录查询.md` | 通过 | 本轮补齐 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径与存储落位边界 | 本轮新增 `2026-04-04-fund-cash-transaction-dividend-query-implementation-plan.md` |
+| `17-SA理财交易查询.md` | 通过 | 本轮补齐 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径与存储落位边界 | 本轮新增 `2026-04-04-sa-wealth-transaction-query-implementation-plan.md` |
+| `18-零售客户基础信息查询.md` | 通过 | 本轮补齐 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径与存储落位边界 | 本轮新增 `2026-04-04-retail-customer-profile-query-implementation-plan.md` |
+| `19-零售户口开户机构变更查询.md` | 通过 | 本轮补齐 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径与存储落位边界 | 本轮新增 `2026-04-04-retail-account-opening-branch-change-query-implementation-plan.md` |
+| `20-客户密码修改日志查询.md` | 通过 | 本轮补齐 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径与存储落位边界 | 本轮新增 `2026-04-04-password-change-audit-query-implementation-plan.md` |
+| `21-断卡排查账户管控核验.md` | 通过 | 本轮补齐 `对应实施计划` 头注、显式 `通用补充项`、逐指标统计口径与存储落位边界 | 本轮新增 `2026-04-04-account-control-verification-for-card-risk-investigation-implementation-plan.md` |
 
 ## 4. 本轮新增实施计划
 
-本轮只为通过最低完备性门禁的 3 份特性文档新增正式计划：
+本轮为通过最低完备性门禁的特性文档新增 / 确认正式计划如下：
 
 1. `docs/plans/2026-04-04-monitoring-audit-impact-analysis-implementation-plan.md`
 2. `docs/plans/2026-04-04-global-shell-navigation-context-implementation-plan.md`
 3. `docs/plans/2026-04-04-home-overview-status-dispatch-implementation-plan.md`
+4. `docs/plans/2026-04-04-fund-subscription-redemption-application-query-implementation-plan.md`
+5. `docs/plans/2026-04-04-fund-cash-transaction-dividend-query-implementation-plan.md`
+6. `docs/plans/2026-04-04-sa-wealth-transaction-query-implementation-plan.md`
+7. `docs/plans/2026-04-04-retail-customer-profile-query-implementation-plan.md`
+8. `docs/plans/2026-04-04-retail-account-opening-branch-change-query-implementation-plan.md`
+9. `docs/plans/2026-04-04-password-change-audit-query-implementation-plan.md`
+10. `docs/plans/2026-04-04-account-control-verification-for-card-risk-investigation-implementation-plan.md`
 
 ## 5. 待补齐项清单
 
 ### 5.1 未通过门禁的特性文档
 
-- `13-代发明细查询.md`
-- `14-代发批次结果查询.md`
-- `15-基金申购、赎回申请记录查询.md`
-- `16-基金资金交易与分红记录查询.md`
-- `17-SA理财交易查询.md`
-- `18-零售客户基础信息查询.md`
-- `19-零售户口开户机构变更查询.md`
-- `20-客户密码修改日志查询.md`
-- `21-断卡排查账户管控核验.md`
+本轮未新增未通过门禁的场景级特性文档；`13-21` 已完成最低完备性补齐。
 
 ### 5.2 平台级专题缺口
 
@@ -96,6 +95,6 @@
 
 ## 6. 建议下一步
 
-1. 优先按统一模板批量补齐 `13-21` 的显式 `通用补充项`、逐指标统计口径与存储落位边界。
-2. 在运行与治理工作台目录中新增 `08b`、`08c`、`08d` 三份专题特性文档，再进入新一轮门禁与计划产出。
-3. 若继续跑本自动化，下一轮重点观察两件事：`13-21` 是否完成门禁补齐，`08b/08c/08d` 是否已从平台级缺口变为正式特性文档。
+1. 下一轮优先新增 `08b`、`08c`、`08d` 三份运行与治理平台专题特性文档，再进入门禁与计划产出。
+2. `13-21` 已进入“可按计划实现”的状态，后续自动化可直接选择其中一批进入实现或测试报告阶段。
+3. 若继续跑本自动化，下一轮重点观察两件事：`08b/08c/08d` 是否已正式建档，`13-21` 是否进入实现 / 测试验收链路。
