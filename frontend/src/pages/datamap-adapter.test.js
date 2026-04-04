@@ -50,6 +50,7 @@ describe("datamap-adapter", () => {
         {
           id: "scene:12>USES_PLAN>plan:1",
           relationType: "USES_PLAN",
+          relationGroup: "control",
           source: "scene:12",
           target: "plan:1",
           traceId: "trace_plan_1",
@@ -79,6 +80,7 @@ describe("datamap-adapter", () => {
     expect(graph.edges[0]).toMatchObject({
       id: "scene:12>USES_PLAN>plan:1",
       relationType: "USES_PLAN",
+      relationGroup: "control",
       label: "USES_PLAN",
       source: "scene:12",
       target: "plan:1",

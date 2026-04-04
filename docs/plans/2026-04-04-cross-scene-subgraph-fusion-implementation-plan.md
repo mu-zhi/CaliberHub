@@ -25,14 +25,14 @@
 - 修改：`backend/src/test/java/com/cmbchina/datadirect/caliber/adapter/web/*`
 - 修改：`frontend/src/pages/datamap-adapter.js`
 - 修改：`frontend/src/components/datamap/*`
-- 修改：`docs/testing/features/iteration-02-runtime-and-governance/10b-cross-scene-canonical-entity-and-domain-graph-test-report.md`
+- 修改：`docs/testing/features/iteration-02-runtime-and-governance/10b-跨场景统一实体层与领域级图谱融合-测试报告.md`
 
 ## 4. 任务拆分
 
 ### Task 0：先补失败测试与测试文档骨架
 
 文件：
-- `docs/testing/features/iteration-02-runtime-and-governance/10b-cross-scene-canonical-entity-and-domain-graph-test-report.md`
+- `docs/testing/features/iteration-02-runtime-and-governance/10b-跨场景统一实体层与领域级图谱融合-测试报告.md`
 - `backend/src/test/java/com/cmbchina/datadirect/caliber/application/service/command/graphrag/CanonicalSnapshotBindingServiceTest.java`
 - `backend/src/test/java/com/cmbchina/datadirect/caliber/adapter/web/MvpKnowledgeGraphFlowIntegrationTest.java`
 

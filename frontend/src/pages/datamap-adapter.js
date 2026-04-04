@@ -161,6 +161,7 @@ function normalizeLineageGraph(payload) {
       target: `${item?.target || ""}`.trim(),
       label: `${item?.label || item?.relationType || ""}`.trim() || undefined,
       relationType: `${item?.relationType || item?.label || ""}`.trim() || undefined,
+      relationGroup: `${item?.relationGroup || ""}`.trim() || undefined,
       confidence: toOptionalNumber(item?.confidence),
       traceId: `${item?.traceId || ""}`.trim() || undefined,
       sourceRef: `${item?.sourceRef || ""}`.trim() || undefined,

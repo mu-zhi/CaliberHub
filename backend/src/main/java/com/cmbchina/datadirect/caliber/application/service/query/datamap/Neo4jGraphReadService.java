@@ -126,7 +126,7 @@ public class Neo4jGraphReadService {
         String edgeId = sourceId + "->" + rel.type() + "->" + targetId;
         if (edgeIds.add(edgeId)) {
             edges.add(new DataMapGraphEdgeDTO(
-                    edgeId, rel.type(), sourceId, targetId,
+                    edgeId, rel.type(), "", sourceId, targetId,
                     rel.type(), null, null, null, null, null, null, null, null));
         }
     }

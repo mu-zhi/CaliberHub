@@ -62,7 +62,7 @@ public class GraphQueryService {
     private DataMapGraphResponseDTO queryFromRelational(String rootType, Long rootId, Long sceneId,
                                                          ReadSourceRouter.ReadSourceDecision decision,
                                                          DataMapGraphQueryOptions options) {
-        GraphSceneBundle bundle = graphReadService.loadBundle(rootType, rootId);
+        GraphSceneBundle bundle = graphReadService.loadBundle(rootType, rootId, decision.snapshotId());
         String rootRef = normalizeRootRef(rootType, rootId);
         DataMapGraphResponseDTO relationalResult = dataMapGraphDtoAdapter.buildGraph(rootRef, bundle, options);
         return new DataMapGraphResponseDTO(

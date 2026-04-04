@@ -293,7 +293,7 @@ public class GraphProjectionAppService {
     }
 
     private DataMapGraphResponseDTO buildRelationalSnapshotGraph(Long sceneId, Long snapshotId) {
-        GraphSceneBundle bundle = graphReadService.loadBundle("SCENE", sceneId);
+        GraphSceneBundle bundle = graphReadService.loadBundle("SCENE", sceneId, snapshotId);
         DataMapGraphResponseDTO graph = dataMapGraphDtoAdapter.buildGraph(
                 "scene:" + sceneId,
                 bundle,

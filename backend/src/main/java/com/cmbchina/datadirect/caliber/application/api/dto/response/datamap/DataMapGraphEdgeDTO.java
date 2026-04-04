@@ -5,6 +5,7 @@ import java.util.Map;
 public record DataMapGraphEdgeDTO(
         String id,
         String relationType,
+        String relationGroup,
         String source,
         String target,
         String label,

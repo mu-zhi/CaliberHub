@@ -90,7 +90,7 @@ class GraphQueryServiceTest {
                 .thenThrow(new IllegalStateException("Neo4j unavailable"));
 
         GraphSceneBundle relationalBundle = relationalBundle();
-        when(graphReadService.loadBundle("SCENE", 12L)).thenReturn(relationalBundle);
+        when(graphReadService.loadBundle("SCENE", 12L, 88L)).thenReturn(relationalBundle);
         when(dataMapGraphDtoAdapter.buildGraph(
                 "scene:12",
                 relationalBundle,
@@ -169,6 +169,8 @@ class GraphQueryServiceTest {
         );
         return new GraphSceneBundle(
                 scene,
+                List.of(),
+                List.of(),
                 List.of(),
                 List.of(),
                 List.of(),

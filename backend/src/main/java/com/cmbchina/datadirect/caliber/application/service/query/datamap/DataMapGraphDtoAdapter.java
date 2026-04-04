@@ -15,6 +15,8 @@ import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.Pla
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.PolicyDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.SourceContractDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.SourceIntakeContractDTO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -153,6 +155,7 @@ public class DataMapGraphDtoAdapter {
         }
 
         appendDomainMembershipEdges(rootRef, sceneRef, nodeMap, edgeMap);
+        appendInstanceOfEdges(rootRef, bundle, nodeMap, edgeMap, options.snapshotId());
         appendSnapshotNodes(nodeMap, edgeMap, List.copyOf(nodeMap.values()));
         return filterGraph(rootRef, scene.id(), scene.sceneTitle(), nodeMap, edgeMap, options);
     }
@@ -402,6 +405,50 @@ public class DataMapGraphDtoAdapter {
                     false,
                     null,
                     Map.of("relationGroup", "control")));
+        }
+    }
+
+    private void appendInstanceOfEdges(String rootRef,
+                                       GraphSceneBundle bundle,
+                                       Map<String, DataMapGraphNodeDTO> nodeMap,
+                                       Map<String, DataMapGraphEdgeDTO> edgeMap,
+                                       Long snapshotId) {
+        if (rootRef == null || !rootRef.startsWith("domain:")) {
+            return;
+        }
+        if (bundle.canonicalSnapshotMemberships() == null || bundle.canonicalSnapshotMemberships().isEmpty()) {
+            return;
+        }
+        Map<Long, CanonicalEntityPO> canonicalEntityMap = bundle.canonicalEntities().stream()
+                .collect(Collectors.toMap(CanonicalEntityPO::getId, item -> item, (left, right) -> left, LinkedHashMap::new));
+        for (CanonicalSnapshotMembershipPO membership : bundle.canonicalSnapshotMemberships()) {
+            if (membership == null) {
+                continue;
+            }
+            CanonicalEntityPO canonicalEntity = canonicalEntityMap.get(membership.getCanonicalEntityId());
+            if (canonicalEntity == null) {
+                continue;
+            }
+            String sceneAssetRef = sceneAssetRef(membership.getSceneAssetType(), membership.getSceneAssetId());
+            if (!nodeMap.containsKey(sceneAssetRef)) {
+                continue;
+            }
+            DataMapGraphNodeDTO canonicalNode = canonicalEntityNode(canonicalEntity, snapshotId);
+            nodeMap.put(canonicalNode.id(), canonicalNode);
+            addEdge(edgeMap, edge(
+                    sceneAssetRef,
+                    "INSTANCE_OF",
+                    canonicalNode.id(),
+                    null,
+                    traceRef(canonicalEntity.getCanonicalKey(), "INSTANCE_OF"),
+                    canonicalEntity.getCanonicalKey(),
+                    false,
+                    null,
+                    Map.of(
+                            "canonicalEntityId", canonicalEntity.getId(),
+                            "sceneAssetType", membership.getSceneAssetType(),
+                            "sceneAssetId", membership.getSceneAssetId()
+                    )));
         }
     }
 
@@ -706,6 +753,30 @@ public class DataMapGraphDtoAdapter {
         );
     }
 
+    private DataMapGraphNodeDTO canonicalEntityNode(CanonicalEntityPO canonicalEntity, Long snapshotId) {
+        Map<String, Object> meta = new LinkedHashMap<>();
+        putAttribute(meta, "canonicalEntityId", canonicalEntity.getId());
+        putAttribute(meta, "canonicalKey", canonicalEntity.getCanonicalKey());
+        putAttribute(meta, "resolutionStatus", canonicalEntity.getResolutionStatus());
+        return new DataMapGraphNodeDTO(
+                canonicalAssetRef(canonicalEntity.getId()),
+                canonicalEntity.getDisplayName(),
+                "CANONICAL_ENTITY",
+                canonicalEntity.getCanonicalKey(),
+                canonicalEntity.getDisplayName(),
+                canonicalEntity.getLifecycleStatus(),
+                snapshotId,
+                "",
+                "",
+                "",
+                "",
+                0,
+                canonicalEntity.getUpdatedAt(),
+                firstNonBlank(canonicalEntity.getDisplayName(), canonicalEntity.getCanonicalKey(), "统一实体"),
+                meta
+        );
+    }
+
     private DataMapGraphEdgeDTO edge(String source,
                                      String relationType,
                                      String target,
@@ -718,6 +789,7 @@ public class DataMapGraphDtoAdapter {
         return new DataMapGraphEdgeDTO(
                 source + ">" + relationType + ">" + target,
                 relationType,
+                resolveRelationGroup(relationType),
                 source,
                 target,
                 relationType,
@@ -732,12 +804,36 @@ public class DataMapGraphDtoAdapter {
         );
     }
 
+    private String resolveRelationGroup(String relationType) {
+        String normalized = safeText(relationType).toUpperCase(Locale.ROOT);
+        return switch (normalized) {
+            case "SCENE_MEMBERSHIP", "INSTANCE_OF", "APPLIES_POLICY" -> "control";
+            case "MAPS_TO_SOURCE" -> "metadata";
+            case "SUPPORTED_BY" -> "evidence";
+            default -> "";
+        };
+    }
+
     private void addEdge(Map<String, DataMapGraphEdgeDTO> edgeMap, DataMapGraphEdgeDTO edge) {
         edgeMap.putIfAbsent(edge.id(), edge);
     }
 
     private String assetRef(String prefix, Long id) {
         return prefix + ":" + id;
+    }
+
+    private String sceneAssetRef(String sceneAssetType, Long id) {
+        return assetRef(
+                safeText(sceneAssetType)
+                        .trim()
+                        .replace('_', '-')
+                        .toLowerCase(Locale.ROOT),
+                id
+        );
+    }
+
+    private String canonicalAssetRef(Long canonicalEntityId) {
+        return assetRef("canonical-entity", canonicalEntityId);
     }
 
     private ResolvedAssetRef parseAssetRef(String assetRef) {

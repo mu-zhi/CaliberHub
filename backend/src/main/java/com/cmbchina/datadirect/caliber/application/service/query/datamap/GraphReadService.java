@@ -7,6 +7,8 @@ import com.cmbchina.datadirect.caliber.application.service.command.graphrag.Grap
 import com.cmbchina.datadirect.caliber.application.service.query.SceneQueryAppService;
 import com.cmbchina.datadirect.caliber.domain.exception.DomainValidationException;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ContractViewMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CoverageDeclarationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.EvidenceFragmentMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.OutputContractMapper;
@@ -15,6 +17,8 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PolicyMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceContractMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceIntakeContractMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanPolicyRefPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PolicyPO;
 import org.springframework.stereotype.Service;
@@ -25,12 +29,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class GraphReadService {
 
     private final SceneQueryAppService sceneQueryAppService;
     private final GraphAssetAppService graphAssetAppService;
+    private final CanonicalSnapshotMembershipMapper canonicalSnapshotMembershipMapper;
+    private final CanonicalEntityMapper canonicalEntityMapper;
     private final PlanMapper planMapper;
     private final OutputContractMapper outputContractMapper;
     private final ContractViewMapper contractViewMapper;
@@ -43,6 +50,8 @@ public class GraphReadService {
 
     public GraphReadService(SceneQueryAppService sceneQueryAppService,
                             GraphAssetAppService graphAssetAppService,
+                            CanonicalSnapshotMembershipMapper canonicalSnapshotMembershipMapper,
+                            CanonicalEntityMapper canonicalEntityMapper,
                             PlanMapper planMapper,
                             OutputContractMapper outputContractMapper,
                             ContractViewMapper contractViewMapper,
@@ -54,6 +63,8 @@ public class GraphReadService {
                             PlanPolicyRefMapper planPolicyRefMapper) {
         this.sceneQueryAppService = sceneQueryAppService;
         this.graphAssetAppService = graphAssetAppService;
+        this.canonicalSnapshotMembershipMapper = canonicalSnapshotMembershipMapper;
+        this.canonicalEntityMapper = canonicalEntityMapper;
         this.planMapper = planMapper;
         this.outputContractMapper = outputContractMapper;
         this.contractViewMapper = contractViewMapper;
@@ -66,10 +77,12 @@ public class GraphReadService {
     }
 
     @Transactional(readOnly = true)
-    public GraphSceneBundle loadBundle(String rootType, Long rootId) {
+    public GraphSceneBundle loadBundle(String rootType, Long rootId, Long snapshotId) {
         Long sceneId = resolveSceneId(rootType, rootId);
         SceneDTO scene = sceneQueryAppService.getById(sceneId);
         Long domainId = scene.domainId();
+        List<CanonicalSnapshotMembershipPO> canonicalSnapshotMemberships = loadCanonicalSnapshotMemberships(sceneId, snapshotId);
+        List<CanonicalEntityPO> canonicalEntities = loadCanonicalEntities(canonicalSnapshotMemberships);
         return new GraphSceneBundle(
                 scene,
                 graphAssetAppService.listPlans(sceneId, domainId, null),
@@ -79,14 +92,37 @@ public class GraphReadService {
                 graphAssetAppService.listPolicies(sceneId, domainId, null),
                 graphAssetAppService.listEvidenceFragments(sceneId, domainId, null),
                 graphAssetAppService.listSourceContracts(sceneId, domainId, null),
-                graphAssetAppService.listSourceIntakeContracts(sceneId, domainId, null)
+                graphAssetAppService.listSourceIntakeContracts(sceneId, domainId, null),
+                canonicalSnapshotMemberships,
+                canonicalEntities
         );
     }
 
     @Transactional(readOnly = true)
     public GraphSceneBundle loadBundleByAssetRef(String assetRef) {
         ResolvedAssetRef resolved = parseAssetRef(assetRef);
-        return loadBundle(resolved.objectType(), resolved.numericId());
+        return loadBundle(resolved.objectType(), resolved.numericId(), null);
+    }
+
+    private List<CanonicalSnapshotMembershipPO> loadCanonicalSnapshotMemberships(Long sceneId, Long snapshotId) {
+        if (snapshotId == null || snapshotId <= 0) {
+            return List.of();
+        }
+        return canonicalSnapshotMembershipMapper.findBySnapshotIdAndSceneIdOrderByUpdatedAtDesc(snapshotId, sceneId);
+    }
+
+    private List<CanonicalEntityPO> loadCanonicalEntities(List<CanonicalSnapshotMembershipPO> memberships) {
+        if (memberships == null || memberships.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> canonicalEntityIds = memberships.stream()
+                .map(CanonicalSnapshotMembershipPO::getCanonicalEntityId)
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+        if (canonicalEntityIds.isEmpty()) {
+            return List.of();
+        }
+        return canonicalEntityMapper.findAllById(canonicalEntityIds);
     }
 
     @Transactional(readOnly = true)

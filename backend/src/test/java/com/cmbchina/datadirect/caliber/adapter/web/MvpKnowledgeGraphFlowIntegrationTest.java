@@ -427,6 +427,13 @@ class MvpKnowledgeGraphFlowIntegrationTest {
                 .as("DOMAIN 图中的 SCENE_MEMBERSHIP 边必须显式返回 relationGroup=control")
                 .anyMatch(edge -> "SCENE_MEMBERSHIP".equals(edge.path("relationType").asText())
                         && "control".equals(edge.path("relationGroup").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图必须包含 scene asset -> canonical entity 的 INSTANCE_OF 边")
+                .anyMatch(edge -> "INSTANCE_OF".equals(edge.path("relationType").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图中的 INSTANCE_OF 边必须显式返回 relationGroup=control")
+                .anyMatch(edge -> "INSTANCE_OF".equals(edge.path("relationType").asText())
+                        && "control".equals(edge.path("relationGroup").asText()));
     }
 
     private JsonNode importPayrollSample(String token) throws Exception {
