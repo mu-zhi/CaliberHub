@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.CanonicalEntityResolutionService;
+import com.cmbchina.datadirect.caliber.application.service.query.datamap.GraphSceneBundle;
+import com.cmbchina.datadirect.caliber.application.service.query.datamap.GraphReadService;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMembershipMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityRelationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
@@ -97,6 +99,9 @@ class MvpKnowledgeGraphFlowIntegrationTest {
 
     @Autowired
     private EvidenceFragmentMapper evidenceFragmentMapper;
+
+    @Autowired
+    private GraphReadService graphReadService;
 
     @Test
     void shouldFinishImportPublishGraphAndRetrievalMvpFlow() throws Exception {
@@ -443,6 +448,22 @@ class MvpKnowledgeGraphFlowIntegrationTest {
         assertThat(canonicalSnapshotMembershipMapper.findBySnapshotIdAndSceneIdOrderByUpdatedAtDesc(snapshotId, sceneId))
                 .as("发布后的 canonical snapshot membership 必须包含 EVIDENCE，才能暴露 SUPPORTED_BY")
                 .anyMatch(item -> "EVIDENCE".equals(item.getSceneAssetType()) && item.getCanonicalEntityId() != null);
+        GraphSceneBundle domainBundle = graphReadService.loadBundle("DOMAIN", domainId, snapshotId);
+        assertThat(domainBundle.outputContracts())
+                .as("DOMAIN 图读 bundle 必须带上 output contracts")
+                .isNotEmpty();
+        assertThat(domainBundle.policies())
+                .as("DOMAIN 图读 bundle 必须带上 policies")
+                .isNotEmpty();
+        assertThat(domainBundle.evidences())
+                .as("DOMAIN 图读 bundle 必须带上 evidence fragments")
+                .isNotEmpty();
+        assertThat(domainBundle.canonicalEntities())
+                .as("DOMAIN 图读 bundle 必须带上 canonical evidence entity")
+                .anyMatch(item -> "EVIDENCE".equals(item.getEntityType()));
+        assertThat(domainBundle.canonicalRelations())
+                .as("DOMAIN 图读 bundle 必须带上 SUPPORTED_BY canonical relation")
+                .anyMatch(item -> "SUPPORTED_BY".equals(item.getRelationType()));
 
         MvcResult domainGraphResult = mockMvc.perform(get("/api/datamap/graph")
                         .header("Authorization", "Bearer " + token)

@@ -6,6 +6,7 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMembershipMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityRelationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotRelationVisibilityMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ContractViewMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CoverageDeclarationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.EntityAliasMapper;
@@ -65,8 +66,10 @@ class CanonicalEntityTestApplication {
 
     @Bean
     CanonicalSnapshotBindingService canonicalSnapshotBindingService(CanonicalEntityMembershipMapper membershipMapper,
-                                                                   CanonicalSnapshotMembershipMapper snapshotMembershipMapper) {
-        return new CanonicalSnapshotBindingService(membershipMapper, snapshotMembershipMapper);
+                                                                   CanonicalSnapshotMembershipMapper snapshotMembershipMapper,
+                                                                   CanonicalEntityRelationMapper relationMapper,
+                                                                   CanonicalSnapshotRelationVisibilityMapper snapshotRelationVisibilityMapper) {
+        return new CanonicalSnapshotBindingService(membershipMapper, snapshotMembershipMapper, relationMapper, snapshotRelationVisibilityMapper);
     }
 
     @Bean

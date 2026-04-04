@@ -157,7 +157,7 @@ public class DataMapGraphDtoAdapter {
 
         appendDomainMembershipEdges(rootRef, sceneRef, nodeMap, edgeMap);
         appendInstanceOfEdges(rootRef, bundle, nodeMap, edgeMap, options.snapshotId());
-        appendCanonicalRelationEdges(rootRef, bundle, nodeMap, edgeMap);
+        appendCanonicalRelationEdges(rootRef, bundle, nodeMap, edgeMap, options.snapshotId());
         appendSnapshotNodes(nodeMap, edgeMap, List.copyOf(nodeMap.values()));
         return filterGraph(rootRef, scene.id(), scene.sceneTitle(), nodeMap, edgeMap, options);
     }
@@ -457,7 +457,8 @@ public class DataMapGraphDtoAdapter {
     private void appendCanonicalRelationEdges(String rootRef,
                                               GraphSceneBundle bundle,
                                               Map<String, DataMapGraphNodeDTO> nodeMap,
-                                              Map<String, DataMapGraphEdgeDTO> edgeMap) {
+                                              Map<String, DataMapGraphEdgeDTO> edgeMap,
+                                              Long snapshotId) {
         if (rootRef == null || !rootRef.startsWith("domain:")) {
             return;
         }
@@ -475,10 +476,10 @@ public class DataMapGraphDtoAdapter {
             CanonicalEntityPO sourceEntity = canonicalEntityMap.get(relation.getSourceCanonicalEntityId());
             CanonicalEntityPO targetEntity = canonicalEntityMap.get(relation.getTargetCanonicalEntityId());
             if (sourceEntity != null) {
-                nodeMap.putIfAbsent(sourceRef, canonicalEntityNode(sourceEntity, null));
+                nodeMap.putIfAbsent(sourceRef, canonicalEntityNode(sourceEntity, snapshotId));
             }
             if (targetEntity != null) {
-                nodeMap.putIfAbsent(targetRef, canonicalEntityNode(targetEntity, null));
+                nodeMap.putIfAbsent(targetRef, canonicalEntityNode(targetEntity, snapshotId));
             }
             if (!nodeMap.containsKey(sourceRef) || !nodeMap.containsKey(targetRef)) {
                 continue;
@@ -867,6 +868,10 @@ public class DataMapGraphDtoAdapter {
     }
 
     private String sceneAssetRef(String sceneAssetType, Long id) {
+        String normalizedType = safeText(sceneAssetType).trim().toUpperCase(Locale.ROOT);
+        if ("EVIDENCE".equals(normalizedType)) {
+            return assetRef("evidence-fragment", id);
+        }
         return assetRef(
                 safeText(sceneAssetType)
                         .trim()

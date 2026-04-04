@@ -21,13 +21,17 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneMap
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityRelationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotRelationVisibilityMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ScenePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityMembershipPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityRelationPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotRelationVisibilityPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.DictionaryPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.IdentifierLineagePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.TimeSemanticSelectorPO;
@@ -69,7 +73,13 @@ class CanonicalSnapshotBindingServiceTest {
     private CanonicalEntityMembershipMapper canonicalEntityMembershipMapper;
 
     @Autowired
+    private CanonicalEntityRelationMapper canonicalEntityRelationMapper;
+
+    @Autowired
     private CanonicalSnapshotMembershipMapper canonicalSnapshotMembershipMapper;
+
+    @Autowired
+    private CanonicalSnapshotRelationVisibilityMapper canonicalSnapshotRelationVisibilityMapper;
 
     @Autowired
     private DictionaryMapper dictionaryMapper;
@@ -126,6 +136,33 @@ class CanonicalSnapshotBindingServiceTest {
         assertThat(frozenMemberships.get(0).getSceneAssetId()).isEqualTo(101L);
     }
 
+    @Test
+    void shouldFreezeVisibleCanonicalRelationsIntoSnapshotWhenPublishingScene() {
+        Long sceneId = seedScene();
+        CanonicalEntityPO outputEntity = seedCanonicalEntity("OUTPUT_CONTRACT", "OUT::PAYROLL::DETAIL", "代发明细输出");
+        CanonicalEntityPO evidenceEntity = seedCanonicalEntity("EVIDENCE", "EVD::DOC::mvp#sql", "代发明细证据");
+        seedMembership(sceneId, outputEntity.getId(), 201L, true, "OUTPUT_CONTRACT");
+        seedMembership(sceneId, evidenceEntity.getId(), 202L, true, "EVIDENCE");
+        CanonicalEntityRelationPO relation = seedRelation(outputEntity.getId(), evidenceEntity.getId(), "SUPPORTED_BY");
+        seedRequiredGovernanceAssets(sceneId);
+
+        SceneDTO published = sceneCommandAppService.publish(sceneId, new PublishSceneCmd(
+                OffsetDateTime.now(),
+                "冻结统一关系",
+                "publisher"
+        ));
+
+        List<CanonicalSnapshotRelationVisibilityPO> frozenRelations =
+                canonicalSnapshotRelationVisibilityMapper.findBySnapshotIdAndSceneIdOrderByUpdatedAtDesc(published.snapshotId(), sceneId);
+
+        assertThat(published.snapshotId()).isNotNull();
+        assertThat(frozenRelations).hasSize(1);
+        assertThat(frozenRelations.get(0).getCanonicalRelationId()).isEqualTo(relation.getId());
+        assertThat(frozenRelations.get(0).getSourceCanonicalEntityId()).isEqualTo(outputEntity.getId());
+        assertThat(frozenRelations.get(0).getTargetCanonicalEntityId()).isEqualTo(evidenceEntity.getId());
+        assertThat(frozenRelations.get(0).getRelationType()).isEqualTo("SUPPORTED_BY");
+    }
+
     private Long seedScene() {
         OffsetDateTime now = OffsetDateTime.now();
         ScenePO scene = new ScenePO();
@@ -156,14 +193,18 @@ class CanonicalSnapshotBindingServiceTest {
     }
 
     private CanonicalEntityPO seedCanonicalEntity() {
+        return seedCanonicalEntity("SOURCE_CONTRACT", "SRC::PAYROLL::T05_AGN_DTL", "T05_AGN_DTL");
+    }
+
+    private CanonicalEntityPO seedCanonicalEntity(String entityType, String canonicalKey, String displayName) {
         OffsetDateTime now = OffsetDateTime.now();
         CanonicalEntityPO entity = new CanonicalEntityPO();
-        entity.setEntityType("SOURCE_CONTRACT");
-        entity.setCanonicalKey("SRC::PAYROLL::T05_AGN_DTL");
-        entity.setDisplayName("T05_AGN_DTL");
+        entity.setEntityType(entityType);
+        entity.setCanonicalKey(canonicalKey);
+        entity.setDisplayName(displayName);
         entity.setResolutionStatus("ACTIVE");
         entity.setLifecycleStatus("ACTIVE");
-        entity.setProfileJson("{\"normalizedPhysicalTable\":\"T05_AGN_DTL\"}");
+        entity.setProfileJson("{\"canonicalKey\":\"" + canonicalKey + "\"}");
         entity.setCreatedBy("tester");
         entity.setCreatedAt(now);
         entity.setUpdatedBy("tester");
@@ -172,10 +213,18 @@ class CanonicalSnapshotBindingServiceTest {
     }
 
     private CanonicalEntityMembershipPO seedMembership(Long sceneId, Long canonicalEntityId, Long sceneAssetId, boolean active) {
+        return seedMembership(sceneId, canonicalEntityId, sceneAssetId, active, "SOURCE_CONTRACT");
+    }
+
+    private CanonicalEntityMembershipPO seedMembership(Long sceneId,
+                                                       Long canonicalEntityId,
+                                                       Long sceneAssetId,
+                                                       boolean active,
+                                                       String sceneAssetType) {
         OffsetDateTime now = OffsetDateTime.now();
         CanonicalEntityMembershipPO membership = new CanonicalEntityMembershipPO();
         membership.setCanonicalEntityId(canonicalEntityId);
-        membership.setSceneAssetType("SOURCE_CONTRACT");
+        membership.setSceneAssetType(sceneAssetType);
         membership.setSceneAssetId(sceneAssetId);
         membership.setSceneId(sceneId);
         membership.setMatchBasis("canonical_key");
@@ -187,6 +236,24 @@ class CanonicalSnapshotBindingServiceTest {
         membership.setUpdatedBy("tester");
         membership.setUpdatedAt(now);
         return canonicalEntityMembershipMapper.save(membership);
+    }
+
+    private CanonicalEntityRelationPO seedRelation(Long sourceCanonicalEntityId,
+                                                   Long targetCanonicalEntityId,
+                                                   String relationType) {
+        OffsetDateTime now = OffsetDateTime.now();
+        CanonicalEntityRelationPO relation = new CanonicalEntityRelationPO();
+        relation.setSourceCanonicalEntityId(sourceCanonicalEntityId);
+        relation.setTargetCanonicalEntityId(targetCanonicalEntityId);
+        relation.setRelationType(relationType);
+        relation.setRelationLabel(relationType);
+        relation.setRelationPayloadJson(null);
+        relation.setVisibleInSnapshotBinding(true);
+        relation.setCreatedBy("tester");
+        relation.setCreatedAt(now);
+        relation.setUpdatedBy("tester");
+        relation.setUpdatedAt(now);
+        return canonicalEntityRelationMapper.save(relation);
     }
 
     private void seedRequiredGovernanceAssets(Long sceneId) {

@@ -8,8 +8,8 @@ import com.cmbchina.datadirect.caliber.application.service.query.SceneQueryAppSe
 import com.cmbchina.datadirect.caliber.domain.exception.DomainValidationException;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ContractViewMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMapper;
-import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityRelationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotRelationVisibilityMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CoverageDeclarationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.EvidenceFragmentMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.OutputContractMapper;
@@ -21,6 +21,7 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityRelationPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotRelationVisibilityPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanPolicyRefPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PolicyPO;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class GraphReadService {
     private final GraphAssetAppService graphAssetAppService;
     private final CanonicalSnapshotMembershipMapper canonicalSnapshotMembershipMapper;
     private final CanonicalEntityMapper canonicalEntityMapper;
-    private final CanonicalEntityRelationMapper canonicalEntityRelationMapper;
+    private final CanonicalSnapshotRelationVisibilityMapper canonicalSnapshotRelationVisibilityMapper;
     private final PlanMapper planMapper;
     private final OutputContractMapper outputContractMapper;
     private final ContractViewMapper contractViewMapper;
@@ -55,7 +56,7 @@ public class GraphReadService {
                             GraphAssetAppService graphAssetAppService,
                             CanonicalSnapshotMembershipMapper canonicalSnapshotMembershipMapper,
                             CanonicalEntityMapper canonicalEntityMapper,
-                            CanonicalEntityRelationMapper canonicalEntityRelationMapper,
+                            CanonicalSnapshotRelationVisibilityMapper canonicalSnapshotRelationVisibilityMapper,
                             PlanMapper planMapper,
                             OutputContractMapper outputContractMapper,
                             ContractViewMapper contractViewMapper,
@@ -69,7 +70,7 @@ public class GraphReadService {
         this.graphAssetAppService = graphAssetAppService;
         this.canonicalSnapshotMembershipMapper = canonicalSnapshotMembershipMapper;
         this.canonicalEntityMapper = canonicalEntityMapper;
-        this.canonicalEntityRelationMapper = canonicalEntityRelationMapper;
+        this.canonicalSnapshotRelationVisibilityMapper = canonicalSnapshotRelationVisibilityMapper;
         this.planMapper = planMapper;
         this.outputContractMapper = outputContractMapper;
         this.contractViewMapper = contractViewMapper;
@@ -88,7 +89,7 @@ public class GraphReadService {
         Long domainId = scene.domainId();
         List<CanonicalSnapshotMembershipPO> canonicalSnapshotMemberships = loadCanonicalSnapshotMemberships(sceneId, snapshotId);
         List<CanonicalEntityPO> canonicalEntities = loadCanonicalEntities(canonicalSnapshotMemberships);
-        List<CanonicalEntityRelationPO> canonicalRelations = loadCanonicalRelations(canonicalEntities);
+        List<CanonicalEntityRelationPO> canonicalRelations = loadCanonicalRelations(sceneId, snapshotId, canonicalEntities);
         return new GraphSceneBundle(
                 scene,
                 graphAssetAppService.listPlans(sceneId, domainId, null),
@@ -132,8 +133,10 @@ public class GraphReadService {
         return canonicalEntityMapper.findAllById(canonicalEntityIds);
     }
 
-    private List<CanonicalEntityRelationPO> loadCanonicalRelations(List<CanonicalEntityPO> canonicalEntities) {
-        if (canonicalEntities == null || canonicalEntities.isEmpty()) {
+    private List<CanonicalEntityRelationPO> loadCanonicalRelations(Long sceneId,
+                                                                   Long snapshotId,
+                                                                   List<CanonicalEntityPO> canonicalEntities) {
+        if (sceneId == null || snapshotId == null || canonicalEntities == null || canonicalEntities.isEmpty()) {
             return List.of();
         }
         Set<Long> canonicalEntityIds = canonicalEntities.stream()
@@ -144,16 +147,28 @@ public class GraphReadService {
             return List.of();
         }
         java.util.LinkedHashMap<Long, CanonicalEntityRelationPO> relationMap = new java.util.LinkedHashMap<>();
-        for (Long canonicalEntityId : canonicalEntityIds) {
-            for (CanonicalEntityRelationPO relation : canonicalEntityRelationMapper.findBySourceCanonicalEntityIdOrderByUpdatedAtDesc(canonicalEntityId)) {
-                if (relation == null || !relation.isVisibleInSnapshotBinding()) {
-                    continue;
-                }
-                if (!canonicalEntityIds.contains(relation.getTargetCanonicalEntityId())) {
-                    continue;
-                }
-                relationMap.putIfAbsent(relation.getId(), relation);
+        for (CanonicalSnapshotRelationVisibilityPO visibility :
+                canonicalSnapshotRelationVisibilityMapper.findBySnapshotIdAndSceneIdOrderByUpdatedAtDesc(snapshotId, sceneId)) {
+            if (visibility == null || visibility.getCanonicalRelationId() == null) {
+                continue;
             }
+            if (!canonicalEntityIds.contains(visibility.getSourceCanonicalEntityId())
+                    || !canonicalEntityIds.contains(visibility.getTargetCanonicalEntityId())) {
+                continue;
+            }
+            CanonicalEntityRelationPO relation = new CanonicalEntityRelationPO();
+            relation.setId(visibility.getCanonicalRelationId());
+            relation.setSourceCanonicalEntityId(visibility.getSourceCanonicalEntityId());
+            relation.setTargetCanonicalEntityId(visibility.getTargetCanonicalEntityId());
+            relation.setRelationType(visibility.getRelationType());
+            relation.setRelationLabel(visibility.getRelationType());
+            relation.setRelationPayloadJson(null);
+            relation.setVisibleInSnapshotBinding(true);
+            relation.setCreatedBy(visibility.getCreatedBy());
+            relation.setCreatedAt(visibility.getCreatedAt());
+            relation.setUpdatedBy(visibility.getUpdatedBy());
+            relation.setUpdatedAt(visibility.getUpdatedAt());
+            relationMap.putIfAbsent(relation.getId(), relation);
         }
         return List.copyOf(relationMap.values());
     }
