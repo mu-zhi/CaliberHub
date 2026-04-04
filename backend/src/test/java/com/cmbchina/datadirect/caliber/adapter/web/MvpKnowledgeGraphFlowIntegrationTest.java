@@ -665,7 +665,9 @@ class MvpKnowledgeGraphFlowIntegrationTest {
             stamp(policy, now);
             policyMapper.save(policy);
         }
-        if (evidenceFragmentMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+        boolean hasManagedEvidence = evidenceFragmentMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).stream()
+                .anyMatch(item -> ("EVD-" + sceneId + "-MAIN").equals(item.getEvidenceCode()));
+        if (!hasManagedEvidence) {
             EvidenceFragmentPO evidence = new EvidenceFragmentPO();
             evidence.setSceneId(sceneId);
             evidence.setEvidenceCode("EVD-" + sceneId + "-MAIN");
