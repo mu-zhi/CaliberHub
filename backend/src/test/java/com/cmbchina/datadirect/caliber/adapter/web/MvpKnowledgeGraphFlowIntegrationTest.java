@@ -307,6 +307,124 @@ class MvpKnowledgeGraphFlowIntegrationTest {
                 .andExpect(jsonPath("$.decision").isString());
     }
 
+    @Test
+    void shouldExposeDomainGraphUsingPublishedSnapshotScopedMemberships() throws Exception {
+        String token = loginAndGetToken("support", "support123");
+        long domainId = createDomain(token);
+
+        JsonNode preprocessPayload = importPayrollSample(token);
+        String taskId = preprocessPayload.path("importBatchId").asText("");
+        assertThat(taskId).isNotBlank();
+
+        JsonNode candidateGraph = fetchCandidateGraph(token, taskId);
+        String candidateCode = firstSceneCandidateCode(candidateGraph.path("nodes"));
+        String timeSemanticNodeCode = firstNodeCode(candidateGraph.path("nodes"), "TIME_SEMANTIC");
+        String sourceTableNodeCode = firstNodeCode(candidateGraph.path("nodes"), "SOURCE_TABLE");
+
+        mockMvc.perform(post("/api/import/tasks/{taskId}/candidate-graph/review", taskId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "targetType":"NODE",
+                                  "targetCode":"%s",
+                                  "action":"ACCEPT",
+                                  "reason":"候选时间语义进入正式载荷",
+                                  "operator":"support"
+                                }
+                                """.formatted(timeSemanticNodeCode)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/import/tasks/{taskId}/candidate-graph/review", taskId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "targetType":"NODE",
+                                  "targetCode":"%s",
+                                  "action":"ACCEPT",
+                                  "reason":"候选来源表进入正式载荷",
+                                  "operator":"support"
+                                }
+                                """.formatted(sourceTableNodeCode)))
+                .andExpect(status().isOk());
+
+        MvcResult confirmResult = mockMvc.perform(post("/api/import/candidates/{candidateCode}/confirm", candidateCode)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "domainId": %d,
+                                  "operator": "support"
+                                }
+                                """.formatted(domainId)))
+                .andExpect(status().isOk())
+                .andReturn();
+        long sceneId = objectMapper.readTree(confirmResult.getResponse().getContentAsString()).path("scene").path("id").asLong();
+        ensureGovernanceAssets(sceneId);
+
+        JsonNode currentScene = fetchScene(token, sceneId);
+        ObjectNode updateRequest = objectMapper.createObjectNode();
+        updateRequest.put("sceneTitle", currentScene.path("sceneTitle").asText());
+        updateRequest.put("domainId", domainId);
+        updateRequest.put("domain", "");
+        updateRequest.put("sceneType", currentScene.path("sceneType").asText("FACT_DETAIL"));
+        updateRequest.put("sceneDescription", currentScene.path("sceneDescription").asText(""));
+        updateRequest.put("caliberDefinition", currentScene.path("caliberDefinition").asText(""));
+        updateRequest.put("applicability", currentScene.path("applicability").asText(""));
+        updateRequest.put("boundaries", currentScene.path("boundaries").asText(""));
+        updateRequest.put("inputsJson", currentScene.path("inputsJson").asText("{}"));
+        updateRequest.put("outputsJson", currentScene.path("outputsJson").asText("{}"));
+        updateRequest.put("sqlVariantsJson", currentScene.path("sqlVariantsJson").asText("[]"));
+        updateRequest.put("codeMappingsJson", currentScene.path("codeMappingsJson").asText("[]"));
+        updateRequest.put("contributors", currentScene.path("contributors").asText(""));
+        updateRequest.put("sqlBlocksJson", currentScene.path("sqlBlocksJson").asText("[]"));
+        updateRequest.put("sourceTablesJson", currentScene.path("sourceTablesJson").asText("[]"));
+        updateRequest.put("caveatsJson", currentScene.path("caveatsJson").asText("[]"));
+        updateRequest.put("unmappedText", currentScene.path("unmappedText").asText(""));
+        updateRequest.put("qualityJson", currentScene.path("qualityJson").asText("{}"));
+        updateRequest.put("rawInput", currentScene.path("rawInput").asText(PAYROLL_SAMPLE));
+        updateRequest.put("expectedVersion", currentScene.path("rowVersion").asLong());
+        updateRequest.put("operator", "support");
+
+        mockMvc.perform(put("/api/scenes/{id}", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
+
+        MvcResult publishResult = mockMvc.perform(post("/api/scenes/{id}/publish", sceneId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "verifiedAt": "2026-03-27T10:00:00+08:00",
+                                  "changeSummary": "DOMAIN 图读红测发布",
+                                  "operator": "support"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+        long snapshotId = objectMapper.readTree(publishResult.getResponse().getContentAsString()).path("snapshotId").asLong();
+        assertThat(snapshotId).isPositive();
+
+        MvcResult domainGraphResult = mockMvc.perform(get("/api/datamap/graph")
+                        .header("Authorization", "Bearer " + token)
+                        .param("root_type", "DOMAIN")
+                        .param("root_id", String.valueOf(domainId))
+                        .param("snapshot_id", String.valueOf(snapshotId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rootRef").value("domain:" + domainId))
+                .andExpect(jsonPath("$.readSource").value("RELATIONAL"))
+                .andExpect(jsonPath("$.edges").isArray())
+                .andReturn();
+
+        JsonNode domainGraph = objectMapper.readTree(domainGraphResult.getResponse().getContentAsString());
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图必须包含来自已发布 scene snapshot 的 SCENE_MEMBERSHIP 边")
+                .anyMatch(edge -> "SCENE_MEMBERSHIP".equals(edge.path("relationType").asText()));
+    }
+
     private JsonNode importPayrollSample(String token) throws Exception {
         ObjectNode body = objectMapper.createObjectNode();
         body.put("rawText", PAYROLL_SAMPLE);

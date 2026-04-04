@@ -540,11 +540,15 @@
 2. 统一实体层的最小对象集固定为：`Canonical Entity（统一实体）`、`Canonical Membership（统一成员归属）`、`Canonical Relation（统一实体关系）`、`Canonical Resolution Audit（统一解析审计记录）`。首轮统一实体类型固定覆盖 `Source Contract（来源契约）`、`Policy（策略对象）`、`Evidence（证据出处）`、`Output Contract（输出契约）` 四类正式对象。
 3. 统一实体是长期稳定身份，不随单次发布复制。发布动作冻结的是“哪些场景资产实例在本次 `snapshot_id（快照标识）` 下属于哪些统一实体，以及哪些统一实体关系在当前快照中可见”的结果，而不是复制新的统一实体副本。
 4. 场景资产实例仍然保留场景内语义、编辑历史、审核记录和快照绑定，是运行时最终执行对象。统一实体层只负责共享身份、领域级连接骨架、跨场景解释和检索辅助，不直接替代 `scene_id + snapshot_id + plan_id` 这类正式运行边界。
-5. 四类对象的 `canonical_key（统一键）` 必须遵循“显式业务键优先，物理身份次之，结构化来源再次，指纹只做建议”的统一规则：`Source Contract` 以 `sourceSystem + normalizedPhysicalTable` 为正式锚点；`Policy` 依赖显式 `policySemanticKey（策略语义键）`；`Evidence` 依赖 `originType + originRef + originLocator（证据出处定位键）`；`Output Contract` 依赖显式 `contractSemanticKey（输出契约语义键）`。场景派生 `code` 不得继续充当全局共享身份。
-6. 自动归并强度必须分层：`Source Contract` 可按正式物理锚点自动归并；`Policy / Evidence / Output Contract` 在缺少显式统一键时只能进入 `NEEDS_REVIEW（待复核）`，不得自动强归并。所有自动判断都必须保留 `match_basis（命中依据）`、`confidence_score（置信度）`、`resolution_rule_version（解析规则版本）` 供发布、审计和回放使用。
-7. `Runtime Retrieval（运行检索）` 可复用统一实体层做跨场景缩域、共享对象扩展和命中解释，但最终知识包仍然必须回落到某个正式已发布场景实例集合；`Impact Analysis（影响分析）` 则允许先在统一实体层扩散，再映射回受影响的场景成员实例与快照。
-8. “跨场景统一实体层与领域级图谱融合”作为当前首个 `Depth-First Working（纵深优先执行）` 试点闭环，固定采用六层边界推进：`Types（类型与契约层）` 只定义统一实体、成员归属、冻结归属和领域级返回契约；`Config（规则与路由层）` 只维护归并策略、门禁开关与固定角色智能体路由；`Repo（持久化访问层）` 只负责 `MySQL` / `Neo4j` 的正式读写，不承载归并决策；`Service（领域服务层）` 负责统一实体解析、成员归属维护、发布冻结和领域级聚合；`Runtime（运行时消费层）` 只消费已发布、已冻结的统一身份结果；`UI（前端表达层）` 只渲染正式 `DTO（数据传输对象，Data Transfer Object）`，不得自行拼装统一实体真相。
-9. 六层边界属于首轮开发硬约束：`Runtime` 不得直接读取控制库中的草稿态统一实体；`Publish（发布）` 不得复制统一实体本体；`UI` 不得绕过接口自行推断成员归属；`Service` 不得绕过 `Repo` 直接散落 `SQL（结构化查询语言，Structured Query Language）` 或 `Cypher（图查询语言）`。任一边界被打破时，必须通过脚本、测试或 `CI（持续集成，Continuous Integration）` 门禁显式拒绝，而不是依赖文档提醒。
+5. 场景正式资产首轮范围固定为：`Scene（业务场景）`、`Plan（方案资产）`、`Coverage Declaration（覆盖声明）`、`Source Contract（来源契约）`、`Policy（策略对象）`、`Evidence Fragment（证据片段）`、`Output Contract（输出契约）`、`Contract View（契约视图）`。统一实体层复用这些正式资产的稳定锚点，不得在实现中把“统一实体首轮范围”误替换为“正式场景资产首轮范围”。
+6. 场景资产实例的稳定锚点固定采用 `scene_asset_ref = scene-asset:{scene_id}:{asset_type}:{asset_id}`。同一正式资产在接口、发布冻结和图投影中的主语标识必须保持一致，不允许不同层各自拼接临时引用。
+7. 四类对象的 `canonical_key（统一键）` 必须遵循“显式业务键优先，物理身份次之，结构化来源再次，指纹只做建议”的统一规则：`Source Contract` 以 `sourceSystem + normalizedPhysicalTable` 为正式锚点；`Policy` 依赖显式 `policySemanticKey（策略语义键）`；`Evidence` 依赖 `originType + originRef + originLocator（证据出处定位键）`；`Output Contract` 依赖显式 `contractSemanticKey（输出契约语义键）`。场景派生 `code` 不得继续充当全局共享身份。
+8. 自动归并强度必须分层：`Source Contract` 可按正式物理锚点自动归并；`Policy / Evidence / Output Contract` 在缺少显式统一键时只能进入 `NEEDS_REVIEW（待复核）`，不得自动强归并。所有自动判断都必须保留 `match_basis（命中依据）`、`confidence_score（置信度）`、`resolution_rule_version（解析规则版本）` 供发布、审计和回放使用。
+9. `SCENE_MEMBERSHIP（场景成员归属）` 在领域级图中的来源必须固定为“已发布 `scene_id + snapshot_id` 对应的场景资产成员集”，不得从当前可变场景内容现算；否则禁止返回 `root_type=DOMAIN` 的聚合结果。
+10. `CANONICAL_RELATION（统一实体关系）` 首轮端点固定为 `Canonical Entity -> Canonical Entity`。`Scene Asset（场景资产实例） -> Canonical Entity（统一实体）` 只能使用 `INSTANCE_OF（实例归属）`，不得伪装成统一实体关系。
+11. `Runtime Retrieval（运行检索）` 可复用统一实体层做跨场景缩域、共享对象扩展和命中解释，但最终知识包仍然必须回落到某个正式已发布场景实例集合；`Impact Analysis（影响分析）` 则允许先在统一实体层扩散，再映射回受影响的场景成员实例与快照。
+12. “跨场景统一实体层与领域级图谱融合”作为当前首个 `Depth-First Working（纵深优先执行）` 试点闭环，固定采用六层边界推进：`Types（类型与契约层）` 只定义统一实体、成员归属、冻结归属和领域级返回契约；`Config（规则与路由层）` 只维护归并策略、门禁开关与固定角色智能体路由；`Repo（持久化访问层）` 只负责 `MySQL` / `Neo4j` 的正式读写，不承载归并决策；`Service（领域服务层）` 负责统一实体解析、成员归属维护、发布冻结和领域级聚合；`Runtime（运行时消费层）` 只消费已发布、已冻结的统一身份结果；`UI（前端表达层）` 只渲染正式 `DTO（数据传输对象，Data Transfer Object）`，不得自行拼装统一实体真相。
+13. 六层边界属于首轮开发硬约束：`Runtime` 不得直接读取控制库中的草稿态统一实体；`Publish（发布）` 不得复制统一实体本体；`UI` 不得绕过接口自行推断成员归属；`Service` 不得绕过 `Repo` 直接散落 `SQL（结构化查询语言，Structured Query Language）` 或 `Cypher（图查询语言）`。任一边界被打破时，必须通过脚本、测试或 `CI（持续集成，Continuous Integration）` 门禁显式拒绝，而不是依赖文档提醒。
 
 ### 8.2 索引、缓存与刷新规则
 
@@ -623,7 +627,7 @@
 #### 投影与分组字段约定
 
 1. **`projection_hints`**：前端在请求时传入当前视图所需的字段子集标识（如 `summary`、`full`、`graph_only`），后端据此裁剪 `nodes[]` 和 `edges[]` 内部返回的属性深度，避免全量属性传输；该字段同时出现在返回体中，供前端确认实际使用的投影口径。用于前端按视图稳定投影，保证不同视图（业务视图 / 路径视图 / 覆盖视图）获取的字段范围可预期。
-2. **`relation_group`**：标注边所属的逻辑分组（`control` / `inference` / `semantic` / `metadata` / `evidence`），用于前端对边进行视觉分层着色和按分组过滤；在 `Data Map Edge Detail API` 返回中同样作为一等字段出现。用于边的分组和视觉分层，前端据此决定边的色相、线型和过滤器归属。
+2. **`relation_group`**：标注边所属的逻辑分组（`control` / `inference` / `semantic` / `metadata` / `evidence`），用于前端对边进行视觉分层着色和按分组过滤；在 `Data Map Edge Detail API` 返回中同样作为一等字段出现。用于边的分组和视觉分层，前端据此决定边的色相、线型和过滤器归属。跨场景统一实体首轮固定映射为：`SCENE_MEMBERSHIP -> control`、`INSTANCE_OF -> control`、`MAPS_TO_SOURCE -> metadata`、`APPLIES_POLICY -> control`、`SUPPORTED_BY -> evidence`；关系库聚合与 `Neo4j` 投影必须复用同一映射。
 3. **`relation_version`**：`Data Map Edge Detail API` 返回的关系自身版本标识，用于边级版本追溯、差异对比和审计回放；当两个快照之间同一关系的 `relation_version` 不同时，发布中心和影响分析可据此定位关系级变更。
 
 #### Phase 1 图读切换与校验规则
@@ -640,6 +644,7 @@
 2. 领域级结果允许同时包含 `Domain（业务领域）`、`Scene（业务场景）`、场景资产实例节点、统一实体节点，以及 `INSTANCE_OF（实例属于统一实体）`、`CANONICAL_RELATION（统一实体关系）`、`SCENE_MEMBERSHIP（场景成员归属）` 三类正式关系边。
 3. `root_type=DOMAIN` 的读侧默认走 `RELATIONAL（关系库聚合回退）`，直到控制库已补齐“统一实体归属冻结 -> 图投影 -> 发布时一致性校验”的完整闭环，才允许切到 `NEO4J（图数据库读模型）`。
 4. 领域级结果中的统一实体节点必须能反查到控制库中的 `canonical_entity` 及其 profile；领域级边必须能反查到 `canonical_entity_membership` 或 `canonical_entity_relation` 的正式记录，不允许由前端或图侧临时猜测。
+5. `SCENE_MEMBERSHIP` 必须由已发布 `scene_id + snapshot_id` 对应的场景资产成员集生成，不得在查询时从当前可变场景关系现算；领域级响应中的 `snapshot_id` 既是 `INSTANCE_OF` / `CANONICAL_RELATION` 的冻结边界，也是 `SCENE_MEMBERSHIP` 的正式口径边界。
 
 #### 关系类型枚举
 

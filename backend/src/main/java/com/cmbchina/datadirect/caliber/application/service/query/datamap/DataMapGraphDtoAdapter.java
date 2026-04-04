@@ -152,6 +152,7 @@ public class DataMapGraphDtoAdapter {
             addEdge(edgeMap, edge(sceneRef, "DERIVED_FROM", intakeRef, null, traceRef(intake.intakeCode(), "DERIVED_FROM"), intake.intakeCode(), false, intake.materialSourceNote(), Map.of("sourceType", safeText(intake.sourceType()))));
         }
 
+        appendDomainMembershipEdges(rootRef, sceneRef, nodeMap, edgeMap);
         appendSnapshotNodes(nodeMap, edgeMap, List.copyOf(nodeMap.values()));
         return filterGraph(rootRef, scene.id(), scene.sceneTitle(), nodeMap, edgeMap, options);
     }
@@ -374,6 +375,33 @@ public class DataMapGraphDtoAdapter {
                     snapshotId -> versionSnapshotNode(snapshotId, currentNodes));
             nodeMap.put(snapshotNode.id(), snapshotNode);
             addEdge(edgeMap, edge(node.id(), "PUBLISHED_IN_SNAPSHOT", snapshotNode.id(), null, traceRef(snapshotNode.objectCode(), "PUBLISHED_IN_SNAPSHOT"), snapshotNode.objectCode(), false, null, Map.of()));
+        }
+    }
+
+    private void appendDomainMembershipEdges(String rootRef,
+                                             String sceneRef,
+                                             Map<String, DataMapGraphNodeDTO> nodeMap,
+                                             Map<String, DataMapGraphEdgeDTO> edgeMap) {
+        if (rootRef == null || !rootRef.startsWith("domain:")) {
+            return;
+        }
+        for (DataMapGraphNodeDTO node : nodeMap.values()) {
+            if (node == null) {
+                continue;
+            }
+            if (node.id().equals(sceneRef) || "DOMAIN".equalsIgnoreCase(node.objectType()) || "VERSION_SNAPSHOT".equalsIgnoreCase(node.objectType())) {
+                continue;
+            }
+            addEdge(edgeMap, edge(
+                    sceneRef,
+                    "SCENE_MEMBERSHIP",
+                    node.id(),
+                    null,
+                    traceRef(node.objectCode(), "SCENE_MEMBERSHIP"),
+                    node.id(),
+                    false,
+                    null,
+                    Map.of("relationGroup", "control")));
         }
     }
 
