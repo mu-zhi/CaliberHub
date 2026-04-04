@@ -179,7 +179,7 @@ bash scripts/claude_mux.sh <provider> <model> [claude args...]
 
 - [`scripts/chatgpt_browser_bridge.py`](/Users/rlc/Code/CaliberHub/scripts/chatgpt_browser_bridge.py)：桥接已打开的 `ChatGPT（对话式人工智能产品）` 页面，提供 `list-tabs / read / type / send` 四个子命令。
 - [`docs/engineering/chatgpt-browser-bridge-capability.md`](/Users/rlc/Code/CaliberHub/docs/engineering/chatgpt-browser-bridge-capability.md)：说明浏览器桥接边界、错误码与安全约束。
-- [`scripts/chatgpt_heartbeat_runner.py`](/Users/rlc/Code/CaliberHub/scripts/chatgpt_heartbeat_runner.py)：每 10 分钟轮询当前唯一已打开的 `ChatGPT（对话式人工智能产品）` 标签页；浏览器桥接可读时会落快照，判断“上下文是否已同步 / 当前进行到哪个阶段 / 是否出现新回复”。当检测到新的 `assistant（助手）` 回复时，会前台激活 `Codex（代码智能体）` 桌面应用并继续尝试调用 `Codex CLI（命令行版 Codex）` 生成下一轮跟进消息；若本轮刚成功发送跟进消息，还会进入一个短观察窗口，按秒级轮询继续接住 GPT 的下一次回复，而不必等到下一个 10 分钟周期。这条链路基于轮询，不是浏览器事件订阅。
+- [`scripts/chatgpt_heartbeat_runner.py`](/Users/rlc/Code/CaliberHub/scripts/chatgpt_heartbeat_runner.py)：轮询当前唯一已打开的 `ChatGPT（对话式人工智能产品）` 标签页；浏览器桥接可读时会落快照，判断“上下文是否已同步 / 当前进行到哪个阶段 / 是否出现新回复”。当检测到新的 `assistant（助手）` 回复时，会前台激活 `Codex（代码智能体）` 桌面应用并继续尝试调用 `Codex CLI（命令行版 Codex）` 生成下一轮跟进消息；若本轮刚成功发送跟进消息，还会进入一个短观察窗口，按秒级轮询继续接住 GPT 的下一次回复，而不必等到下一个常规周期。这条链路基于轮询，不是浏览器事件订阅。
 - [`scripts/chatgpt_accessibility_send.py`](/Users/rlc/Code/CaliberHub/scripts/chatgpt_accessibility_send.py)：当 `System Events（系统事件）` 辅助功能权限可用时，使用剪贴板 + 粘贴发送把文本发到指定 `ChatGPT（对话式人工智能产品）` 会话，不依赖页面 JavaScript 读写。
 - [`docs/engineering/chatgpt-heartbeat-launchd.plist`](/Users/rlc/Code/CaliberHub/docs/engineering/chatgpt-heartbeat-launchd.plist)：本机 `launchd（macOS 定时任务守护）` 样板，按 600 秒间隔执行浏览器 GPT 巡检。
 
@@ -189,6 +189,7 @@ bash scripts/claude_mux.sh <provider> <model> [claude args...]
 2. 用户若未特别说明“只读一次”或“只发这一条”，不得把浏览器桥接当成一次性 `read / send` 动作后就停止。
 3. 若前台标签页被切到其他网站，但 `Google Chrome（谷歌浏览器）` 中仍存在已打开的 `chatgpt.com` 标签页，巡检与桥接应优先切回该会话再继续，而不是把会话误判为结束。
 4. 只有在用户明确说“只读一次”“先别继续追问”“只发这条”时，才降级成单次读取或单次发送模式。
+5. 当用户已明确授权“持续盯守并继续回复”时，守护脚本默认可直接发送自动生成的下一条消息，不再逐轮回到终端等待人工确认；但桥接失败、发送失败、发送未确认、重复回路保护触发和达到强制上限时必须停机。
 - [`scripts/claude_mux.sh`](/Users/rlc/Code/CaliberHub/scripts/claude_mux.sh)：本地 `Claude Code（代码智能体）` provider + model 统一入口。
 - `claude1`：全局 `Claude Code（代码智能体）` 快捷命令，对应百炼 `qwen3.5-plus`。
 - `claude2`：全局 `Claude Code（代码智能体）` 快捷命令，对应百炼 `qwen3-coder-plus`。
