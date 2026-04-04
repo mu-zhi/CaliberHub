@@ -9,6 +9,7 @@ import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.Pla
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.PolicyDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.SourceContractDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.SourceIntakeContractDTO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityRelationPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
 
@@ -25,6 +26,7 @@ public record GraphSceneBundle(
         List<SourceContractDTO> sourceContracts,
         List<SourceIntakeContractDTO> sourceIntakeContracts,
         List<CanonicalSnapshotMembershipPO> canonicalSnapshotMemberships,
-        List<CanonicalEntityPO> canonicalEntities
+        List<CanonicalEntityPO> canonicalEntities,
+        List<CanonicalEntityRelationPO> canonicalRelations
 ) {
 }

@@ -16,6 +16,7 @@ import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.Pol
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.SourceContractDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.SourceIntakeContractDTO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityRelationPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
 import org.springframework.stereotype.Component;
 
@@ -156,6 +157,7 @@ public class DataMapGraphDtoAdapter {
 
         appendDomainMembershipEdges(rootRef, sceneRef, nodeMap, edgeMap);
         appendInstanceOfEdges(rootRef, bundle, nodeMap, edgeMap, options.snapshotId());
+        appendCanonicalRelationEdges(rootRef, bundle, nodeMap, edgeMap);
         appendSnapshotNodes(nodeMap, edgeMap, List.copyOf(nodeMap.values()));
         return filterGraph(rootRef, scene.id(), scene.sceneTitle(), nodeMap, edgeMap, options);
     }
@@ -449,6 +451,38 @@ public class DataMapGraphDtoAdapter {
                             "sceneAssetType", membership.getSceneAssetType(),
                             "sceneAssetId", membership.getSceneAssetId()
                     )));
+        }
+    }
+
+    private void appendCanonicalRelationEdges(String rootRef,
+                                              GraphSceneBundle bundle,
+                                              Map<String, DataMapGraphNodeDTO> nodeMap,
+                                              Map<String, DataMapGraphEdgeDTO> edgeMap) {
+        if (rootRef == null || !rootRef.startsWith("domain:")) {
+            return;
+        }
+        if (bundle.canonicalRelations() == null || bundle.canonicalRelations().isEmpty()) {
+            return;
+        }
+        for (CanonicalEntityRelationPO relation : bundle.canonicalRelations()) {
+            if (relation == null) {
+                continue;
+            }
+            String sourceRef = canonicalAssetRef(relation.getSourceCanonicalEntityId());
+            String targetRef = canonicalAssetRef(relation.getTargetCanonicalEntityId());
+            if (!nodeMap.containsKey(sourceRef) || !nodeMap.containsKey(targetRef)) {
+                continue;
+            }
+            addEdge(edgeMap, edge(
+                    sourceRef,
+                    relation.getRelationType(),
+                    targetRef,
+                    null,
+                    traceRef(relation.getRelationLabel(), relation.getRelationType()),
+                    relation.getRelationLabel(),
+                    false,
+                    null,
+                    Map.of("canonicalRelationId", relation.getId())));
         }
     }
 

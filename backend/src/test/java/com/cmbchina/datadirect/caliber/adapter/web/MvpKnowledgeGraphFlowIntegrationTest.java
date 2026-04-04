@@ -3,14 +3,21 @@ package com.cmbchina.datadirect.caliber.adapter.web;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.CanonicalEntityResolutionService;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.DictionaryMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.EvidenceFragmentMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.OutputContractMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PlanMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PolicyMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.AbstractSnapshotGraphAuditablePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.DictionaryPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.EvidenceFragmentPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.IdentifierLineagePO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.OutputContractPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PlanPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.PolicyPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.TimeSemanticSelectorPO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +73,18 @@ class MvpKnowledgeGraphFlowIntegrationTest {
 
     @Autowired
     private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
+
+    @Autowired
+    private OutputContractMapper outputContractMapper;
+
+    @Autowired
+    private CanonicalEntityResolutionService canonicalEntityResolutionService;
+
+    @Autowired
+    private PolicyMapper policyMapper;
+
+    @Autowired
+    private EvidenceFragmentMapper evidenceFragmentMapper;
 
     @Test
     void shouldFinishImportPublishGraphAndRetrievalMvpFlow() throws Exception {
@@ -393,6 +412,8 @@ class MvpKnowledgeGraphFlowIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk());
 
+        ensureCanonicalRelationAssets(sceneId);
+
         MvcResult publishResult = mockMvc.perform(post("/api/scenes/{id}/publish", sceneId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -434,6 +455,27 @@ class MvpKnowledgeGraphFlowIntegrationTest {
                 .as("DOMAIN 图中的 INSTANCE_OF 边必须显式返回 relationGroup=control")
                 .anyMatch(edge -> "INSTANCE_OF".equals(edge.path("relationType").asText())
                         && "control".equals(edge.path("relationGroup").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图必须包含 canonical entity -> canonical entity 的 MAPS_TO_SOURCE 边")
+                .anyMatch(edge -> "MAPS_TO_SOURCE".equals(edge.path("relationType").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图中的 MAPS_TO_SOURCE 边必须显式返回 relationGroup=metadata")
+                .anyMatch(edge -> "MAPS_TO_SOURCE".equals(edge.path("relationType").asText())
+                        && "metadata".equals(edge.path("relationGroup").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图必须包含 canonical entity -> canonical entity 的 APPLIES_POLICY 边")
+                .anyMatch(edge -> "APPLIES_POLICY".equals(edge.path("relationType").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图中的 APPLIES_POLICY 边必须显式返回 relationGroup=control")
+                .anyMatch(edge -> "APPLIES_POLICY".equals(edge.path("relationType").asText())
+                        && "control".equals(edge.path("relationGroup").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图必须包含 canonical entity -> canonical entity 的 SUPPORTED_BY 边")
+                .anyMatch(edge -> "SUPPORTED_BY".equals(edge.path("relationType").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图中的 SUPPORTED_BY 边必须显式返回 relationGroup=evidence")
+                .anyMatch(edge -> "SUPPORTED_BY".equals(edge.path("relationType").asText())
+                        && "evidence".equals(edge.path("relationGroup").asText()));
     }
 
     private JsonNode importPayrollSample(String token) throws Exception {
@@ -590,6 +632,56 @@ class MvpKnowledgeGraphFlowIntegrationTest {
             stamp(selector, now);
             timeSemanticSelectorMapper.save(selector);
         }
+    }
+
+    private void ensureCanonicalRelationAssets(long sceneId) {
+        OffsetDateTime now = OffsetDateTime.now();
+        if (outputContractMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            OutputContractPO contract = new OutputContractPO();
+            contract.setSceneId(sceneId);
+            contract.setContractCode("OUT-" + sceneId + "-MAIN");
+            contract.setContractName("代发明细输出契约");
+            contract.setContractSemanticKey("payroll.detail.list");
+            contract.setSummaryText("代发明细统一输出");
+            contract.setFieldsJson("[\"PROTOCOL_NBR\",\"TRX_DT\",\"TRX_AMT\",\"EAC_NBR\"]");
+            contract.setMaskingRulesJson("[]");
+            contract.setUsageConstraints("仅用于工单核验与样板回放");
+            contract.setTimeCaliberNote("TRX_DT");
+            stamp(contract, now);
+            outputContractMapper.save(contract);
+        }
+        if (policyMapper.findByFilter(null, sceneId, null).isEmpty()) {
+            PolicyPO policy = new PolicyPO();
+            policy.setPolicyCode("PLC-" + sceneId + "-MAIN");
+            policy.setPolicyName("代发明细脱敏策略");
+            policy.setPolicySemanticKey("payroll.detail.masking");
+            policy.setScopeType("SCENE");
+            policy.setScopeRefId(sceneId);
+            policy.setEffectType("MASK");
+            policy.setConditionText("收款账号默认脱敏显示");
+            policy.setSourceType("RULE");
+            policy.setSensitivityLevel("L2");
+            policy.setMaskingRule("EAC_NBR -> tail4");
+            stamp(policy, now);
+            policyMapper.save(policy);
+        }
+        if (evidenceFragmentMapper.findBySceneIdOrderByUpdatedAtDesc(sceneId).isEmpty()) {
+            EvidenceFragmentPO evidence = new EvidenceFragmentPO();
+            evidence.setSceneId(sceneId);
+            evidence.setEvidenceCode("EVD-" + sceneId + "-MAIN");
+            evidence.setTitle("代发明细样板 SQL 片段");
+            evidence.setFragmentText("SELECT MCH_AGR_NBR AS PROTOCOL_NBR, TRX_DT, TRX_AMT, EAC_NBR FROM PDM_VHIS.T05_AGN_DTL");
+            evidence.setSourceAnchor("raw-input#sql");
+            evidence.setSourceType("RAW_INPUT_DOC");
+            evidence.setSourceRef("mvp-payroll-sample.md");
+            evidence.setOriginType("DOC");
+            evidence.setOriginRef("mvp-payroll-sample.md");
+            evidence.setOriginLocator("raw-input#sql");
+            evidence.setConfidenceScore(1.0d);
+            stamp(evidence, now);
+            evidenceFragmentMapper.save(evidence);
+        }
+        canonicalEntityResolutionService.resolveScene(sceneId, "tester");
     }
 
     private void stamp(AbstractSnapshotGraphAuditablePO po, OffsetDateTime now) {

@@ -2,10 +2,12 @@ package com.cmbchina.datadirect.caliber.application.service.command.graphrag;
 
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityRelationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.EvidenceFragmentMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.OutputContractMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.PolicyMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.SourceContractMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityRelationPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityMembershipPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.EvidenceFragmentPO;
@@ -34,6 +36,7 @@ public class CanonicalEntityResolutionService {
     private final CanonicalKeyFactory canonicalKeyFactory;
     private final CanonicalEntityMapper canonicalEntityMapper;
     private final CanonicalEntityMembershipMapper membershipMapper;
+    private final CanonicalEntityRelationMapper relationMapper;
     private final SourceContractMapper sourceContractMapper;
     private final PolicyMapper policyMapper;
     private final EvidenceFragmentMapper evidenceFragmentMapper;
@@ -42,6 +45,7 @@ public class CanonicalEntityResolutionService {
     public CanonicalEntityResolutionService(CanonicalKeyFactory canonicalKeyFactory,
                                             CanonicalEntityMapper canonicalEntityMapper,
                                             CanonicalEntityMembershipMapper membershipMapper,
+                                            CanonicalEntityRelationMapper relationMapper,
                                             SourceContractMapper sourceContractMapper,
                                             PolicyMapper policyMapper,
                                             EvidenceFragmentMapper evidenceFragmentMapper,
@@ -49,6 +53,7 @@ public class CanonicalEntityResolutionService {
         this.canonicalKeyFactory = canonicalKeyFactory;
         this.canonicalEntityMapper = canonicalEntityMapper;
         this.membershipMapper = membershipMapper;
+        this.relationMapper = relationMapper;
         this.sourceContractMapper = sourceContractMapper;
         this.policyMapper = policyMapper;
         this.evidenceFragmentMapper = evidenceFragmentMapper;
@@ -65,6 +70,7 @@ public class CanonicalEntityResolutionService {
         resolvePolicies(sceneId, operator);
         resolveEvidences(sceneId, operator);
         resolveOutputContracts(sceneId, operator);
+        resolveCanonicalRelations(sceneId, operator);
     }
 
     private void resolveSourceContracts(Long sceneId, String operator) {
@@ -228,6 +234,94 @@ public class CanonicalEntityResolutionService {
         entity.setUpdatedBy(normalizeOperator(operator));
         entity.setUpdatedAt(OffsetDateTime.now());
         canonicalEntityMapper.save(entity);
+    }
+
+    private void resolveCanonicalRelations(Long sceneId, String operator) {
+        List<CanonicalEntityMembershipPO> outputMemberships = membershipMapper
+                .findBySceneIdAndSceneAssetTypeOrderByUpdatedAtDesc(sceneId, OUTPUT_CONTRACT)
+                .stream()
+                .filter(CanonicalEntityMembershipPO::isActiveFlag)
+                .toList();
+        List<CanonicalEntityMembershipPO> sourceMemberships = membershipMapper
+                .findBySceneIdAndSceneAssetTypeOrderByUpdatedAtDesc(sceneId, SOURCE_CONTRACT)
+                .stream()
+                .filter(CanonicalEntityMembershipPO::isActiveFlag)
+                .toList();
+        List<CanonicalEntityMembershipPO> policyMemberships = membershipMapper
+                .findBySceneIdAndSceneAssetTypeOrderByUpdatedAtDesc(sceneId, POLICY)
+                .stream()
+                .filter(CanonicalEntityMembershipPO::isActiveFlag)
+                .toList();
+        List<CanonicalEntityMembershipPO> evidenceMemberships = membershipMapper
+                .findBySceneIdAndSceneAssetTypeOrderByUpdatedAtDesc(sceneId, EVIDENCE)
+                .stream()
+                .filter(CanonicalEntityMembershipPO::isActiveFlag)
+                .toList();
+        if (outputMemberships.isEmpty()) {
+            return;
+        }
+        OffsetDateTime now = OffsetDateTime.now();
+        for (CanonicalEntityMembershipPO outputMembership : outputMemberships) {
+            for (CanonicalEntityMembershipPO sourceMembership : sourceMemberships) {
+                upsertCanonicalRelation(
+                        outputMembership.getCanonicalEntityId(),
+                        sourceMembership.getCanonicalEntityId(),
+                        "MAPS_TO_SOURCE",
+                        "scene:" + sceneId + ":maps-to-source",
+                        operator,
+                        now
+                );
+            }
+            for (CanonicalEntityMembershipPO policyMembership : policyMemberships) {
+                upsertCanonicalRelation(
+                        outputMembership.getCanonicalEntityId(),
+                        policyMembership.getCanonicalEntityId(),
+                        "APPLIES_POLICY",
+                        "scene:" + sceneId + ":applies-policy",
+                        operator,
+                        now
+                );
+            }
+            for (CanonicalEntityMembershipPO evidenceMembership : evidenceMemberships) {
+                upsertCanonicalRelation(
+                        outputMembership.getCanonicalEntityId(),
+                        evidenceMembership.getCanonicalEntityId(),
+                        "SUPPORTED_BY",
+                        "scene:" + sceneId + ":supported-by",
+                        operator,
+                        now
+                );
+            }
+        }
+    }
+
+    private void upsertCanonicalRelation(Long sourceCanonicalEntityId,
+                                         Long targetCanonicalEntityId,
+                                         String relationType,
+                                         String relationLabel,
+                                         String operator,
+                                         OffsetDateTime now) {
+        if (sourceCanonicalEntityId == null || targetCanonicalEntityId == null) {
+            return;
+        }
+        CanonicalEntityRelationPO relation = relationMapper.findBySourceCanonicalEntityIdOrderByUpdatedAtDesc(sourceCanonicalEntityId).stream()
+                .filter(item -> targetCanonicalEntityId.equals(item.getTargetCanonicalEntityId()))
+                .filter(item -> relationType.equalsIgnoreCase(item.getRelationType()))
+                .findFirst()
+                .orElseGet(CanonicalEntityRelationPO::new);
+        if (relation.getId() == null) {
+            relation.setCreatedBy(normalizeOperator(operator));
+            relation.setCreatedAt(now);
+        }
+        relation.setSourceCanonicalEntityId(sourceCanonicalEntityId);
+        relation.setTargetCanonicalEntityId(targetCanonicalEntityId);
+        relation.setRelationType(relationType);
+        relation.setRelationLabel(relationLabel);
+        relation.setRelationPayloadJson(null);
+        relation.setVisibleInSnapshotBinding(true);
+        relation.setUpdatedBy(normalizeOperator(operator));
+        relation.setUpdatedAt(now);
+        relationMapper.save(relation);
     }
 
     private boolean isActiveAsset(String assetStatus) {

@@ -178,6 +178,7 @@ class GraphQueryServiceTest {
                 List.of(),
                 List.of(),
                 List.of(),
+                List.of(),
                 List.of()
         );
     }

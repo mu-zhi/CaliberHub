@@ -4,6 +4,7 @@ import com.cmbchina.datadirect.caliber.application.service.graphrag.GraphAssetSu
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.SceneMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityMembershipMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalEntityRelationMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ContractViewMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CoverageDeclarationMapper;
@@ -45,6 +46,7 @@ class CanonicalEntityTestApplication {
     CanonicalEntityResolutionService canonicalEntityResolutionService(CanonicalKeyFactory canonicalKeyFactory,
                                                                      CanonicalEntityMapper canonicalEntityMapper,
                                                                      CanonicalEntityMembershipMapper membershipMapper,
+                                                                     CanonicalEntityRelationMapper relationMapper,
                                                                      SourceContractMapper sourceContractMapper,
                                                                      PolicyMapper policyMapper,
                                                                      EvidenceFragmentMapper evidenceFragmentMapper,
@@ -53,6 +55,7 @@ class CanonicalEntityTestApplication {
                 canonicalKeyFactory,
                 canonicalEntityMapper,
                 membershipMapper,
+                relationMapper,
                 sourceContractMapper,
                 policyMapper,
                 evidenceFragmentMapper,
