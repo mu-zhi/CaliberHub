@@ -423,6 +423,10 @@ class MvpKnowledgeGraphFlowIntegrationTest {
         assertThat(domainGraph.path("edges"))
                 .as("DOMAIN 图必须包含来自已发布 scene snapshot 的 SCENE_MEMBERSHIP 边")
                 .anyMatch(edge -> "SCENE_MEMBERSHIP".equals(edge.path("relationType").asText()));
+        assertThat(domainGraph.path("edges"))
+                .as("DOMAIN 图中的 SCENE_MEMBERSHIP 边必须显式返回 relationGroup=control")
+                .anyMatch(edge -> "SCENE_MEMBERSHIP".equals(edge.path("relationType").asText())
+                        && "control".equals(edge.path("relationGroup").asText()));
     }
 
     private JsonNode importPayrollSample(String token) throws Exception {
