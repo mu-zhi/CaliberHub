@@ -1,11 +1,17 @@
 // @vitest-environment jsdom
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 let currentRole = "support";
 let currentRoles = ["SUPPORT"];
+let currentToken = "";
+let currentTokenExpireAt = "";
+let currentUsername = "";
+const setRoleMock = vi.fn();
+const loginByRoleMock = vi.fn();
+const logoutMock = vi.fn();
 
 vi.mock("./pages/HomePage", () => ({
   HomePage: () => <div>home page</div>,
@@ -62,7 +68,12 @@ vi.mock("./store/authStore", () => ({
   useAuthStore: (selector) => selector({
     role: currentRole,
     roles: currentRoles,
-    setRole: vi.fn(),
+    token: currentToken,
+    tokenExpireAt: currentTokenExpireAt,
+    username: currentUsername,
+    setRole: setRoleMock,
+    loginByRole: loginByRoleMock,
+    logout: logoutMock,
   }),
 }));
 vi.mock("./store/appStore", () => ({
@@ -87,6 +98,12 @@ describe("App route access control", () => {
   beforeEach(() => {
     currentRole = "support";
     currentRoles = ["SUPPORT"];
+    currentToken = "";
+    currentTokenExpireAt = "";
+    currentUsername = "";
+    setRoleMock.mockReset();
+    loginByRoleMock.mockReset();
+    logoutMock.mockReset();
   });
 
   afterEach(() => {
@@ -108,5 +125,42 @@ describe("App route access control", () => {
 
     expect(await screen.findByText("approval page")).toBeTruthy();
     expect(screen.queryByText("home page")).toBeNull();
+  });
+
+  it("submits current role password from topbar auth entry", async () => {
+    loginByRoleMock.mockResolvedValue(true);
+
+    renderAppAt("/map");
+
+    const passwordInput = await screen.findByLabelText("当前角色密码");
+    fireEvent.change(passwordInput, { target: { value: "support123" } });
+    fireEvent.click(screen.getByRole("button", { name: "登录" }));
+
+    expect(loginByRoleMock).toHaveBeenCalledWith("support", "support123");
+  });
+
+  it("shows logged-in summary and logout action", async () => {
+    currentToken = "jwt-token";
+    currentTokenExpireAt = "2026-04-06T12:00:00.000Z";
+    currentUsername = "admin";
+    currentRoles = ["ADMIN", "SUPPORT"];
+
+    renderAppAt("/map");
+
+    expect(await screen.findByText("admin")).toBeTruthy();
+    expect(screen.getByText("ADMIN / SUPPORT")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "退出" })).toBeTruthy();
+  });
+
+  it("clears session immediately when switching role", async () => {
+    currentToken = "jwt-token";
+    currentTokenExpireAt = "2026-04-06T12:00:00.000Z";
+    currentUsername = "support";
+
+    renderAppAt("/map");
+
+    fireEvent.change(await screen.findByLabelText("当前角色"), { target: { value: "admin" } });
+
+    expect(setRoleMock).toHaveBeenCalledWith("admin");
   });
 });

@@ -55,12 +55,18 @@ const ROLE_OPTIONS = [
 function AppShell({ children }) {
   const location = useLocation();
   const role = useAuthStore((state) => state.role);
+  const token = useAuthStore((state) => state.token);
+  const tokenExpireAt = useAuthStore((state) => state.tokenExpireAt);
+  const username = useAuthStore((state) => state.username);
   const setRole = useAuthStore((state) => state.setRole);
   const roles = useAuthStore((state) => state.roles);
+  const loginByRole = useAuthStore((state) => state.loginByRole);
+  const logout = useAuthStore((state) => state.logout);
   const navCollapsed = useAppStore((state) => state.navCollapsed);
   const setNavCollapsed = useAppStore((state) => state.setNavCollapsed);
   const recordRecent = useAppStore((state) => state.recordRecent);
   const toastTimerRef = useRef(null);
+  const [password, setPassword] = useState("");
   const [toast, setToast] = useState({ show: false, tone: "warn", message: "" });
 
   function showToast(message, tone = "warn") {
@@ -115,6 +121,24 @@ function AppShell({ children }) {
       window.clearTimeout(toastTimerRef.current);
     }
   }, []);
+
+  async function handleLoginSubmit(event) {
+    event.preventDefault();
+    const success = await loginByRole(role || "admin", password);
+    if (success) {
+      setPassword("");
+    }
+  }
+
+  function handleRoleChange(event) {
+    setPassword("");
+    setRole(event.target.value);
+  }
+
+  function handleLogout() {
+    setPassword("");
+    logout();
+  }
 
   const currentRoute = findRoute(location.pathname);
   const currentTopKey = currentRoute?.topKey || "overview";
@@ -192,12 +216,34 @@ function AppShell({ children }) {
               name="topRoleSwitch"
               autoComplete="off"
               value={role || "admin"}
-              onChange={(event) => setRole(event.target.value)}
+              onChange={handleRoleChange}
             >
               {ROLE_OPTIONS.map((item) => (
                 <option key={item.value} value={item.value}>{item.label}</option>
               ))}
             </select>
+            {!token ? (
+              <form className="mast-auth-entry" onSubmit={handleLoginSubmit}>
+                <input
+                  aria-label="当前角色密码"
+                  id="topRolePassword"
+                  name="topRolePassword"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="输入当前角色密码"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+                <button className="mini-link mast-login-btn" type="submit">登录</button>
+              </form>
+            ) : (
+              <div className="mast-auth-summary">
+                <span className="mast-auth-user">{username || "已登录"}</span>
+                <span className="mast-auth-meta">{roles.join(" / ")}</span>
+                <span className="mast-auth-meta">{tokenExpireAt || "会话有效"}</span>
+                <button className="mini-link mast-login-btn" type="button" onClick={handleLogout}>退出</button>
+              </div>
+            )}
           </div>
         </div>
       </header>

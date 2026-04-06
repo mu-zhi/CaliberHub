@@ -338,6 +338,7 @@ body {
   justify-self: end;
   width: 100%;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .mast-tools .subtle-note {
@@ -371,6 +372,32 @@ body {
   min-width: auto;
   padding: 7px 12px;
   border-radius: 999px;
+}
+
+.mast-auth-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mast-auth-summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mast-auth-user {
+  font-size: 12px;
+  font-weight: 600;
+  color: #244257;
+}
+
+.mast-auth-meta {
+  font-size: 11px;
+  color: #6b7280;
 }
 
 .admin-entry {
