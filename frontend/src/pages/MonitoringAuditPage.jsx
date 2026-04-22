@@ -18,6 +18,20 @@ const TRACE_TIMELINE = [
   "11:03 审批任务生成：APR-20260327-001",
 ];
 
+const RETRIEVAL_EXPERIMENT_METRICS = [
+  { label: "scene hit@5", value: "0.93", detail: "首批 payroll 回放集" },
+  { label: "evidence precision@10", value: "0.81", detail: "引用命中前 10" },
+  { label: "误放行风险", value: "0", detail: "Policy false allow" },
+  { label: "p95", value: "2.3s", detail: "实验侧车延迟" },
+];
+
+const INDEX_SYNC_STATUS = {
+  indexVersion: "SCN_PAYROLL_DETAIL::SCN_PAYROLL_DETAIL-V001::42",
+  manifestStatus: "ACTIVE",
+  lockedSnapshot: "42",
+  mismatchAlert: "snapshot mismatch 0",
+};
+
 export function MonitoringAuditPage() {
   const runtimeReplayHref = useMemo(
     () => buildWorkbenchHref("/runtime", {
@@ -65,6 +79,48 @@ export function MonitoringAuditPage() {
         <UiCard className="workbench-metric-card"><span>审批积压</span><strong>2</strong><small>均在 SLA 内</small></UiCard>
         <UiCard className="workbench-metric-card"><span>图查询超时</span><strong>0</strong><small>近 1 小时</small></UiCard>
       </div>
+
+      <UiCard className="workbench-pane">
+        <div className="proto-card-head">
+          <div>
+            <h3>检索实验评测</h3>
+            <p className="subtle-note">用于观察运行检索实验侧车在 shadow mode 下的召回质量、误放行风险与回退动作。</p>
+          </div>
+          <UiBadge tone="good">Shadow Mode 已开启</UiBadge>
+        </div>
+        <div className="workbench-metric-strip">
+          {RETRIEVAL_EXPERIMENT_METRICS.map((item) => (
+            <UiCard key={item.label} className="workbench-metric-card">
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+              <small>{item.detail}</small>
+            </UiCard>
+          ))}
+        </div>
+        <p className="subtle-note">停灰度 -&gt; 停影子模式 -&gt; 禁用适配器</p>
+      </UiCard>
+
+      <UiCard className="workbench-pane">
+        <div className="proto-card-head">
+          <div>
+            <h3>实验索引版本</h3>
+            <p className="subtle-note">已发布快照与实验检索索引版本保持一一锁定；错配时只允许降级，不允许跨快照混读。</p>
+          </div>
+          <UiBadge tone="neutral">{INDEX_SYNC_STATUS.manifestStatus}</UiBadge>
+        </div>
+        <div className="workbench-metric-strip">
+          <UiCard className="workbench-metric-card">
+            <span>index version</span>
+            <strong>{INDEX_SYNC_STATUS.indexVersion}</strong>
+            <small>已锁定快照 {INDEX_SYNC_STATUS.lockedSnapshot}</small>
+          </UiCard>
+          <UiCard className="workbench-metric-card">
+            <span>snapshot mismatch</span>
+            <strong>{INDEX_SYNC_STATUS.mismatchAlert}</strong>
+            <small>当前窗口未发现错配</small>
+          </UiCard>
+        </div>
+      </UiCard>
 
       <div className="workbench-grid">
         <UiCard className="workbench-pane">

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "caliber_audit_event",
@@ -44,6 +45,33 @@ public class AuditEventPO extends AbstractGraphAuditablePO {
     @Column(name = "payload_json", columnDefinition = "LONGTEXT")
     private String payloadJson;
 
+    @Transient
+    private String adapterName;
+
+    @Transient
+    private String indexVersion;
+
+    @Transient
+    private Long latencyMs;
+
+    @Transient
+    private Integer referenceCount;
+
+    @Transient
+    private Integer candidateCount;
+
+    @Transient
+    private Boolean shadowModeEnabled;
+
+    @Transient
+    private String grayReleaseScope;
+
+    @Transient
+    private Boolean falseAllowRisk;
+
+    @Transient
+    private String rollbackRecommendation;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getSceneId() { return sceneId; }
@@ -62,4 +90,22 @@ public class AuditEventPO extends AbstractGraphAuditablePO {
     public void setReasonCode(String reasonCode) { this.reasonCode = reasonCode; }
     public String getPayloadJson() { return payloadJson; }
     public void setPayloadJson(String payloadJson) { this.payloadJson = payloadJson; }
+    public String getAdapterName() { return adapterName; }
+    public void setAdapterName(String adapterName) { this.adapterName = adapterName; }
+    public String getIndexVersion() { return indexVersion; }
+    public void setIndexVersion(String indexVersion) { this.indexVersion = indexVersion; }
+    public Long getLatencyMs() { return latencyMs; }
+    public void setLatencyMs(Long latencyMs) { this.latencyMs = latencyMs; }
+    public Integer getReferenceCount() { return referenceCount; }
+    public void setReferenceCount(Integer referenceCount) { this.referenceCount = referenceCount; }
+    public Integer getCandidateCount() { return candidateCount; }
+    public void setCandidateCount(Integer candidateCount) { this.candidateCount = candidateCount; }
+    public Boolean getShadowModeEnabled() { return shadowModeEnabled; }
+    public void setShadowModeEnabled(Boolean shadowModeEnabled) { this.shadowModeEnabled = shadowModeEnabled; }
+    public String getGrayReleaseScope() { return grayReleaseScope; }
+    public void setGrayReleaseScope(String grayReleaseScope) { this.grayReleaseScope = grayReleaseScope; }
+    public Boolean getFalseAllowRisk() { return falseAllowRisk; }
+    public void setFalseAllowRisk(Boolean falseAllowRisk) { this.falseAllowRisk = falseAllowRisk; }
+    public String getRollbackRecommendation() { return rollbackRecommendation; }
+    public void setRollbackRecommendation(String rollbackRecommendation) { this.rollbackRecommendation = rollbackRecommendation; }
 }

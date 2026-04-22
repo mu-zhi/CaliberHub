@@ -143,7 +143,7 @@ export function ImportLiveGraphCanvas({
         <div className="import-live-graph-head">
           <div>
             <h3>候选实体图谱</h3>
-            <p>{graphState?.summaryMessage || "正在等待首批实体"}</p>
+            <p>{graphState?.summaryMessage || "导入开始后显示候选实体图谱"}</p>
           </div>
           <span>
             {Math.max(0, Math.min(100, Number(importPercent || 0)))}% · {importStageText || "待导入"}
@@ -151,7 +151,7 @@ export function ImportLiveGraphCanvas({
         </div>
         {!hasGraph ? (
           <div className="import-live-graph-empty">
-            <strong>正在等待首批实体</strong>
+            <strong>导入开始后显示候选实体图谱</strong>
             <p>导入开始后，候选场景、字段和来源表会在这里实时补充出来。</p>
           </div>
         ) : isServer ? (

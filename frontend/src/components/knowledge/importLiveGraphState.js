@@ -1,5 +1,26 @@
 const MAX_RECENT_ACTIVITY = 6;
-const EMPTY_MESSAGE = "正在等待首批实体";
+const EMPTY_MESSAGE = "导入开始后显示候选实体图谱";
+
+function normalizeExperimentSummary(summary) {
+  if (!summary || typeof summary !== "object") {
+    return null;
+  }
+  const adapterName = `${summary.adapterName || ""}`.trim();
+  const adapterVersion = `${summary.adapterVersion || ""}`.trim();
+  const referenceRefs = Array.isArray(summary.referenceRefs) ? summary.referenceRefs.filter(Boolean) : [];
+  const warnings = Array.isArray(summary.warnings) ? summary.warnings.filter(Boolean) : [];
+  const formalAssetWrites = Array.isArray(summary.formalAssetWrites) ? summary.formalAssetWrites.filter(Boolean) : [];
+  if (!adapterName && !adapterVersion && referenceRefs.length === 0 && warnings.length === 0 && formalAssetWrites.length === 0) {
+    return null;
+  }
+  return {
+    adapterName,
+    adapterVersion,
+    referenceRefs,
+    warnings,
+    formalAssetWrites,
+  };
+}
 
 function normalizeNode(node) {
   if (!node?.id) {
@@ -97,6 +118,7 @@ export function createImportLiveGraphState() {
     stageKey: "",
     stageName: "",
     summaryMessage: EMPTY_MESSAGE,
+    experimentSummary: null,
   };
 }
 
@@ -119,6 +141,7 @@ export function applyImportLiveGraphPatch(state, patch) {
     ...current.recentActivity,
   ].filter((item, index, collection) => collection.findIndex((entry) => entry.id === item.id) === index).slice(0, MAX_RECENT_ACTIVITY);
   const hasSelectedNode = nextNodes.some((node) => node.id === current.selectedNodeId);
+  const experimentSummary = normalizeExperimentSummary(patch?.experimentSummary || patch?.preprocessExperiment) || current.experimentSummary;
   return {
     ...current,
     nodes: nextNodes,
@@ -130,6 +153,7 @@ export function applyImportLiveGraphPatch(state, patch) {
     stageKey: `${patch?.stageKey || current.stageKey || ""}`,
     stageName: `${patch?.stageName || current.stageName || ""}`,
     summaryMessage: `${patch?.message || `候选实体图谱已更新，共 ${nextNodes.length} 个节点 / ${nextEdges.length} 条关系`}`,
+    experimentSummary,
   };
 }
 
@@ -138,6 +162,7 @@ export function restoreImportLiveGraphSnapshot(state, snapshot, options = {}) {
   const nextNodes = dedupeNodes(snapshot?.nodes || []);
   const nextEdges = dedupeEdges(snapshot?.edges || []);
   const hasSelectedNode = nextNodes.some((node) => node.id === current.selectedNodeId);
+  const experimentSummary = normalizeExperimentSummary(options.experimentSummary || snapshot?.preprocessExperiment) || current.experimentSummary;
   return {
     ...createImportLiveGraphState(),
     nodes: nextNodes,
@@ -149,6 +174,7 @@ export function restoreImportLiveGraphSnapshot(state, snapshot, options = {}) {
     stageKey: `${options.stageKey || current.stageKey || ""}`,
     stageName: `${options.stageName || current.stageName || ""}`,
     summaryMessage: `${options.message || summarizeSnapshot(nextNodes, nextEdges)}`,
+    experimentSummary,
   };
 }
 

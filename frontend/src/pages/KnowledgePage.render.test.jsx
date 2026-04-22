@@ -37,6 +37,7 @@ describe("KnowledgePage render smoke", () => {
     expect(html).toContain("历史步骤摘要");
     expect(html).toContain("场景队列");
     expect(html).toContain("导入明细");
+    expect(html).toContain("实验候选仅进入候选层");
     expect(html).not.toContain("正在等待首批实体");
     expect(html).not.toContain("导入内容类型");
   });

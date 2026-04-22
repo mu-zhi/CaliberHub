@@ -68,7 +68,31 @@ const CLARIFICATION_RESULT = {
     ],
     clarificationQuestions: ["本次是查询明细还是批次结果？"],
   },
-  trace: { traceId: "trace_clar_001", snapshotId: null, inferenceSnapshotId: 99 },
+  trace: {
+    traceId: "trace_clar_001",
+    snapshotId: null,
+    inferenceSnapshotId: 99,
+    retrievalAdapter: "LightRAG",
+    retrievalStatus: "COMPLETED",
+    fallbackToFormal: false,
+  },
+  experiment: {
+    adapterName: "LightRAG",
+    adapterVersion: "heuristic-sidecar/v1",
+    status: "COMPLETED",
+    fallbackToFormal: false,
+    summary: "实验侧车确认当前问题命中两个已发布场景，需要先拆分子问题。",
+    referenceRefs: ["clarification:scene:1", "clarification:scene:2"],
+    candidateScenes: [
+      { sceneId: 1, sceneCode: "SCN_PAYROLL_DETAIL", sceneTitle: "代发明细查询", score: 0.74, source: "LightRAG" },
+      { sceneId: 2, sceneCode: "SCN_PAYROLL_BATCH", sceneTitle: "代发批次结果查询", score: 0.71, source: "LightRAG" },
+    ],
+    candidateEvidence: [],
+    scoreBreakdown: [
+      { label: "scene.lexical", score: 0.44 },
+      { label: "slot.identifier", score: 0.17 },
+    ],
+  },
   risk: { riskLevel: "MEDIUM", riskReasons: ["跨场景多意图"] },
 };
 
@@ -87,8 +111,42 @@ const ALLOW_RESULT = {
     restrictedFields: [],
     forbiddenFields: [],
   },
-  trace: { traceId: "trace_allow_001", snapshotId: 42, inferenceSnapshotId: 42, versionTag: "v1" },
-  evidence: [{ evidenceCode: "EV_001", title: "代发交易说明", sourceAnchor: "§3.2" }],
+  trace: {
+    traceId: "trace_allow_001",
+    snapshotId: 42,
+    inferenceSnapshotId: 42,
+    versionTag: "v1",
+    retrievalAdapter: "LightRAG",
+    retrievalStatus: "COMPLETED",
+    fallbackToFormal: false,
+  },
+  evidence: [{
+    evidenceCode: "EV_001",
+    title: "代发交易说明",
+    sourceAnchor: "§3.2",
+    retrievalSource: "FORMAL_PLAN_EVIDENCE",
+    referenceRef: "§3.2",
+    retrievalScore: 0.95,
+  }],
+  experiment: {
+    adapterName: "LightRAG",
+    adapterVersion: "heuristic-sidecar/v1",
+    status: "COMPLETED",
+    fallbackToFormal: false,
+    summary: "实验侧车补充了候选场景与证据引用，正式决策仍由原链路给出。",
+    referenceRefs: ["§3.2", "05-口径文档现状-代发明细查询.sql#current"],
+    candidateScenes: [
+      { sceneId: 1, sceneCode: "SCN_PAYROLL_DETAIL", sceneTitle: "代发明细查询", score: 0.88, source: "LightRAG" },
+    ],
+    candidateEvidence: [
+      { evidenceCode: "EV_001", title: "代发交易说明", sourceAnchor: "§3.2", referenceRef: "§3.2", score: 0.93 },
+    ],
+    scoreBreakdown: [
+      { label: "scene.lexical", score: 0.56 },
+      { label: "slot.identifier", score: 0.22 },
+      { label: "evidence.anchor", score: 0.10 },
+    ],
+  },
   risk: { riskLevel: "LOW", riskReasons: [] },
   path: { resolutionSteps: ["场景命中", "方案选择", "覆盖校验"] },
 };
@@ -264,6 +322,9 @@ describe("KnowledgePackageWorkbenchPage interactive flow", () => {
     expect(screen.queryByText("allow")).toBeNull();
     expect(screen.getByText("检索过程")).toBeTruthy();
     expect(screen.getByText("1 个候选场景")).toBeTruthy();
+    expect(screen.getByText("实验检索调试")).toBeTruthy();
+    expect(screen.getAllByText("LightRAG").length).toBeGreaterThan(0);
+    expect(screen.getByText("候选引用 2 条")).toBeTruthy();
   });
 
   it("submits query and renders clarification result with interactive buttons", async () => {

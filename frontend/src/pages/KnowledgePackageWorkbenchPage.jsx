@@ -159,6 +159,14 @@ function normalizeErrorMessage(error, fallback) {
   return raw;
 }
 
+function formatExperimentScore(value) {
+  const score = Number(value || 0);
+  if (!Number.isFinite(score) || score <= 0) {
+    return "--";
+  }
+  return score > 1 ? `${score.toFixed(2)}` : `${(score * 100).toFixed(0)}%`;
+}
+
 async function safeRequest(path, options = {}) {
   try {
     return await apiRequest(path, options);
@@ -833,7 +841,7 @@ export function KnowledgePackageWorkbenchPage() {
                 <article className="runtime-process-item">
                   <strong>场景召回</strong>
                   <p>{pipeline.sceneSearch?.reasons?.join("；") || "未返回召回说明"}</p>
-                  <span>{pipeline.sceneSearch?.candidates?.length || 0} 个候选场景</span>
+                  <span>场景候选数 {pipeline.sceneSearch?.candidates?.length || 0} 个</span>
                 </article>
                 <article className="runtime-process-item">
                   <strong>方案选择</strong>
@@ -1039,6 +1047,87 @@ export function KnowledgePackageWorkbenchPage() {
                   </div>
                 </UiCard>
               )}
+
+              {result.experiment ? (
+                <UiCard className="knowledge-package-card" elevation="card">
+                  <div className="knowledge-package-card-head">
+                    <div>
+                      <h3>实验检索调试</h3>
+                      <p className="subtle-note">实验侧车只返回候选和引用，不替代正式知识包决策链。</p>
+                    </div>
+                    <TestTube2 size={18} strokeWidth={1.8} />
+                  </div>
+                  <div className="knowledge-package-summary-grid">
+                    <div className="knowledge-package-summary-item">
+                      <TestTube2 size={16} />
+                      <div>
+                        <strong>{result.experiment.adapterName || result.trace?.retrievalAdapter || "未知适配器"}</strong>
+                        <p>检索适配器 · {result.experiment.status || result.trace?.retrievalStatus || "UNKNOWN"}</p>
+                      </div>
+                    </div>
+                    <div className="knowledge-package-summary-item">
+                      <ClipboardList size={16} />
+                      <div>
+                        <strong>{(result.experiment.candidateScenes || []).length} 个候选场景</strong>
+                        <p>{result.experiment.summary || "未返回实验摘要"}</p>
+                      </div>
+                    </div>
+                    <div className="knowledge-package-summary-item">
+                      <FileJson2 size={16} />
+                      <div>
+                        <strong>候选引用 {Number(result.experiment.referenceRefs?.length || 0)} 条</strong>
+                        <p>{result.experiment.fallbackToFormal ? "已降级回正式链路" : "当前未触发正式链路降级"}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="knowledge-package-detail-grid">
+                    <div>
+                      <h4>候选场景</h4>
+                      <ul>
+                        {(result.experiment.candidateScenes || []).map((item) => (
+                          <li key={`${item.sceneCode || item.sceneId}`}>
+                            {item.sceneTitle || item.sceneCode}
+                            {item.sceneCode ? ` · ${item.sceneCode}` : ""}
+                            {item.score != null ? ` · ${formatExperimentScore(item.score)}` : ""}
+                            {item.source ? ` · ${item.source}` : ""}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4>候选证据</h4>
+                      <ul>
+                        {(result.experiment.candidateEvidence || []).map((item) => (
+                          <li key={`${item.evidenceCode || item.referenceRef || item.title}`}>
+                            {item.title || item.evidenceCode}
+                            {item.referenceRef ? ` · ${item.referenceRef}` : ""}
+                            {item.sourceAnchor ? ` · ${item.sourceAnchor}` : ""}
+                            {item.score != null ? ` · ${formatExperimentScore(item.score)}` : ""}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4>候选引用</h4>
+                      <ul>
+                        {(result.experiment.referenceRefs || []).map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4>分数拆解</h4>
+                      <ul>
+                        {(result.experiment.scoreBreakdown || []).map((item, index) => (
+                          <li key={`${item.label || "score"}-${index}`}>
+                            {item.label || "score"} · {formatExperimentScore(item.score)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </UiCard>
+              ) : null}
 
               <UiCard className="knowledge-package-card" elevation="card">
                 <div className="knowledge-package-card-head">

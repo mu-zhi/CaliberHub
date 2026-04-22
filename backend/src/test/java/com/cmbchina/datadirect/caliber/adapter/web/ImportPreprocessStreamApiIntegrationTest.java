@@ -59,6 +59,10 @@ class ImportPreprocessStreamApiIntegrationTest {
         assertThat(body.indexOf("event:graph_patch")).isLessThan(body.indexOf("event:done"));
         assertThat(body).contains("\"addedNodes\"");
         assertThat(body).contains("\"addedEdges\"");
+        assertThat(body).contains("\"preprocessExperiment\"");
+        assertThat(body).contains("\"adapterName\":\"LightRAG\"");
+        assertThat(body).contains("\"formalAssetWrites\":[]");
+        assertThat(body).contains("\"referenceRefs\"");
     }
 
     private String loginAndGetToken(String username, String password) throws Exception {

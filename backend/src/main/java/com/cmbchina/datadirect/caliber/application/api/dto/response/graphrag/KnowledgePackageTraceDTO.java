@@ -4,6 +4,9 @@ public record KnowledgePackageTraceDTO(
         String traceId,
         Long snapshotId,
         Long inferenceSnapshotId,
-        String versionTag
+        String versionTag,
+        String retrievalAdapter,
+        String retrievalStatus,
+        boolean fallbackToFormal
 ) {
 }

@@ -47,7 +47,7 @@
 
 - “更新项目文档”场景：遵循 [`README.md`](README.md) 中“项目文档同步更新规范（12条，生效版）”以及 [`docs/engineering/collaboration-workflow.md`](docs/engineering/collaboration-workflow.md) 中的共享协作协议。
 - 团队成员需要了解“本项目怎么开发、不同动作用什么模型、`Claude Code（代码智能体）` 怎么启动、有哪些项目级工具入口”时，统一先读 [`docs/engineering/development-manual.md`](docs/engineering/development-manual.md)。
-- 项目正式设计内容的默认路由固定为：前端页面结构、导航、交互、状态表达和前端评审留痕写入 [`docs/architecture/frontend-workbench-design.md`](docs/architecture/frontend-workbench-design.md)；方案对象、运行主线、接口契约和治理边界写入 [`docs/architecture/system-design.md`](docs/architecture/system-design.md)；已经从主方案拆出的场景级特性文档写入 [`docs/architecture/features/README.md`](docs/architecture/features/README.md) 所在目录。特性文档是主方案的展开，不是并行真源；同一需求若同时影响两类内容，必须拆分回写，不等待用户提醒。
+- 项目正式设计内容的默认路由固定为：前端页面结构、导航、交互、状态表达和前端评审留痕写入 [`docs/architecture/frontend-workbench-design.md`](docs/architecture/frontend-workbench-design.md)；方案对象、运行主线、接口契约和治理边界写入 [`docs/architecture/system-design.md`](docs/architecture/system-design.md)；已经从主方案拆出的场景级特性文档与经路线稿明确拆出的专题特性文档写入 [`docs/architecture/features/README.md`](docs/architecture/features/README.md) 所在目录。特性文档是主方案的展开，不是并行真源；同一需求若同时影响两类内容，必须拆分回写，不等待用户提醒。
 - 团队内部“当前开发进度 / 下个阶段工作”的默认路由固定为 [`docs/engineering/current-delivery-status.md`](docs/engineering/current-delivery-status.md)；它只承载当前事实、下一动作、阻塞项与任务接力，不替代正式设计文档和实施计划。
 - 文档更新时，英文术语、缩写、变量名、常量名、指标名都要附中文解释；若术语表缺项，先补 [`docs/glossary.md`](docs/glossary.md)。
 - 协作工作流基线固定在 [`docs/engineering/collaboration-workflow.md`](docs/engineering/collaboration-workflow.md)。

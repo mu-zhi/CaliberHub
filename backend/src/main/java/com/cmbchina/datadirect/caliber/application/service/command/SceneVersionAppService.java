@@ -30,6 +30,7 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.Sou
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.SourceIntakeContractPO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +59,7 @@ public class SceneVersionAppService {
     private final ContractViewMapper contractViewMapper;
     private final SourceContractMapper sourceContractMapper;
     private final ObjectMapper objectMapper;
+    private com.cmbchina.datadirect.caliber.application.service.command.graphrag.ExperimentalRetrievalIndexSyncService experimentalRetrievalIndexSyncService;
 
     public SceneVersionAppService(SceneMapper sceneMapper,
                                   SceneVersionMapper sceneVersionMapper,
@@ -72,6 +74,37 @@ public class SceneVersionAppService {
                                   ContractViewMapper contractViewMapper,
                                   SourceContractMapper sourceContractMapper,
                                   ObjectMapper objectMapper) {
+        this(sceneMapper,
+                sceneVersionMapper,
+                planMapper,
+                outputContractMapper,
+                coverageDeclarationMapper,
+                policyMapper,
+                planPolicyRefMapper,
+                sourceIntakeContractMapper,
+                evidenceFragmentMapper,
+                inputSlotSchemaMapper,
+                contractViewMapper,
+                sourceContractMapper,
+                objectMapper,
+                null);
+    }
+
+    @Autowired
+    public SceneVersionAppService(SceneMapper sceneMapper,
+                                  SceneVersionMapper sceneVersionMapper,
+                                  PlanMapper planMapper,
+                                  OutputContractMapper outputContractMapper,
+                                  CoverageDeclarationMapper coverageDeclarationMapper,
+                                  PolicyMapper policyMapper,
+                                  PlanPolicyRefMapper planPolicyRefMapper,
+                                  SourceIntakeContractMapper sourceIntakeContractMapper,
+                                  EvidenceFragmentMapper evidenceFragmentMapper,
+                                  InputSlotSchemaMapper inputSlotSchemaMapper,
+                                  ContractViewMapper contractViewMapper,
+                                  SourceContractMapper sourceContractMapper,
+                                  ObjectMapper objectMapper,
+                                  com.cmbchina.datadirect.caliber.application.service.command.graphrag.ExperimentalRetrievalIndexSyncService experimentalRetrievalIndexSyncService) {
         this.sceneMapper = sceneMapper;
         this.sceneVersionMapper = sceneVersionMapper;
         this.planMapper = planMapper;
@@ -85,6 +118,13 @@ public class SceneVersionAppService {
         this.contractViewMapper = contractViewMapper;
         this.sourceContractMapper = sourceContractMapper;
         this.objectMapper = objectMapper;
+        this.experimentalRetrievalIndexSyncService = experimentalRetrievalIndexSyncService;
+    }
+
+    @Autowired(required = false)
+    void setExperimentalRetrievalIndexSyncService(
+            com.cmbchina.datadirect.caliber.application.service.command.graphrag.ExperimentalRetrievalIndexSyncService experimentalRetrievalIndexSyncService) {
+        this.experimentalRetrievalIndexSyncService = experimentalRetrievalIndexSyncService;
     }
 
     @Transactional
@@ -148,6 +188,17 @@ public class SceneVersionAppService {
         SceneVersionPO saved = sceneVersionMapper.save(po);
         if (bindAssets) {
             bindAssets(scene.getId(), saved.getId(), versionTag, now);
+            if (experimentalRetrievalIndexSyncService != null) {
+                experimentalRetrievalIndexSyncService.syncSnapshotManifest(
+                        scene.getId(),
+                        saved.getId(),
+                        scene.getSceneCode(),
+                        versionTag,
+                        po.getPublishStatus(),
+                        po.getSnapshotSummaryJson(),
+                        operator
+                );
+            }
         }
         return toDTO(saved);
     }

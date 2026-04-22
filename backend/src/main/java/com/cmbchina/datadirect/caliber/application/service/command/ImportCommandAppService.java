@@ -10,6 +10,8 @@ import com.cmbchina.datadirect.caliber.application.api.dto.response.PreprocessSc
 import com.cmbchina.datadirect.caliber.application.api.dto.response.SceneDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.StageTimingDTO;
 import com.cmbchina.datadirect.caliber.application.support.LlmPreprocessSupport;
+import com.cmbchina.datadirect.caliber.application.support.PreprocessExperimentSupport;
+import com.cmbchina.datadirect.caliber.infrastructure.module.supportimpl.application.LightRagPreprocessExperimentSupportImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -62,18 +64,19 @@ public class ImportCommandAppService {
     private final SceneCommandAppService sceneCommandAppService;
     private final ImportTaskCommandAppService importTaskCommandAppService;
     private final ImportCandidateGraphAssembler importCandidateGraphAssembler;
+    private final PreprocessExperimentSupport preprocessExperimentSupport;
 
     public ImportCommandAppService(LlmPreprocessSupport llmPreprocessSupport,
                                    ObjectMapper objectMapper,
                                    MeterRegistry meterRegistry) {
-        this(llmPreprocessSupport, objectMapper, meterRegistry, null, null, new ImportCandidateGraphAssembler());
+        this(llmPreprocessSupport, objectMapper, meterRegistry, null, null, new ImportCandidateGraphAssembler(), new LightRagPreprocessExperimentSupportImpl(objectMapper));
     }
 
     public ImportCommandAppService(LlmPreprocessSupport llmPreprocessSupport,
                                    ObjectMapper objectMapper,
                                    MeterRegistry meterRegistry,
                                    SceneCommandAppService sceneCommandAppService) {
-        this(llmPreprocessSupport, objectMapper, meterRegistry, sceneCommandAppService, null, new ImportCandidateGraphAssembler());
+        this(llmPreprocessSupport, objectMapper, meterRegistry, sceneCommandAppService, null, new ImportCandidateGraphAssembler(), new LightRagPreprocessExperimentSupportImpl(objectMapper));
     }
 
     @Autowired
@@ -82,13 +85,17 @@ public class ImportCommandAppService {
                                    MeterRegistry meterRegistry,
                                    SceneCommandAppService sceneCommandAppService,
                                    ImportTaskCommandAppService importTaskCommandAppService,
-                                   ImportCandidateGraphAssembler importCandidateGraphAssembler) {
+                                   ImportCandidateGraphAssembler importCandidateGraphAssembler,
+                                   PreprocessExperimentSupport preprocessExperimentSupport) {
         this.llmPreprocessSupport = llmPreprocessSupport;
         this.objectMapper = objectMapper;
         this.meterRegistry = meterRegistry;
         this.sceneCommandAppService = sceneCommandAppService;
         this.importTaskCommandAppService = importTaskCommandAppService;
         this.importCandidateGraphAssembler = importCandidateGraphAssembler;
+        this.preprocessExperimentSupport = preprocessExperimentSupport == null
+                ? new LightRagPreprocessExperimentSupportImpl(objectMapper)
+                : preprocessExperimentSupport;
     }
 
     public PreprocessResultDTO preprocess(PreprocessImportCmd cmd) {
@@ -141,6 +148,7 @@ public class ImportCommandAppService {
             PreprocessResultDTO base = measured("llm_force", () -> llmPreprocessSupport.preprocessToCaliberImportV2ByLlm(
                     cmd.rawText(), cmd.sourceType(), cmd.sourceName()
             ));
+            base = attachPreprocessExperiment(base, importBatchId, materialId);
             StageTimingDTO extractStage = stage(
                     STAGE_EXTRACT,
                     "抽取识别",
@@ -266,6 +274,7 @@ public class ImportCommandAppService {
             long extractStart = now();
             if (chunks.size() == 1) {
                 base = preprocessDirect(cmd);
+                base = attachPreprocessExperiment(base, importBatchId, materialId);
                 StageTimingDTO extractStage = stage(
                         STAGE_EXTRACT,
                         "抽取识别",
@@ -336,6 +345,7 @@ public class ImportCommandAppService {
 
                 long mergeStart = now();
                 base = mergeChunkResults(chunkResults);
+                base = attachPreprocessExperiment(base, importBatchId, materialId);
                 StageTimingDTO mergeStage = stage(
                         STAGE_MERGE,
                         "结果合并",
@@ -870,7 +880,7 @@ public class ImportCommandAppService {
         return new PreprocessResultDTO(
                 base.caliberImportJson(),
                 base.mode(),
-                base.global(),
+                enrichGlobalWithExperiment(base.global(), base.preprocessExperiment()),
                 base.scenes(),
                 base.quality(),
                 base.warnings(),
@@ -882,8 +892,86 @@ public class ImportCommandAppService {
                 stageTimings,
                 sceneDrafts,
                 importBatchId,
-                materialId == null ? base.materialId() : materialId
+                materialId == null ? base.materialId() : materialId,
+                base.preprocessExperiment(),
+                base.referenceRefs(),
+                base.formalAssetWrites()
         );
+    }
+
+    private JsonNode enrichGlobalWithExperiment(JsonNode global, JsonNode preprocessExperiment) {
+        ObjectNode result = global != null && global.isObject()
+                ? ((ObjectNode) global).deepCopy()
+                : objectMapper.createObjectNode();
+        if (preprocessExperiment != null && !preprocessExperiment.isMissingNode() && !preprocessExperiment.isNull()) {
+            result.set("preprocess_experiment", preprocessExperiment.deepCopy());
+        }
+        return result;
+    }
+
+    private PreprocessResultDTO attachPreprocessExperiment(PreprocessResultDTO base, String importTaskId, String materialId) {
+        if (base == null || preprocessExperimentSupport == null) {
+            return base;
+        }
+        PreprocessExperimentSupport.PreprocessExperimentResult experiment = preprocessExperimentSupport.run(
+                new PreprocessExperimentSupport.PreprocessExperimentRequest(
+                        importTaskId,
+                        materialId == null ? base.materialId() : materialId,
+                        collectNormalizedChunks(base),
+                        List.of(),
+                        List.of("TEXT", "PDF"),
+                        importTaskId == null ? "trace-import" : "trace-" + importTaskId,
+                        base
+                )
+        );
+        return new PreprocessResultDTO(
+                base.caliberImportJson(),
+                base.mode(),
+                base.global(),
+                base.scenes(),
+                base.quality(),
+                base.warnings(),
+                base.confidenceScore(),
+                base.confidenceLevel(),
+                base.lowConfidence(),
+                base.totalElapsedMs(),
+                base.candidateGraph(),
+                base.stageTimings(),
+                base.sceneDrafts(),
+                base.importBatchId(),
+                materialId == null ? base.materialId() : materialId,
+                objectMapper.valueToTree(experiment),
+                experiment.referenceRefs(),
+                experiment.formalAssetWrites()
+        );
+    }
+
+    private List<String> collectNormalizedChunks(PreprocessResultDTO base) {
+        List<String> chunks = new ArrayList<>();
+        if (base == null) {
+            return chunks;
+        }
+        if (base.scenes() != null) {
+            for (JsonNode scene : base.scenes()) {
+                String title = safeText(scene.path("scene_title"), null);
+                if (title != null) {
+                    chunks.add(title);
+                }
+                JsonNode variants = scene.path("sql_variants");
+                if (variants.isArray()) {
+                    variants.forEach(variant -> {
+                        String sqlText = safeText(variant.path("sql_text"), null);
+                        if (sqlText != null) {
+                            chunks.add(sqlText);
+                        }
+                    });
+                }
+            }
+        }
+        if (chunks.isEmpty() && base.global() != null) {
+            chunks.add(base.global().toString());
+        }
+        return chunks;
     }
 
     private ImportGraphPatchDTO buildGraphPatch(CandidateGraphDTO graph,

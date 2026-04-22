@@ -45,6 +45,26 @@ describe("importLiveGraphState", () => {
     expect(withSecondPatch.lastPatchSeq).toBe(2);
   });
 
+  it("stores preprocess experiment summary from final snapshot", () => {
+    const restored = restoreImportLiveGraphSnapshot(createImportLiveGraphState(), {
+      nodes: [
+        { id: "scene-1", nodeType: "CANDIDATE_SCENE", label: "代发明细查询", status: "PENDING_CONFIRMATION", confidenceScore: 0.9, evidenceRefs: ["scene:0:lines:11-13"] },
+      ],
+      edges: [],
+    }, {
+      experimentSummary: {
+        adapterName: "LightRAG",
+        adapterVersion: "simulated-v1",
+        referenceRefs: ["scene:0:lines:11-13"],
+        warnings: ["experimental_candidates_only"],
+      },
+    });
+
+    expect(restored.experimentSummary.adapterName).toBe("LightRAG");
+    expect(restored.experimentSummary.referenceRefs).toContain("scene:0:lines:11-13");
+    expect(restored.summaryMessage).toContain("已恢复");
+  });
+
   it("restores final snapshot and keeps valid node selection", () => {
     const state = selectImportLiveGraphNode(
       restoreImportLiveGraphSnapshot(createImportLiveGraphState(), {

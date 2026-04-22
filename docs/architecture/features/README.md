@@ -19,6 +19,7 @@
 - [`02c-preprocess-structured-output-and-prompt-governance.md`](iteration-01-knowledge-production/02c-preprocess-structured-output-and-prompt-governance.md)：预处理结构化输出与 Prompt 治理
 - [`02d-knowledge-task-mainline-finalization.md`](iteration-01-knowledge-production/02d-knowledge-task-mainline-finalization.md)：知识生产台任务主线页收口
 - [`02e-knowledge-production-real-service-e2e-hardening.md`](iteration-01-knowledge-production/02e-knowledge-production-real-service-e2e-hardening.md)：知识生产台真实服务 E2E 收口
+- [`02f-rag-预处理实验适配与候选回写.md`](iteration-01-knowledge-production/02f-rag-预处理实验适配与候选回写.md)：RAG 预处理实验适配与候选回写
 - [`03-资产建模与治理对象编辑.md`](iteration-01-knowledge-production/03-资产建模与治理对象编辑.md)：资产建模与治理对象编辑
 - [`03a-dictionary-governance.md`](iteration-01-knowledge-production/03a-dictionary-governance.md)：字典治理
 - [`04-推理校验与推理链复核.md`](iteration-01-knowledge-production/04-推理校验与推理链复核.md)：推理校验与推理链复核
@@ -35,6 +36,9 @@
 - [`12a-首页总览与状态分发.md`](iteration-02-runtime-and-governance/12a-首页总览与状态分发.md)：首页总览与状态分发
 - [`07-发布检查、灰度发布与回滚.md`](iteration-02-runtime-and-governance/07-发布检查、灰度发布与回滚.md)：发布检查、灰度发布与回滚
 - [`08-运行决策与知识包生成.md`](iteration-02-runtime-and-governance/08-运行决策与知识包生成.md)：运行决策与知识包生成
+- [`08b-rag-运行检索增强侧车与候选合并.md`](iteration-02-runtime-and-governance/08b-rag-运行检索增强侧车与候选合并.md)：RAG 运行检索增强侧车与候选合并
+- [`08c-已发布快照检索索引同步与版本锁定.md`](iteration-02-runtime-and-governance/08c-已发布快照检索索引同步与版本锁定.md)：已发布快照检索索引同步与版本锁定
+- [`08d-检索实验评测、灰度与运行观测.md`](iteration-02-runtime-and-governance/08d-检索实验评测、灰度与运行观测.md)：检索实验评测、灰度与运行观测
 - [`09-审批与导出.md`](iteration-02-runtime-and-governance/09-审批与导出.md)：审批与导出
 - [`10-数据地图浏览与覆盖追踪.md`](iteration-02-runtime-and-governance/10-数据地图浏览与覆盖追踪.md)：数据地图浏览与覆盖追踪
 - [`11-监控审计与影响分析.md`](iteration-02-runtime-and-governance/11-监控审计与影响分析.md)：监控审计与影响分析

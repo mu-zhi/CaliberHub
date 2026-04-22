@@ -137,17 +137,20 @@
 | --- | --- | --- |
 | `Source Intake Service（来源接入服务）` | 接收原始材料、校验 `Source Intake Contract（来源接入契约）`、生成导入任务与缺口任务 | 治理 / 数据产品 |
 | `Parsing & Evidence Service（解析与证据服务）` | 解析文档、`SQL（结构化查询语言，Structured Query Language）`、工单，提取证据片段与候选资产 | 数据研发 |
+| `Preprocess Experiment Adapter（预处理实验适配器）` | 在材料标准化后调用实验引擎，生成候选实体、候选关系、候选证据与引用元数据，只回写候选层 | 数据研发 / 平台研发 |
 | `Asset Registry Service（资产注册服务）` | 维护资产主键、版本、关系、状态机与缓存刷新，支撑资产建模 | 平台研发 |
 | `Inference Build Service（推理构建服务）` | 在知识生产期执行候选三元组收敛、确定性推理、置信度推理、冲突检测、推理链生成和候选结论归档，并把正式生效候选送入复核与发布 | 数据研发 |
 | `Metadata Alignment Service（元数据对齐服务）` | 校验建模阶段声明的逻辑字段，对齐表、快照周期与可用性，生成 `Source Contract（来源契约）` | 数据研发 |
 | `Review & Publish Service（复核与发布服务）` | 组织业务、技术、合规复核，执行发布门禁与快照切换 | 治理 + 研发 |
 | `Inference Runtime Service（运行推理服务）` | 只读取当前已发布推理资产，完成标识收敛、时间语义收敛、关系补全、候选路径收敛和解释链拼装，并向场景、方案和路径决策输出标准化推理断言 | 运行服务 |
+| `Retrieval Experiment Adapter（运行检索实验适配器）` | 在 `Query Rewrite（查询改写）` / `Slot Filling（槽位补齐）` 与正式场景召回之间补充候选场景、统一实体和证据引用，结果只作为候选输入，不直接决定正式结果 | 运行服务 |
 | `Scene Recall Service（场景召回服务）` | 按问题与槽位召回 `Domain（业务领域）` / `Scene（业务场景）` 候选 | 运行服务 |
 | `Plan Selection Service（方案选择服务）` | 按输入槽位、`Coverage Declaration（覆盖声明）`、`Policy（策略对象）`、`Source Contract（来源契约）` 过滤并选择可运行 `Plan（方案资产）` | 运行服务 |
 | `Coverage Engine（覆盖引擎）` | 对 `Coverage Declaration（覆盖声明）` 与 `Coverage Segment（覆盖分段）` 做命中判定、完整度判断、回退动作选择与覆盖解释生成 | 运行服务 |
 | `Policy Decision Service（策略决策服务）` | 输出 `allow（允许）` / `need_approval（需要审批）` / `deny（拒绝）`，并给出字段级视图 | 运行服务 |
 | `Path Template / Graph Query Service（路径模板 / 图查询服务）` | 在运行推理服务给出的合格推理断言和候选路径范围内走模板或受限图查询 | 运行服务 |
 | `Knowledge Package API（知识包接口）` | 统一对外提供知识包、错误码与追踪信息 | 运行服务 |
+| `Retrieval Index Sync Service（检索索引同步服务）` | 按已发布 `snapshot_id（快照标识）` 导出摘要、构建实验检索索引版本、处理回滚与退役映射 | 平台研发 |
 | `Data Map Portal（数据地图门户）` | 提供浏览、追溯、差异、发布与运维视图 | 治理产品 |
 | `Audit & Monitoring Service（审计与监控服务）` | 聚合事件、指标、告警与运行日志 | 运维 / SRE |
 
@@ -272,6 +275,10 @@
 10. `graph_patch` 必须表达“增量补丁”而不是“整图快照”，至少包含 `patchSeq（补丁序号）`、`stageKey（阶段键）`、`chunkIndex（分块序号）`、`chunkTotal（分块总数）`、`addedNodes（新增节点列表）`、`updatedNodes（更新节点列表）`、`addedEdges（新增边列表）`、`updatedEdges（更新边列表）`、`focusNodeIds（当前焦点节点列表）` 和 `summary（本批次摘要）`。
 11. 候选图导入中不做硬删除；若发生实体归一、别名合并或关系修正，旧节点 / 旧边先以 `merged（已合并）`、`superseded（被替代）`、`downgraded（降级待确认）` 等状态弱化显示，最终由 `done` 事件或后续正式确认动作完成收敛。
 12. 前端消费 `graph_patch` 时，只允许局部补丁更新和局部重排；最终 `done` 事件返回的完成态结果用于校准与补齐，不得反向覆盖掉用户在导入过程中的当前焦点和已展开详情。
+13. 候选图旁允许接入统一 `Preprocess Experiment Adapter（预处理实验适配器）`，但调用时点固定在“材料标准化完成后、正式解析抽取入库前”；它只输出候选实体、候选关系、候选证据与引用元数据，不直接生成正式 `Scene（业务场景）`、`Plan（方案资产）`、`Evidence Fragment（证据片段）` 或 `Source Contract（来源契约）`。
+14. `Preprocess Experiment Adapter（预处理实验适配器）` 的标准输入至少包含 `import_task_id（导入任务标识）`、`material_refs（材料引用列表）`、`normalized_chunks（标准化文本分块列表）`、`attachment_refs（附件引用列表）`、`allowed_modality_scope（允许模态范围）` 与 `trace_id（追踪编号）`；标准输出至少包含 `candidate_entities（候选实体列表）`、`candidate_relations（候选关系列表）`、`candidate_evidence（候选证据列表）`、`reference_refs（引用定位列表）`、`adapter_name（适配器名称）`、`adapter_version（适配器版本）` 与 `warnings（警告列表）`。
+15. 首轮允许以 `LightRAG（开源 GraphRAG 检索框架，LightRAG）` 作为首个适配器与回放对照，但产品名只属于实验实现层，不进入正式对象命名、真源表结构命名或发布契约命名。
+16. `Preprocess Experiment Adapter（预处理实验适配器）` 的结果只允许回写候选图、候选证据与实验运行记录；若引擎需要向量索引或临时图索引，必须使用任务级隔离命名空间，并随 `task_id（任务标识）` 退役，不得并入已发布主图、运行时快照或正式推理图。
 
 ### 5.1.1 `Contract View（契约视图）` 作为一等受治理资产
 
@@ -393,6 +400,14 @@
 2. 临时提示只有在被已发布 `Inference Assertion（推理结论）`、`Inference Rule（推理规则）`、`Source Contract（来源契约）` 或显式校验规则再次验证后，才能影响场景召回、方案选择或路径解析；否则只允许进入澄清问题。
 3. `Inference Runtime（运行推理）` 超时、推理断言缺失、阈值配置不可读或依赖服务熔断时，必须依次退化到 `deterministic_only（仅确定性推理）`、`template_only（仅模板路径）`、`clarification_only（仅澄清返回）`。
 4. 降级时必须返回结构化原因编码；若已经降级到 `clarification_only（仅澄清返回）` 仍不能形成受控结果，则返回受控拒绝或知识拆解结果，不返回未经验证的推理事实。
+
+### 6.2.3 运行检索实验适配层边界
+
+1. 运行面允许在 `Query Rewrite（查询改写）` / `Slot Filling（槽位补齐）` 完成后、正式 `Scene Recall（场景召回）` 排序前调用统一 `Retrieval Experiment Adapter（运行检索实验适配器）`；它只负责补候选，不替代正式九步主链路。
+2. `Retrieval Experiment Adapter（运行检索实验适配器）` 的标准输入至少包含 `query_text（原始问题文本）`、`structured_slots（结构化槽位）`、`domain_scope（业务域范围）`、`snapshot_id（快照标识）`、`allowed_evidence_scope（允许证据范围）` 与 `trace_id（追踪编号）`；标准输出至少包含 `candidate_scenes（候选场景列表）`、`candidate_entities（候选实体列表）`、`candidate_evidence（候选证据列表）`、`reference_refs（引用定位列表）`、`score_breakdown（分数组成）` 与 `adapter_metadata（适配器元数据）`。
+3. 实验适配器输出只允许作为 `Scene Recall Service（场景召回服务）`、`Plan Selection Service（方案选择服务）` 和知识包调试块的候选输入；正式命中结果仍由已发布 `Scene（业务场景）`、`Plan（方案资产）`、`Coverage Declaration（覆盖声明）`、`Policy（策略对象）` 和 `Output Contract（输出契约）` 共同决定。
+4. 当 `Retrieval Experiment Adapter（运行检索实验适配器）` 超时、失败、返回空集或索引版本不可读时，运行面必须直接退回现有正式召回路径；失败本身只能影响实验观测与调试块，不得改变 `allow（允许）` / `need_approval（需要审批）` / `deny（拒绝）` 正式结果。
+5. `Retrieval Experiment Adapter（运行检索实验适配器）` 只能读取与当前 `snapshot_id（快照标识）` 绑定的 `Experimental Retrieval Index（实验检索索引）`；若该索引不存在、已退役或版本不匹配，只允许降级，不允许跨快照混读。
 
 ### 6.3 审批与导出流程
 
@@ -518,6 +533,12 @@
 | 对象存储 | 原始文档、`SQL（结构化查询语言，Structured Query Language）`、截图、导出附件、审计文件 | 原文留存与低成本归档 |
 
 知识生产期的 `Candidate Entity Graph（候选实体图谱）` 可复用图存储能力，但必须使用独立任务级命名空间或隔离 `graph_id`，禁止与已发布主图、运行时快照和正式推理图混存。
+
+运行面在通用向量索引之外，允许维护按 `snapshot_id（快照标识）` 锁定的 `Experimental Retrieval Index（实验检索索引）`。它只保存已发布 `Scene（业务场景）`、`Plan（方案资产）`、`Evidence Fragment（证据片段）`、`Canonical Entity（统一实体）` 摘要、引用锚点和索引版本映射，用于回放评测、`Shadow Mode（影子模式）` 和检索增强侧车，不承担正式真源。
+
+1. `Experimental Retrieval Index（实验检索索引）` 只接收 `PUBLISHED（已发布）` 快照摘要，禁止导入 `DRAFT（草稿）`、候选态、待复核态或未通过发布门禁的对象。
+2. 每个 `snapshot_id（快照标识）` 只能绑定一个当前有效的实验索引版本；发布、回滚和退役都必须同步刷新这组映射，避免运行时索引漂移。
+3. 实验索引可以采用图索引、向量索引或混合索引实现，但任何实现都只能做只读召回和回放评测，不能反向写控制库、修改统一实体归属或补写正式推理事实。
 
 | 事件 / 日志库 | 发布事件、审批事件、接口调用、告警事件、审计明细 | 监控与审计 |
 

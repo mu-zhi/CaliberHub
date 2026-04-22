@@ -1172,6 +1172,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
       return restoreImportLiveGraphSnapshot(prev, snapshot, {
         stageKey: "finalize",
         stageName: "导入完成",
+        experimentSummary: response?.preprocessExperiment || null,
       });
     });
 
@@ -2362,6 +2363,7 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
           <div>
             <h3>次级结果区</h3>
             <p>场景队列、原文对照、候选图谱和导入明细统一收纳为辅助结果，不再与当前任务主线并列抢焦点。</p>
+            <p className="subtle-note">实验候选仅进入候选层，不会直接写入正式治理资产。</p>
           </div>
         </div>
         <div className="import-best-practice-grid">
@@ -2614,6 +2616,18 @@ export function KnowledgePage({ preset = "import", entry = "ingest" }) {
                 setImportLiveGraphState((prev) => selectImportLiveGraphNode(prev, nodeId));
               }}
             />
+            <div className="import-stage-strip">
+              <div className="import-stage-head">
+                <strong>实验候选仅进入候选层</strong>
+                <span>{importLiveGraphState?.experimentSummary?.adapterName || "LightRAG"} 侧车</span>
+              </div>
+              <p className="subtle-note">
+                实验引擎只补候选实体、候选关系和证据引用，不直接写入正式治理资产。
+                {importLiveGraphState?.experimentSummary?.referenceRefs?.length
+                  ? ` 当前引用 ${importLiveGraphState.experimentSummary.referenceRefs.length} 条。`
+                  : " 当前等待最终导入结果回传引用。"}
+              </p>
+            </div>
             {isImportPreset ? (
               <div className="import-task-board">
                 <div className="import-task-board-head">

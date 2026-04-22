@@ -25,6 +25,7 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotMembershipMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.CanonicalSnapshotRelationVisibilityMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.IdentifierLineageMapper;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.ExperimentalRetrievalIndexManifestMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.mapper.graphrag.TimeSemanticSelectorMapper;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.ScenePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalEntityMembershipPO;
@@ -33,6 +34,7 @@ import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.Can
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotMembershipPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.CanonicalSnapshotRelationVisibilityPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.DictionaryPO;
+import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.ExperimentalRetrievalIndexManifestPO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.IdentifierLineagePO;
 import com.cmbchina.datadirect.caliber.infrastructure.module.dao.po.graphrag.TimeSemanticSelectorPO;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -89,6 +91,12 @@ class CanonicalSnapshotBindingServiceTest {
 
     @Autowired
     private TimeSemanticSelectorMapper timeSemanticSelectorMapper;
+
+    @Autowired
+    private ExperimentalRetrievalIndexManifestMapper experimentalRetrievalIndexManifestMapper;
+
+    @Autowired
+    private ExperimentalRetrievalIndexSyncService experimentalRetrievalIndexSyncService;
 
     @MockBean
     private CaliberDictSyncService caliberDictSyncService;
@@ -161,6 +169,30 @@ class CanonicalSnapshotBindingServiceTest {
         assertThat(frozenRelations.get(0).getSourceCanonicalEntityId()).isEqualTo(outputEntity.getId());
         assertThat(frozenRelations.get(0).getTargetCanonicalEntityId()).isEqualTo(evidenceEntity.getId());
         assertThat(frozenRelations.get(0).getRelationType()).isEqualTo("SUPPORTED_BY");
+    }
+
+    @Test
+    void shouldPersistPublishedSnapshotIndexManifestWhenPublishingScene() {
+        Long sceneId = seedScene();
+        seedRequiredGovernanceAssets(sceneId);
+
+        SceneDTO published = sceneCommandAppService.publish(sceneId, new PublishSceneCmd(
+                OffsetDateTime.now(),
+                "冻结检索索引版本",
+                "publisher"
+        ));
+
+        ExperimentalRetrievalIndexManifestPO manifest = experimentalRetrievalIndexManifestMapper
+                .findBySceneIdAndSnapshotId(sceneId, published.snapshotId())
+                .orElseThrow();
+
+        assertThat(manifest.getSnapshotId()).isEqualTo(published.snapshotId());
+        assertThat(manifest.getSourceStatus()).isEqualTo("PUBLISHED");
+        assertThat(manifest.getDraftLeakCount()).isZero();
+        assertThat(experimentalRetrievalIndexSyncService.resolveLockedIndexVersion(sceneId, published.snapshotId()))
+                .contains(manifest.getIndexVersion());
+        assertThat(experimentalRetrievalIndexSyncService.resolveLockedIndexVersion(sceneId, published.snapshotId() + 1))
+                .isEmpty();
     }
 
     private Long seedScene() {
@@ -511,6 +543,18 @@ class CanonicalSnapshotBindingServiceTest {
                     inputSlotSchemaMapper,
                     contractViewMapper,
                     sourceContractMapper,
+                    objectMapper
+            );
+        }
+
+        @Bean
+        ExperimentalRetrievalIndexSyncService experimentalRetrievalIndexSyncService(
+                ExperimentalRetrievalIndexManifestMapper experimentalRetrievalIndexManifestMapper,
+                SceneVersionMapper sceneVersionMapper,
+                com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
+            return new ExperimentalRetrievalIndexSyncService(
+                    experimentalRetrievalIndexManifestMapper,
+                    sceneVersionMapper,
                     objectMapper
             );
         }

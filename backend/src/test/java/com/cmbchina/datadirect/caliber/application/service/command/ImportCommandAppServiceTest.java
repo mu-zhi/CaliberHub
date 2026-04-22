@@ -262,6 +262,66 @@ class ImportCommandAppServiceTest {
         verify(llmPreprocessSupport, never()).preprocessToCaliberImportV2ByLlm(cmd.rawText(), "PASTE_MD", "rule.md");
     }
 
+    @Test
+    void shouldExposePreprocessExperimentSummaryWithoutFormalWrites() {
+        ImportCommandAppService importCommandAppService = newService();
+        PreprocessImportCmd cmd = new PreprocessImportCmd(
+                """
+                ### 场景标题：按协议号查询代发明细
+                - 结果字段：交易金额、交易日期
+                - 注意事项：历史查询需核对来源表
+                -- Step 1：当前表方案
+                SELECT TRX_AMT, TRX_DT
+                FROM PDM_VHIS.T05_AGN_DTL
+                WHERE MCH_AGR_NBR='${AGR_ID}';
+                """,
+                "PASTE_MD",
+                "experiment.md",
+                "RULE_ONLY",
+                false,
+                "tester"
+        );
+        String responseJson = """
+                {
+                  "doc_type": "CALIBER_IMPORT_V2",
+                  "schema_version": "2.0.0",
+                  "source_type": "PASTE_MD",
+                  "global": {},
+                  "scenes": [
+                    {
+                      "scene_title": "按协议号查询代发明细",
+                      "source_evidence_lines": [4, 5, 6],
+                      "inputs": {"params": [{"name":"协议号","type":"STRING","required":true}]},
+                      "outputs": {"fields": [{"name":"交易金额"},{"name":"交易日期"}]},
+                      "sql_variants": [
+                        {
+                          "variant_name": "当前表方案",
+                          "source_tables": ["PDM_VHIS.T05_AGN_DTL"],
+                          "source_columns": ["TRX_AMT","TRX_DT"],
+                          "join_relations": [{"label":"T01_PROTOCOL.ID = T05_AGN_DTL.PROTOCOL_ID"}]
+                        }
+                      ],
+                      "quality": {"confidence": 0.91, "warnings": [], "errors": []}
+                    }
+                  ],
+                  "quality": {"confidence": 0.91, "warnings": [], "errors": []},
+                  "parse_report": {"warnings": [], "errors": []},
+                  "_meta": {"mode": "rule_generated"}
+                }
+                """;
+        when(llmPreprocessSupport.preprocessToCaliberImportV2(eq(cmd.rawText()), eq("PASTE_MD"), eq("experiment.md")))
+                .thenReturn(responseJson);
+
+        PreprocessResultDTO result = importCommandAppService.preprocess(cmd);
+
+        assertThat(result.preprocessExperiment()).isNotNull();
+        assertThat(result.preprocessExperiment().path("adapterName").asText()).isEqualTo("LightRAG");
+        assertThat(result.preprocessExperiment().path("adapterVersion").asText()).isNotBlank();
+        assertThat(result.referenceRefs()).isNotEmpty();
+        assertThat(result.formalAssetWrites()).isEmpty();
+        assertThat(result.global().path("preprocess_experiment").path("adapterName").asText()).isEqualTo("LightRAG");
+    }
+
     private String buildLargeRawText() {
         StringBuilder builder = new StringBuilder();
         for (int i = 1; i <= 320; i++) {

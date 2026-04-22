@@ -6,12 +6,15 @@ import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.Kno
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackageCoverageDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackageDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackageEvidenceDTO;
+import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackageExperimentDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackagePathDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackagePlanDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackagePolicyDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackageRiskDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackageSceneDTO;
 import com.cmbchina.datadirect.caliber.application.api.dto.response.graphrag.KnowledgePackageTraceDTO;
+import com.cmbchina.datadirect.caliber.application.support.RetrievalExperimentSupport;
+import com.cmbchina.datadirect.caliber.application.service.command.graphrag.ExperimentalRetrievalIndexSyncService;
 import com.cmbchina.datadirect.caliber.application.service.command.graphrag.GraphAuditEventAppService;
 import com.cmbchina.datadirect.caliber.application.service.graphrag.GraphAssetSupport;
 import com.cmbchina.datadirect.caliber.domain.model.SceneStatus;
@@ -48,6 +51,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -71,6 +75,8 @@ public class KnowledgePackageQueryAppService {
     private final InputSlotSchemaMapper inputSlotSchemaMapper;
     private final GraphAssetSupport graphAssetSupport;
     private final GraphAuditEventAppService graphAuditEventAppService;
+    private final RetrievalExperimentSupport retrievalExperimentSupport;
+    private final ExperimentalRetrievalIndexSyncService experimentalRetrievalIndexSyncService;
 
     public KnowledgePackageQueryAppService(SceneMapper sceneMapper,
                                            SceneVersionMapper sceneVersionMapper,
@@ -85,7 +91,9 @@ public class KnowledgePackageQueryAppService {
                                            EvidenceFragmentMapper evidenceFragmentMapper,
                                            InputSlotSchemaMapper inputSlotSchemaMapper,
                                            GraphAssetSupport graphAssetSupport,
-                                           GraphAuditEventAppService graphAuditEventAppService) {
+                                           GraphAuditEventAppService graphAuditEventAppService,
+                                           RetrievalExperimentSupport retrievalExperimentSupport,
+                                           ExperimentalRetrievalIndexSyncService experimentalRetrievalIndexSyncService) {
         this.sceneMapper = sceneMapper;
         this.sceneVersionMapper = sceneVersionMapper;
         this.planMapper = planMapper;
@@ -100,6 +108,8 @@ public class KnowledgePackageQueryAppService {
         this.inputSlotSchemaMapper = inputSlotSchemaMapper;
         this.graphAssetSupport = graphAssetSupport;
         this.graphAuditEventAppService = graphAuditEventAppService;
+        this.retrievalExperimentSupport = retrievalExperimentSupport;
+        this.experimentalRetrievalIndexSyncService = experimentalRetrievalIndexSyncService;
     }
 
     public KnowledgePackageDTO query(KnowledgePackageQueryCmd cmd) {
@@ -111,35 +121,46 @@ public class KnowledgePackageQueryAppService {
         LocalDate dateFrom = graphAssetSupport.parseDate(cmd.dateFrom());
         LocalDate dateTo = graphAssetSupport.parseDate(cmd.dateTo());
         List<String> requestedFields = normalizeFields(cmd.requestedFields());
+        RetrievalExperimentSupport.RetrievalExperimentResult retrievalExperiment = retrieveExperiment(
+                traceId,
+                cmd,
+                queryText,
+                identifierType,
+                identifierValue,
+                requestedFields
+        );
 
         SceneRecallResult sceneRecall = recallScene(cmd, identifierType, queryText);
         if (sceneRecall.requiresClarification()) {
-            return clarification(traceId, sceneRecall.candidates(), operator);
+            return clarification(traceId, sceneRecall.candidates(), operator, retrievalExperiment);
         }
 
         if (identifierValue.isBlank() && queryText.isBlank()) {
             return deny(traceId, null, null, identifierType, identifierValue, null, null, null,
                     "GAP", null, null, List.of(),
-                    "IDENTIFIER_REQUIRED", "INPUT_INVALID", List.of("IDENTIFIER_REQUIRED"), "HIGH", List.of("标识值不能为空"), operator);
+                    "IDENTIFIER_REQUIRED", "INPUT_INVALID", List.of("IDENTIFIER_REQUIRED"), "HIGH", List.of("标识值不能为空"), operator, retrievalExperiment);
         }
         if (dateFrom != null && dateTo != null && dateFrom.isAfter(dateTo)) {
             return deny(traceId, null, null, identifierType, identifierValue, null, null, null,
                     "GAP", null, null, List.of(),
-                    "INVALID_DATE_RANGE", "INPUT_INVALID", List.of("INVALID_DATE_RANGE"), "HIGH", List.of("查询起始日期晚于结束日期"), operator);
+                    "INVALID_DATE_RANGE", "INPUT_INVALID", List.of("INVALID_DATE_RANGE"), "HIGH", List.of("查询起始日期晚于结束日期"), operator, retrievalExperiment);
         }
 
         ScenePO scene = sceneRecall.scene();
         if (scene == null) {
             return deny(traceId, null, null, identifierType, identifierValue, null, null, null,
                     "GAP", null, null, List.of(),
-                    "SCENE_NOT_FOUND", "NO_MATCH_SCENE", List.of("SCENE_NOT_FOUND"), "HIGH", List.of("未找到可用的代发明细已发布场景"), operator);
+                    "SCENE_NOT_FOUND", "NO_MATCH_SCENE", List.of("SCENE_NOT_FOUND"), "HIGH", List.of("未找到可用的代发明细已发布场景"), operator, retrievalExperiment);
         }
         SceneVersionPO latestVersion = resolveSnapshot(scene.getId(), cmd.snapshotId());
         Long snapshotId = latestVersion == null ? null : latestVersion.getId();
+        if (scene != null && snapshotId != null) {
+            experimentalRetrievalIndexSyncService.ensureSnapshotLock(scene.getId(), snapshotId, scene.getSceneCode(), operator);
+        }
         if (identifierValue.isBlank()) {
             return deny(traceId, scene, null, identifierType, identifierValue, null, null, latestVersion,
                     "GAP", null, null, List.of(),
-                    "IDENTIFIER_REQUIRED", "INPUT_INVALID", List.of("IDENTIFIER_REQUIRED"), "HIGH", List.of("标识值不能为空"), operator);
+                    "IDENTIFIER_REQUIRED", "INPUT_INVALID", List.of("IDENTIFIER_REQUIRED"), "HIGH", List.of("标识值不能为空"), operator, retrievalExperiment);
         }
 
         List<PlanPO> plans = publishedPlans(scene.getId(), snapshotId).stream()
@@ -154,7 +175,7 @@ public class KnowledgePackageQueryAppService {
                     match.coverageStatus(), match.segmentLabel(), match.coverageExplanation(), List.of(),
                     match.reasonCode(), deriveRuntimeMode("deny", match.coverageStatus(), match.reasonCode()),
                     normalizeDegradeReasonCodes(match.reasonCode()), riskLevel("deny"),
-                    List.of(match.coverageExplanation()), operator);
+                    List.of(match.coverageExplanation()), operator, retrievalExperiment);
         }
 
         ContractViewPO contractView = resolveContractView(scene.getId(), match.plan(), snapshotId);
@@ -187,6 +208,7 @@ public class KnowledgePackageQueryAppService {
                 policies,
                 evidences,
                 latestVersion,
+                retrievalExperiment,
                 buildResolutionSteps(identifierType, match.plan(), reasonCode),
                 riskLevel(decision),
                 riskReasons
@@ -742,6 +764,7 @@ public class KnowledgePackageQueryAppService {
                                             List<PolicyPO> policies,
                                             List<EvidenceFragmentPO> evidences,
                                             SceneVersionPO latestVersion,
+                                            RetrievalExperimentSupport.RetrievalExperimentResult retrievalExperiment,
                                             List<String> resolutionSteps,
                                             String riskLevel,
                                             List<String> riskReasons) {
@@ -799,20 +822,34 @@ public class KnowledgePackageQueryAppService {
                         matchedSourceContracts.stream().map(SourceContractPO::getSourceContractCode).toList()
                 ),
                 evidences.stream()
-                        .map(evidence -> new KnowledgePackageEvidenceDTO(evidence.getEvidenceCode(), evidence.getTitle(), evidence.getSourceAnchor()))
+                        .map(evidence -> new KnowledgePackageEvidenceDTO(
+                                evidence.getEvidenceCode(),
+                                evidence.getTitle(),
+                                evidence.getSourceAnchor(),
+                                "FORMAL_PLAN_EVIDENCE",
+                                evidence.getSourceAnchor(),
+                                evidence.getConfidenceScore()
+                        ))
                         .toList(),
                 new KnowledgePackageRiskDTO(riskLevel, riskReasons),
                 new KnowledgePackageTraceDTO(
                         null,
                         latestVersion == null ? null : latestVersion.getId(),
                         latestVersion == null ? null : latestVersion.getId(),
-                        latestVersion == null ? null : latestVersion.getVersionTag()
+                        latestVersion == null ? null : latestVersion.getVersionTag(),
+                        retrievalExperiment == null ? null : retrievalExperiment.adapterName(),
+                        retrievalExperiment == null ? null : retrievalExperiment.status(),
+                        retrievalExperiment != null && retrievalExperiment.fallbackToFormal()
                 ),
+                toExperiment(retrievalExperiment),
                 null
         );
     }
 
-    private KnowledgePackageDTO clarification(String traceId, List<SceneCandidate> candidates, String operator) {
+    private KnowledgePackageDTO clarification(String traceId,
+                                              List<SceneCandidate> candidates,
+                                              String operator,
+                                              RetrievalExperimentSupport.RetrievalExperimentResult retrievalExperiment) {
         List<SceneCandidate> selectedCandidates = candidates.stream().limit(2).toList();
 
         List<KnowledgePackageClarificationDTO.SceneCandidateDTO> sceneCandidateDtos = new ArrayList<>();
@@ -856,7 +893,16 @@ public class KnowledgePackageQueryAppService {
                 null,
                 List.of(),
                 new KnowledgePackageRiskDTO("MEDIUM", List.of("问题包含跨场景多意图，必须拆分为受控子问题后再继续检索")),
-                new KnowledgePackageTraceDTO(null, null, null, null),
+                new KnowledgePackageTraceDTO(
+                        null,
+                        null,
+                        null,
+                        null,
+                        retrievalExperiment == null ? null : retrievalExperiment.adapterName(),
+                        retrievalExperiment == null ? null : retrievalExperiment.status(),
+                        retrievalExperiment != null && retrievalExperiment.fallbackToFormal()
+                ),
+                toExperiment(retrievalExperiment),
                 clarification
         );
         result = withTrace(result, traceId);
@@ -900,7 +946,8 @@ public class KnowledgePackageQueryAppService {
                                      List<String> degradeReasonCodes,
                                      String riskLevel,
                                      List<String> riskReasons,
-                                     String operator) {
+                                     String operator,
+                                     RetrievalExperimentSupport.RetrievalExperimentResult retrievalExperiment) {
         FieldDecision fieldDecision = evaluateFields(outputContract, contractView, List.of());
         KnowledgePackageDTO result = buildResult(
                 "deny",
@@ -921,6 +968,7 @@ public class KnowledgePackageQueryAppService {
                 List.of(),
                 List.of(),
                 latestVersion,
+                retrievalExperiment,
                 buildResolutionSteps(identifierType, plan, reasonCode),
                 riskLevel,
                 riskReasons
@@ -948,9 +996,74 @@ public class KnowledgePackageQueryAppService {
                         traceId,
                         result.trace() == null ? null : result.trace().snapshotId(),
                         result.trace() == null ? null : result.trace().inferenceSnapshotId(),
-                        result.trace() == null ? null : result.trace().versionTag()
+                        result.trace() == null ? null : result.trace().versionTag(),
+                        result.trace() == null ? null : result.trace().retrievalAdapter(),
+                        result.trace() == null ? null : result.trace().retrievalStatus(),
+                        result.trace() != null && result.trace().fallbackToFormal()
                 ),
+                result.experiment(),
                 result.clarification()
+        );
+    }
+
+    private RetrievalExperimentSupport.RetrievalExperimentResult retrieveExperiment(String traceId,
+                                                                                    KnowledgePackageQueryCmd cmd,
+                                                                                    String queryText,
+                                                                                    String identifierType,
+                                                                                    String identifierValue,
+                                                                                    List<String> requestedFields) {
+        return retrievalExperimentSupport.retrieve(new RetrievalExperimentSupport.RetrievalExperimentRequest(
+                traceId,
+                queryText,
+                Map.of(
+                        "identifierType", safe(identifierType),
+                        "identifierValue", safe(identifierValue),
+                        "dateFrom", safe(cmd.dateFrom()),
+                        "dateTo", safe(cmd.dateTo())
+                ),
+                null,
+                cmd.selectedSceneId(),
+                cmd.snapshotId(),
+                requestedFields,
+                "published_evidence_only",
+                safe(cmd.operator()).isBlank() ? "system" : safe(cmd.operator())
+        ));
+    }
+
+    private KnowledgePackageExperimentDTO toExperiment(RetrievalExperimentSupport.RetrievalExperimentResult retrievalExperiment) {
+        if (retrievalExperiment == null) {
+            return null;
+        }
+        return new KnowledgePackageExperimentDTO(
+                retrievalExperiment.adapterName(),
+                retrievalExperiment.adapterVersion(),
+                retrievalExperiment.status(),
+                retrievalExperiment.fallbackToFormal(),
+                retrievalExperiment.summary(),
+                retrievalExperiment.referenceRefs(),
+                retrievalExperiment.candidateScenes().stream()
+                        .map(item -> new KnowledgePackageExperimentDTO.ExperimentSceneCandidateDTO(
+                                item.sceneId(),
+                                item.sceneCode(),
+                                item.sceneTitle(),
+                                item.snapshotId(),
+                                item.score(),
+                                item.source()
+                        ))
+                        .toList(),
+                retrievalExperiment.candidateEvidence().stream()
+                        .map(item -> new KnowledgePackageEvidenceDTO(
+                                item.evidenceCode(),
+                                item.title(),
+                                item.sourceAnchor(),
+                                retrievalExperiment.adapterName(),
+                                item.referenceRef(),
+                                item.score()
+                        ))
+                        .toList(),
+                retrievalExperiment.scoreBreakdown().stream()
+                        .map(item -> new KnowledgePackageExperimentDTO.ExperimentScoreDTO(item.label(), item.score()))
+                        .toList()
         );
     }
 

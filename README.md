@@ -34,11 +34,12 @@
 6. [Feature Docs Index](docs/architecture/features/README.md)
 7. [Collaboration Workflow](docs/engineering/collaboration-workflow.md)
 8. [Development Manual](docs/engineering/development-manual.md)
-9. [Current Delivery Status](docs/engineering/current-delivery-status.md)
-10. [ChatGPT Browser Bridge Capability](docs/engineering/chatgpt-browser-bridge-capability.md)
-11. [Plans README](docs/plans/README.md)
-12. [Research README](research/README.md)
-13. [AI README](ai/README.md)
+9. [Project Overview](docs/engineering/project-overview.md)
+10. [Current Delivery Status](docs/engineering/current-delivery-status.md)
+11. [ChatGPT Browser Bridge Capability](docs/engineering/chatgpt-browser-bridge-capability.md)
+12. [Plans README](docs/plans/README.md)
+13. [Research README](research/README.md)
+14. [AI README](ai/README.md)
 
 ---
 
@@ -150,7 +151,7 @@ bash scripts/run_nfr_acceptance_gate.sh
 5. 禁止使用“最终版”“修改版”“新版”等过程性后缀。
 6. 英文术语、缩写、变量名、常量名、指标名在文档中每次出现都必须附中文解释。
 7. 术语以 [docs/glossary.md](docs/glossary.md) 为唯一标准；新增术语时，必须先补术语表，再写入其他文档。
-8. 文档路由固定为：系统对象、运行主线、接口契约、治理边界写入 [docs/architecture/system-design.md](docs/architecture/system-design.md)；前端页面结构、导航、交互、状态表达、状态机展示、中文界面口径写入 [docs/architecture/frontend-workbench-design.md](docs/architecture/frontend-workbench-design.md)；已从主方案拆出的场景级特性文档写入 [docs/architecture/features/README.md](docs/architecture/features/README.md) 所在目录；开发规范、协作协议、实施约束写入 `docs/engineering/`；用户手册写入 `docs/user-guide/`；外部样例与调研写入 `research/`。
+8. 文档路由固定为：系统对象、运行主线、接口契约、治理边界写入 [docs/architecture/system-design.md](docs/architecture/system-design.md)；前端页面结构、导航、交互、状态表达、状态机展示、中文界面口径写入 [docs/architecture/frontend-workbench-design.md](docs/architecture/frontend-workbench-design.md)；已从主方案拆出的场景级特性文档与经路线稿明确拆出的专题特性文档写入 [docs/architecture/features/README.md](docs/architecture/features/README.md) 所在目录；开发规范、协作协议、实施约束写入 `docs/engineering/`；用户手册写入 `docs/user-guide/`；外部样例与调研写入 `research/`。
 9. 战略口径固定：`数据直通车2.0` 是远期蓝图，`口径治理` 是基础，`知识梳理服务` 是口径治理的大模型场景。
 10. 改名、迁移、新增、下线文档时，必须同步修复链接，并更新 `README.md`、`AGENTS.md`、`docs/README.md` 与相关域 README。
 11. AI 相关代理、技能、规则、上下文、项目级代理资产统一维护在 `ai/`；项目正文不得混入这些实现资产。

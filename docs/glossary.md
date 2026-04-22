@@ -130,6 +130,13 @@
 | 大语言模型 | Large Language Model | LLM | 基于Transformer的语言模型 |
 | 检索增强生成 | Retrieval-Augmented Generation | RAG | 结合检索和生成的AI技术 |
 | 图检索增强生成 | Graph Retrieval-Augmented Generation | GraphRAG | 让图结构参与检索、上下文组织、约束与生成的增强生成范式 |
+| 预处理实验适配器 | Preprocess Experiment Adapter | - | 知识生产期在材料标准化之后调用的统一实验接口，只生成候选实体、候选关系、候选证据和引用元数据，不直接写正式治理资产 |
+| 运行检索实验适配器 | Retrieval Experiment Adapter | - | 运行时在查询改写 / 槽位补齐之后、正式场景召回之前调用的统一实验接口，只补候选场景、统一实体、证据引用与得分，不直接输出正式决策 |
+| 实验检索索引 | Experimental Retrieval Index | - | 按 `snapshot_id（运行态快照标识）` 锁定的只读实验索引，只接收 `PUBLISHED（已发布）` 快照摘要，用于回放评测、影子模式和检索增强侧车 |
+| 侧车服务 | Sidecar Service | - | 以独立进程或独立服务形态运行、由主系统调用的辅助能力，不承担主系统正式真源或最终决策职责 |
+| 影子模式 | Shadow Mode | - | 与正式请求并行运行实验链路、记录结果但不影响正式返回的验证方式 |
+| 前 k 命中率 | Hit at K | hit@k | 统计目标结果是否出现在前 `k` 个候选中的指标 |
+| 前 k 精确率 | Precision at K | precision@k | 统计前 `k` 个候选中有多少比例为正确结果的指标 |
 | 基于词频与逆文档频率的文本相关性算法 | Best Matching 25 | BM25 | 常用于关键词检索与文本相关性排序的经典打分算法 |
 | 语义召回 | Semantic Retrieval | - | 面向场景、术语、规则、口径等语义对象的检索方式，通常组合向量检索、关键词和术语归一 |
 | 确定性定位 | Deterministic Lookup | - | 面向数据库、schema、表、字段等物理对象的精确定位方式，以结构化标识和精确匹配为主 |

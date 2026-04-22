@@ -123,7 +123,15 @@ class KnowledgePackageApiIntegrationTest {
                 .andExpect(jsonPath("$.coverage.status").value("FULL"))
                 .andExpect(jsonPath("$.trace.snapshotId").isNumber())
                 .andExpect(jsonPath("$.trace.inferenceSnapshotId").isNumber())
-                .andExpect(jsonPath("$.trace.versionTag").value(fixture.versionTag));
+                .andExpect(jsonPath("$.trace.versionTag").value(fixture.versionTag))
+                .andExpect(jsonPath("$.trace.retrievalAdapter").value("LightRAG"))
+                .andExpect(jsonPath("$.trace.retrievalStatus").value("COMPLETED"))
+                .andExpect(jsonPath("$.trace.fallbackToFormal").value(false))
+                .andExpect(jsonPath("$.experiment.adapterName").value("LightRAG"))
+                .andExpect(jsonPath("$.experiment.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.experiment.candidateScenes[0].sceneCode").value(fixture.sceneCode))
+                .andExpect(jsonPath("$.experiment.referenceRefs[0]").isString())
+                .andExpect(jsonPath("$.experiment.candidateEvidence[0].evidenceCode").isString());
 
         mockMvc.perform(post("/api/graphrag/query")
                         .header("Authorization", "Bearer " + token)
@@ -148,7 +156,10 @@ class KnowledgePackageApiIntegrationTest {
                 .andExpect(jsonPath("$.plan.planCode").value(fixture.historyPlanCode))
                 .andExpect(jsonPath("$.plan.resolvedIdentifierType").value("PROTOCOL_NBR"))
                 .andExpect(jsonPath("$.coverage.status").value("PARTIAL"))
-                .andExpect(jsonPath("$.policy.approvalRequired").value(true));
+                .andExpect(jsonPath("$.policy.approvalRequired").value(true))
+                .andExpect(jsonPath("$.trace.retrievalAdapter").value("LightRAG"))
+                .andExpect(jsonPath("$.experiment.adapterName").value("LightRAG"))
+                .andExpect(jsonPath("$.experiment.fallbackToFormal").value(false));
 
         MvcResult gapResult = mockMvc.perform(post("/api/graphrag/query")
                         .header("Authorization", "Bearer " + token)

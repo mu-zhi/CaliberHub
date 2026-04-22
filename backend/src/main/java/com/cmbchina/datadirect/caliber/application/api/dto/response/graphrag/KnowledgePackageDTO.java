@@ -16,6 +16,7 @@ public record KnowledgePackageDTO(
         List<KnowledgePackageEvidenceDTO> evidence,
         KnowledgePackageRiskDTO risk,
         KnowledgePackageTraceDTO trace,
+        KnowledgePackageExperimentDTO experiment,
         KnowledgePackageClarificationDTO clarification
 ) {
 }

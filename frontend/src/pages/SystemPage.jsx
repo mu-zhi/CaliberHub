@@ -181,6 +181,16 @@ const PREPROCESS_SOURCE_TYPE_OPTIONS = [
 const DEFAULT_TEST_RAW_TEXT = "# 测试文档\n```sql\nselect 1;\n```";
 const REQUIRED_PROMPT_CORE_TOKENS = ["{{RAW_DOC}}", "{{SOURCE_TYPE}}"];
 const SUPPORTED_SCHEMA_TOKENS = ["{{PREP_SCHEMA}}", "{{DYNAMIC_JSON_SCHEMA}}"];
+const DEFAULT_RETRIEVAL_EXPERIMENT_GOVERNANCE = {
+  shadowModeEnabled: true,
+  grayReleaseEnabled: true,
+  grayReleaseScope: "domain:payroll",
+  emergencyStopEnabled: false,
+  sceneHitThreshold: 0.85,
+  evidencePrecisionThreshold: 0.7,
+  latencyBudgetMs: 8000,
+  adapterName: "LightRAG",
+};
 
 function defaultPrompts() {
   return {
@@ -501,6 +511,7 @@ export function SystemPage({ view = "llm" }) {
   const [guideLoading, setGuideLoading] = useState(false);
   const [guideError, setGuideError] = useState("");
   const [guideReloadTick, setGuideReloadTick] = useState(0);
+  const [retrievalExperimentGovernance, setRetrievalExperimentGovernance] = useState(DEFAULT_RETRIEVAL_EXPERIMENT_GOVERNANCE);
 
   const readonly = useMemo(() => !isAdmin, [isAdmin]);
   const testTone = useMemo(() => resolveTestTone(testResult), [testResult]);
@@ -1255,6 +1266,108 @@ export function SystemPage({ view = "llm" }) {
             />
             <span className="ios-switch-ui" aria-hidden="true" />
           </label>
+        </div>
+      </div>
+
+      <div className="settings-card">
+        <div className="panel-head">
+          <div>
+            <h3>检索实验治理</h3>
+            <p className="subtle-note">统一承载 shadow mode、灰度范围与紧急停机门禁，避免实验检索侧车直接漂移到正式决策链。</p>
+          </div>
+        </div>
+        <div className="settings-row">
+          <label htmlFor="retrievalShadowMode" className="settings-label">影子模式开关</label>
+          <label className="ios-switch" htmlFor="retrievalShadowMode">
+            <input
+              id="retrievalShadowMode"
+              name="retrievalShadowMode"
+              autoComplete="off"
+              type="checkbox"
+              checked={!!retrievalExperimentGovernance.shadowModeEnabled}
+              onChange={(event) => setRetrievalExperimentGovernance((prev) => ({ ...prev, shadowModeEnabled: event.target.checked }))}
+              disabled={readonly}
+            />
+            <span className="ios-switch-ui" aria-hidden="true" />
+          </label>
+        </div>
+        <div className="settings-row">
+          <label htmlFor="retrievalGrayRelease" className="settings-label">灰度发布开关</label>
+          <label className="ios-switch" htmlFor="retrievalGrayRelease">
+            <input
+              id="retrievalGrayRelease"
+              name="retrievalGrayRelease"
+              autoComplete="off"
+              type="checkbox"
+              checked={!!retrievalExperimentGovernance.grayReleaseEnabled}
+              onChange={(event) => setRetrievalExperimentGovernance((prev) => ({ ...prev, grayReleaseEnabled: event.target.checked }))}
+              disabled={readonly}
+            />
+            <span className="ios-switch-ui" aria-hidden="true" />
+          </label>
+        </div>
+        <div className="settings-row">
+          <label htmlFor="retrievalGrayScope" className="settings-label">灰度范围</label>
+          <input
+            id="retrievalGrayScope"
+            name="retrievalGrayScope"
+            autoComplete="off"
+            value={retrievalExperimentGovernance.grayReleaseScope}
+            onChange={(event) => setRetrievalExperimentGovernance((prev) => ({ ...prev, grayReleaseScope: event.target.value }))}
+            disabled={readonly}
+            className="settings-input"
+          />
+        </div>
+        <div className="settings-row">
+          <label htmlFor="retrievalEmergencyStop" className="settings-label">紧急停机开关</label>
+          <label className="ios-switch" htmlFor="retrievalEmergencyStop">
+            <input
+              id="retrievalEmergencyStop"
+              name="retrievalEmergencyStop"
+              autoComplete="off"
+              type="checkbox"
+              checked={!!retrievalExperimentGovernance.emergencyStopEnabled}
+              onChange={(event) => setRetrievalExperimentGovernance((prev) => ({ ...prev, emergencyStopEnabled: event.target.checked }))}
+              disabled={readonly}
+            />
+            <span className="ios-switch-ui" aria-hidden="true" />
+          </label>
+        </div>
+        <div className="settings-row">
+          <label htmlFor="retrievalSceneHitThreshold" className="settings-label">场景命中阈值</label>
+          <input
+            id="retrievalSceneHitThreshold"
+            name="retrievalSceneHitThreshold"
+            autoComplete="off"
+            type="number"
+            min="0"
+            max="1"
+            step="0.01"
+            value={retrievalExperimentGovernance.sceneHitThreshold}
+            onChange={(event) => setRetrievalExperimentGovernance((prev) => ({ ...prev, sceneHitThreshold: Number(event.target.value) }))}
+            disabled={readonly}
+            className="settings-input"
+          />
+        </div>
+        <div className="settings-row">
+          <label htmlFor="retrievalEvidencePrecisionThreshold" className="settings-label">证据精度阈值</label>
+          <input
+            id="retrievalEvidencePrecisionThreshold"
+            name="retrievalEvidencePrecisionThreshold"
+            autoComplete="off"
+            type="number"
+            min="0"
+            max="1"
+            step="0.01"
+            value={retrievalExperimentGovernance.evidencePrecisionThreshold}
+            onChange={(event) => setRetrievalExperimentGovernance((prev) => ({ ...prev, evidencePrecisionThreshold: Number(event.target.value) }))}
+            disabled={readonly}
+            className="settings-input"
+          />
+        </div>
+        <div className="settings-row">
+          <span className="settings-label">当前实验适配器</span>
+          <span className="settings-value">{retrievalExperimentGovernance.adapterName}</span>
         </div>
       </div>
 
