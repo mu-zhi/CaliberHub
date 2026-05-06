@@ -48,6 +48,21 @@ jobs:
 
       - name: Backend Start (Test Profile)
         working-directory: backend
+        env:
+          CALIBER_DB_URL: jdbc:h2:mem:caliber_ci;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+          CALIBER_DB_DRIVER: org.h2.Driver
+          CALIBER_DB_USERNAME: sa
+          CALIBER_DB_PASSWORD: ''
+          CALIBER_JWT_SECRET: test-jwt-secret-for-ci-1234567890
+          CALIBER_ADMIN_PASSWORD: $2y$10$hg6A0/dS1XzC2XEuDmj3D.izdAKY55ucy1SjAySnMffKUXjr4bri.
+          CALIBER_SUPPORT_PASSWORD: $2y$10$3jTJxjRbTcNaTpb2QAmgVeY0SlNaJvRS9KVE6seDZ/hBjEw/5fqIu
+          CALIBER_EXPERT_PASSWORD: $2y$10$e31EkcTR483pUsc5PfcaqewquNxI218bmPg07WUsPpkFny9qe4lea
+          CALIBER_GOVERNANCE_PASSWORD: $2y$10$rP1YnRbtz4c1fKaMyNw6ou2x0jf1zyBRGCtZqgNg1rOJ8OP0fs99S
+          CALIBER_FRONTLINE_PASSWORD: $2y$10$emX7AL6fdJLeRKXmq3AuhOwvTu5ZV9nsDESOagUiTH9NQZMNxHrnC
+          CALIBER_COMPLIANCE_PASSWORD: $2y$10$Z4UxpGKVzMripqXXUkc41OizZx7yxsaUDBM9NEsb6SGwm2H4s0TAe
+          CALIBER_RATE_LIMIT_ENABLED: 'false'
+          CALIBER_CACHE_REDIS_ENABLED: 'false'
+          CALIBER_GRAPH_HEALTH_ENABLED: 'false'
         run: |
           nohup env SPRING_PROFILES_ACTIVE=test mvn -q spring-boot:run >/tmp/datadirect-backend-ci.log 2>&1 &
           echo $! >/tmp/datadirect-backend-ci.pid
