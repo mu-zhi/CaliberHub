@@ -106,7 +106,7 @@ class MvpKnowledgeGraphFlowIntegrationTest {
     @Test
     void shouldFinishImportPublishGraphAndRetrievalMvpFlow() throws Exception {
         String token = loginAndGetToken("support", "support123");
-        long domainId = createDomain(token);
+        long domainId = createDomain(token, "PAYROLL_MVP_FLOW");
 
         JsonNode preprocessPayload = importPayrollSample(token);
         String taskId = preprocessPayload.path("importBatchId").asText("");
@@ -346,7 +346,7 @@ class MvpKnowledgeGraphFlowIntegrationTest {
     @Test
     void shouldExposeDomainGraphUsingPublishedSnapshotScopedMemberships() throws Exception {
         String token = loginAndGetToken("support", "support123");
-        long domainId = createDomain(token);
+        long domainId = createDomain(token, "PAYROLL_MVP_SNAPSHOT_FLOW");
 
         JsonNode preprocessPayload = importPayrollSample(token);
         String taskId = preprocessPayload.path("importBatchId").asText("");
@@ -547,18 +547,18 @@ class MvpKnowledgeGraphFlowIntegrationTest {
         return objectMapper.readTree(result.getResponse().getContentAsString());
     }
 
-    private long createDomain(String token) throws Exception {
+    private long createDomain(String token, String domainCode) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/domains")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "domainCode": "PAYROLL_MVP_FLOW",
+                                  "domainCode": "%s",
                                   "domainName": "代发样板域",
                                   "domainOverview": "用于 MVP 闭环验证的代发明细样板域",
                                   "operator": "support"
                                 }
-                                """))
+                                """.formatted(domainCode)))
                 .andExpect(status().isCreated())
                 .andReturn();
         return objectMapper.readTree(result.getResponse().getContentAsString()).path("id").asLong();
